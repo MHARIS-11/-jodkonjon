@@ -829,6 +829,155 @@
       box-shadow: 0 0 0 3px rgba(40, 77, 59, 0.14);
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin: 0 0 14px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--background);
+    }
+
+    .mode-tabs.four {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mode-tab {
+      min-height: 38px;
+      padding: 8px 6px;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .mode-tab.active {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    .line-panel {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--background);
+    }
+
+    .line-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .line-panel-title {
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    .line-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .line-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(86px, 0.45fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .line-row.with-category {
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 0.82fr) minmax(82px, 0.44fr) auto;
+    }
+
+    .line-row.category-only {
+      grid-template-columns: minmax(0, 1fr) minmax(92px, 0.45fr) auto;
+    }
+
+    .line-row .input,
+    .line-row .select {
+      min-height: 42px;
+      padding: 8px 10px;
+    }
+
+    .line-remove {
+      display: inline-flex;
+      width: 38px;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--expense);
+    }
+
+    .mini-action {
+      display: inline-flex;
+      min-height: 36px;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .total-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(40, 77, 59, 0.08);
+      color: var(--primary);
+      font-weight: 760;
+    }
+
+    [data-theme="dark"] .total-strip {
+      color: #D8E7DC;
+      background: rgba(216, 231, 220, 0.1);
+    }
+
+    .transaction-detail {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .history-head-actions .ghost-action {
+      min-height: 38px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
     .toast {
       position: fixed;
       left: 50%;
@@ -880,6 +1029,10 @@
 
       .form-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .mode-tabs.four {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }
 
       .settings-grid {
@@ -960,7 +1113,10 @@
         <section class="section">
           <div class="section-head">
             <h2 class="section-title">History</h2>
-            <p class="section-note" id="historyCount">0 รายการ</p>
+            <div class="history-head-actions">
+              <p class="section-note" id="historyCount">0 รายการ</p>
+              <button class="ghost-action" id="openBackfillButton" type="button">จดย้อนหลัง</button>
+            </div>
           </div>
 
           <div class="filters">
@@ -1143,20 +1299,47 @@
       </div>
       <input type="hidden" id="editingTransactionId">
       <input type="hidden" id="transactionTypeInput" value="expense">
+      <input type="hidden" id="transactionModeInput" value="single">
 
-      <div class="amount-field">
+      <div class="mode-tabs four" id="expenseModeTabs" aria-label="รูปแบบรายจ่าย" hidden>
+        <button class="mode-tab active" type="button" data-expense-mode="single">รายการเดียว</button>
+        <button class="mode-tab" type="button" data-expense-mode="itemized">แจกแจง</button>
+        <button class="mode-tab" type="button" data-expense-mode="split">แยกหมวด</button>
+        <button class="mode-tab" type="button" data-expense-mode="detailedSplit">บิลละเอียด</button>
+      </div>
+
+      <div class="amount-field" id="amountBlock">
         <label for="amountInput">จำนวนเงิน</label>
         <input id="amountInput" type="number" inputmode="decimal" min="0" step="1" placeholder="0" required>
       </div>
 
+      <div class="line-panel" id="lineItemsBlock" hidden>
+        <div class="line-panel-head">
+          <span class="line-panel-title" id="lineItemsTitle">รายการย่อย</span>
+          <button class="mini-action" id="addLineItemButton" type="button">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            เพิ่มแถว
+          </button>
+        </div>
+        <div class="line-list" id="lineItemsList"></div>
+        <div class="total-strip">
+          <span>รวม</span>
+          <strong id="lineItemsTotal">฿0</strong>
+        </div>
+      </div>
+
       <div class="form-grid">
-        <div class="field">
+        <div class="field" id="categoryField">
           <label for="categoryInput">หมวดหมู่</label>
           <select class="select" id="categoryInput" required></select>
         </div>
         <div class="field">
           <label for="dateInput">วันที่</label>
           <input class="input" id="dateInput" type="date" required>
+        </div>
+        <div class="field">
+          <label for="timeInput">เวลา</label>
+          <input class="input" id="timeInput" type="time" required>
         </div>
       </div>
 
@@ -1171,6 +1354,58 @@
       </div>
 
       <button class="primary-action" id="saveTransactionButton" type="submit" style="width:100%;">บันทึก</button>
+    </form>
+  </div>
+
+  <div class="sheet-backdrop" id="backfillSheet" role="dialog" aria-modal="true" aria-labelledby="backfillTitle">
+    <form class="sheet" id="backfillForm">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="backfillTitle">จดย้อนหลัง</h2>
+        <button class="icon-button" id="closeBackfillButton" type="button" title="ปิด" aria-label="ปิด">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="backfillDateInput">วันที่</label>
+          <input class="input" id="backfillDateInput" type="date" required>
+        </div>
+        <div class="field">
+          <label for="backfillTimeInput">เวลาเริ่มต้น</label>
+          <input class="input" id="backfillTimeInput" type="time" required>
+        </div>
+      </div>
+
+      <div class="line-panel">
+        <div class="line-panel-head">
+          <span class="line-panel-title">รายรับ</span>
+          <button class="mini-action" id="addBackfillIncomeButton" type="button">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            เพิ่มรายรับ
+          </button>
+        </div>
+        <div class="line-list" id="backfillIncomeList"></div>
+      </div>
+
+      <div class="line-panel">
+        <div class="line-panel-head">
+          <span class="line-panel-title">รายจ่ายละเอียด</span>
+          <button class="mini-action" id="addBackfillExpenseButton" type="button">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            เพิ่มรายจ่าย
+          </button>
+        </div>
+        <div class="line-list" id="backfillExpenseList"></div>
+      </div>
+
+      <div class="total-strip">
+        <span>สรุปวันนี้</span>
+        <strong id="backfillTotal">฿0</strong>
+      </div>
+
+      <button class="primary-action" id="saveBackfillButton" type="submit" style="width:100%; margin-top:14px;">บันทึกวันนี้</button>
     </form>
   </div>
 
@@ -1235,6 +1470,11 @@
         type: "all",
         category: "all"
       },
+      transactionLines: [],
+      backfill: {
+        incomes: [],
+        expenses: []
+      },
       toastTimer: null
     };
 
@@ -1281,11 +1521,32 @@
       closeSheetButton: document.getElementById("closeSheetButton"),
       editingTransactionId: document.getElementById("editingTransactionId"),
       transactionTypeInput: document.getElementById("transactionTypeInput"),
+      transactionModeInput: document.getElementById("transactionModeInput"),
+      expenseModeTabs: document.getElementById("expenseModeTabs"),
+      amountBlock: document.getElementById("amountBlock"),
       amountInput: document.getElementById("amountInput"),
+      lineItemsBlock: document.getElementById("lineItemsBlock"),
+      lineItemsTitle: document.getElementById("lineItemsTitle"),
+      addLineItemButton: document.getElementById("addLineItemButton"),
+      lineItemsList: document.getElementById("lineItemsList"),
+      lineItemsTotal: document.getElementById("lineItemsTotal"),
+      categoryField: document.getElementById("categoryField"),
       categoryInput: document.getElementById("categoryInput"),
       dateInput: document.getElementById("dateInput"),
+      timeInput: document.getElementById("timeInput"),
       titleInput: document.getElementById("titleInput"),
       noteInput: document.getElementById("noteInput"),
+      openBackfillButton: document.getElementById("openBackfillButton"),
+      backfillSheet: document.getElementById("backfillSheet"),
+      backfillForm: document.getElementById("backfillForm"),
+      closeBackfillButton: document.getElementById("closeBackfillButton"),
+      backfillDateInput: document.getElementById("backfillDateInput"),
+      backfillTimeInput: document.getElementById("backfillTimeInput"),
+      addBackfillIncomeButton: document.getElementById("addBackfillIncomeButton"),
+      addBackfillExpenseButton: document.getElementById("addBackfillExpenseButton"),
+      backfillIncomeList: document.getElementById("backfillIncomeList"),
+      backfillExpenseList: document.getElementById("backfillExpenseList"),
+      backfillTotal: document.getElementById("backfillTotal"),
       toast: document.getElementById("toast")
     };
 
@@ -1297,6 +1558,7 @@
         saveBudget();
       }
 
+      normalizeTransactions();
       applyTheme(readStorage(STORAGE_KEYS.theme, "light"));
       bindEvents();
       renderAll();
@@ -1314,18 +1576,41 @@
       els.exportSettingsButton.addEventListener("click", exportCsv);
       els.backupButton.addEventListener("click", backupJson);
       els.closeSheetButton.addEventListener("click", closeTransactionSheet);
+      els.openBackfillButton.addEventListener("click", openBackfillSheet);
+      els.closeBackfillButton.addEventListener("click", closeBackfillSheet);
+      els.addLineItemButton.addEventListener("click", addCurrentLineItem);
+      els.addBackfillIncomeButton.addEventListener("click", () => addBackfillRow("income"));
+      els.addBackfillExpenseButton.addEventListener("click", () => addBackfillRow("expense"));
 
       els.sheet.addEventListener("click", (event) => {
         if (event.target === els.sheet) closeTransactionSheet();
+      });
+
+      els.backfillSheet.addEventListener("click", (event) => {
+        if (event.target === els.backfillSheet) closeBackfillSheet();
       });
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && els.sheet.classList.contains("open")) {
           closeTransactionSheet();
         }
+        if (event.key === "Escape" && els.backfillSheet.classList.contains("open")) {
+          closeBackfillSheet();
+        }
       });
 
       els.form.addEventListener("submit", handleTransactionSubmit);
+      els.backfillForm.addEventListener("submit", handleBackfillSubmit);
+      els.categoryInput.addEventListener("change", () => {
+        if (els.transactionModeInput.value === "itemized") {
+          state.transactionLines = state.transactionLines.map((line) => ({ ...line, category: els.categoryInput.value }));
+          renderLineItems();
+        }
+      });
+
+      document.querySelectorAll("[data-expense-mode]").forEach((button) => {
+        button.addEventListener("click", () => setTransactionMode(button.dataset.expenseMode));
+      });
 
       els.searchInput.addEventListener("input", () => {
         state.historyFilter.search = els.searchInput.value.trim().toLowerCase();
@@ -1387,7 +1672,75 @@
       renderBudget();
       renderSettings();
       renderCategoryOptionsForSheet(els.transactionTypeInput.value);
+      renderLineItems();
+      renderBackfillRows();
       renderQuickCategoryOptions();
+    }
+
+    function normalizeTransactions() {
+      let changed = false;
+      state.transactions = state.transactions.map((transaction) => {
+        const normalized = { ...transaction };
+        if (!normalized.mode) {
+          normalized.mode = "single";
+          changed = true;
+        }
+        if (!normalized.time) {
+          normalized.time = timeFromIso(normalized.createdAt) || "12:00";
+          changed = true;
+        }
+        if (!Array.isArray(normalized.lines) || !normalized.lines.length) {
+          normalized.lines = [{
+            id: uid(),
+            title: normalized.title || normalized.category,
+            category: normalized.category,
+            amount: Number(normalized.amount) || 0
+          }];
+          changed = true;
+        }
+        normalized.amount = sum(normalized.lines.map((line) => line.amount)) || Number(normalized.amount) || 0;
+        return normalized;
+      });
+      if (changed) saveTransactions();
+    }
+
+    function transactionLines(transaction) {
+      if (Array.isArray(transaction.lines) && transaction.lines.length) {
+        return transaction.lines.map((line) => ({
+          id: line.id || uid(),
+          title: line.title || line.category || transaction.title,
+          category: line.category || transaction.category,
+          amount: Number(line.amount) || 0
+        }));
+      }
+      return [{
+        id: transaction.id,
+        title: transaction.title || transaction.category,
+        category: transaction.category,
+        amount: Number(transaction.amount) || 0
+      }];
+    }
+
+    function transactionSearchText(transaction) {
+      const lineText = transactionLines(transaction)
+        .map((line) => `${line.title} ${line.category} ${line.amount}`)
+        .join(" ");
+      return `${transaction.title} ${transaction.category} ${transaction.note || ""} ${modeLabel(transaction.mode)} ${lineText}`.toLowerCase();
+    }
+
+    function transactionMatchesCategory(transaction, category) {
+      if (category === "all") return true;
+      return transaction.category === category || transactionLines(transaction).some((line) => line.category === category);
+    }
+
+    function expenseLedgerEntries(transactions) {
+      return transactions
+        .filter((transaction) => transaction.type === "expense")
+        .flatMap((transaction) => transactionLines(transaction).map((line) => ({
+          transactionId: transaction.id,
+          category: line.category,
+          amount: Number(line.amount) || 0
+        })));
     }
 
     function renderHome() {
@@ -1437,10 +1790,10 @@
 
     function renderHistory() {
       const filtered = sortedTransactions().filter((transaction) => {
-        const searchTarget = `${transaction.title} ${transaction.category} ${transaction.note || ""}`.toLowerCase();
+        const searchTarget = transactionSearchText(transaction);
         const matchesSearch = !state.historyFilter.search || searchTarget.includes(state.historyFilter.search);
         const matchesType = state.historyFilter.type === "all" || transaction.type === state.historyFilter.type;
-        const matchesCategory = state.historyFilter.category === "all" || transaction.category === state.historyFilter.category;
+        const matchesCategory = transactionMatchesCategory(transaction, state.historyFilter.category);
         return matchesSearch && matchesType && matchesCategory;
       });
 
@@ -1468,8 +1821,9 @@
 
     function renderBudget() {
       ensureBudgetCategories();
-      const monthTransactions = getCurrentMonthTransactions().filter((transaction) => transaction.type === "expense");
-      const totalSpent = sum(monthTransactions.map((transaction) => transaction.amount));
+      const monthTransactions = getCurrentMonthTransactions();
+      const expenseEntries = expenseLedgerEntries(monthTransactions);
+      const totalSpent = sum(expenseEntries.map((entry) => entry.amount));
       const totalBudget = state.budget.totalBudget || 0;
       const totalPercent = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
 
@@ -1483,7 +1837,7 @@
       const expenseCategories = state.categories.filter((category) => category.type === "expense");
       expenseCategories.forEach((category) => {
         const budgetItem = state.budget.categoryBudgets.find((item) => item.category === category.name) || { category: category.name, amount: 0 };
-        const spent = sum(monthTransactions.filter((transaction) => transaction.category === category.name).map((transaction) => transaction.amount));
+        const spent = sum(expenseEntries.filter((entry) => entry.category === category.name).map((entry) => entry.amount));
         const budget = budgetItem.amount || 0;
         const percent = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0;
 
@@ -1577,6 +1931,71 @@
         .join("");
     }
 
+    function renderLineItems() {
+      if (!els.lineItemsList) return;
+      const mode = els.transactionModeInput.value;
+      const showLines = mode !== "single";
+      els.lineItemsBlock.hidden = !showLines;
+      if (!showLines) return;
+
+      const isItemized = mode === "itemized";
+      const isSplit = mode === "split";
+      els.lineItemsTitle.textContent = isItemized ? "แจกแจงรายการ" : (isSplit ? "แยกหมวด" : "บิลละเอียด");
+      els.lineItemsList.innerHTML = "";
+
+      if (!state.transactionLines.length) {
+        state.transactionLines.push(defaultLineForMode(mode));
+      }
+
+      state.transactionLines.forEach((line) => {
+        const row = document.createElement("div");
+        row.className = `line-row ${mode === "detailedSplit" ? "with-category" : ""} ${mode === "split" ? "category-only" : ""}`;
+
+        if (isSplit) {
+          row.innerHTML = `
+            <select class="select" data-line-field="category" aria-label="หมวดหมู่">${expenseCategoryOptions(line.category)}</select>
+            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="1" value="${line.amount || ""}" placeholder="ยอด">
+            <button class="line-remove" type="button" aria-label="ลบแถว">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
+            </button>
+          `;
+        } else if (mode === "detailedSplit") {
+          row.innerHTML = `
+            <input class="input" data-line-field="title" type="text" value="${escapeAttr(line.title)}" placeholder="รายการ">
+            <select class="select" data-line-field="category" aria-label="หมวดหมู่">${expenseCategoryOptions(line.category)}</select>
+            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="1" value="${line.amount || ""}" placeholder="ยอด">
+            <button class="line-remove" type="button" aria-label="ลบแถว">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
+            </button>
+          `;
+        } else {
+          row.innerHTML = `
+            <input class="input" data-line-field="title" type="text" value="${escapeAttr(line.title)}" placeholder="รายการ">
+            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="1" value="${line.amount || ""}" placeholder="ยอด">
+            <button class="line-remove" type="button" aria-label="ลบแถว">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
+            </button>
+          `;
+        }
+
+        row.querySelectorAll("[data-line-field]").forEach((input) => {
+          input.addEventListener("input", () => updateCurrentLine(line.id, input.dataset.lineField, input.value));
+          input.addEventListener("change", () => updateCurrentLine(line.id, input.dataset.lineField, input.value));
+        });
+        row.querySelector(".line-remove").addEventListener("click", () => removeCurrentLine(line.id));
+        els.lineItemsList.appendChild(row);
+      });
+
+      updateLineTotal();
+    }
+
+    function expenseCategoryOptions(selected) {
+      return state.categories
+        .filter((category) => category.type === "expense")
+        .map((category) => `<option value="${escapeAttr(category.name)}" ${category.name === selected ? "selected" : ""}>${escapeHtml(category.name)}</option>`)
+        .join("");
+    }
+
     function renderQuickCategoryOptions() {
       const categories = state.categories.filter((category) => category.type === els.quickTypeInput.value);
       els.quickCategoryInput.innerHTML = categories
@@ -1587,13 +2006,17 @@
     function transactionRow(transaction, withActions) {
       const row = document.createElement("div");
       row.className = "transaction-row";
+      const lines = transactionLines(transaction);
+      const detail = transactionDetailText(transaction, lines);
+      const categoryLabel = categoryLabelForTransaction(transaction, lines);
       row.innerHTML = `
         <div class="transaction-main">
           <div class="transaction-title">
             <span>${escapeHtml(transaction.title || transaction.category)}</span>
-            <span class="pill">${escapeHtml(transaction.category)}</span>
+            <span class="pill">${escapeHtml(categoryLabel)}</span>
           </div>
-          <div class="transaction-meta">${formatDateShort(transaction.date)}${transaction.note ? " · " + escapeHtml(transaction.note) : ""}</div>
+          <div class="transaction-meta">${escapeHtml(transaction.time || "--:--")} · ${formatDateShort(transaction.date)} · ${escapeHtml(modeLabel(transaction.mode))}${transaction.note ? " · " + escapeHtml(transaction.note) : ""}</div>
+          ${detail ? `<div class="transaction-detail">${escapeHtml(detail)}</div>` : ""}
           ${withActions ? `
             <div class="row-actions">
               <button class="small-icon-button" type="button" data-edit="${escapeAttr(transaction.id)}" title="แก้ไข" aria-label="แก้ไข">
@@ -1635,17 +2058,25 @@
       els.sheetTitle.textContent = transaction ? "แก้ไขรายการ" : (isIncome ? "รายรับ" : "รายจ่าย");
       els.transactionTypeInput.value = type;
       renderCategoryOptionsForSheet(type);
+      els.expenseModeTabs.hidden = isIncome;
 
+      const mode = isIncome ? "single" : (transaction?.mode || "single");
       els.editingTransactionId.value = transaction?.id || "";
       els.amountInput.value = transaction?.amount || "";
       els.categoryInput.value = transaction?.category || state.categories.find((category) => category.type === type)?.name || "";
       els.dateInput.value = transaction?.date || todayISO();
+      els.timeInput.value = transaction?.time || currentTime();
       els.titleInput.value = transaction?.title || "";
       els.noteInput.value = transaction?.note || "";
+      state.transactionLines = transaction ? transactionLines(transaction).map((line) => ({ ...line, id: line.id || uid() })) : [defaultLineForMode(mode)];
+      setTransactionMode(mode);
 
       els.sheet.classList.add("open");
       document.body.style.overflow = "hidden";
-      requestAnimationFrame(() => els.amountInput.focus());
+      requestAnimationFrame(() => {
+        if (mode === "single") els.amountInput.focus();
+        else els.lineItemsList.querySelector("input, select")?.focus();
+      });
     }
 
     function openEditTransaction(id) {
@@ -1660,29 +2091,48 @@
       els.form.reset();
       els.editingTransactionId.value = "";
       els.transactionTypeInput.value = "expense";
+      els.transactionModeInput.value = "single";
       els.dateInput.value = todayISO();
+      els.timeInput.value = currentTime();
+      state.transactionLines = [];
+      setTransactionMode("single");
     }
 
     function handleTransactionSubmit(event) {
       event.preventDefault();
-      const amount = clampMoney(els.amountInput.value);
+      const now = new Date().toISOString();
+      const type = els.transactionTypeInput.value;
+      const mode = type === "income" ? "single" : els.transactionModeInput.value;
+      const lines = linesForSubmit(mode);
+      const amount = mode === "single" ? clampMoney(els.amountInput.value) : sum(lines.map((line) => line.amount));
       if (!amount) {
-        showToast("ใส่จำนวนเงินก่อนบันทึก");
-        els.amountInput.focus();
+        showToast(mode === "single" ? "ใส่จำนวนเงินก่อนบันทึก" : "ใส่ยอดในรายการย่อยก่อนบันทึก");
+        (mode === "single" ? els.amountInput : els.lineItemsList.querySelector("input, select"))?.focus();
         return;
       }
 
-      const now = new Date().toISOString();
-      const type = els.transactionTypeInput.value;
-      const category = els.categoryInput.value;
-      const title = els.titleInput.value.trim() || category;
+      if (mode !== "single" && !lines.length) {
+        showToast("เพิ่มรายการย่อยก่อนบันทึก");
+        return;
+      }
+
+      const category = categoryForPayload(mode, lines, els.categoryInput.value);
+      const title = els.titleInput.value.trim() || defaultTitleForMode(mode, category);
       const payload = {
         type,
+        mode,
         amount,
         title,
         category,
+        lines: mode === "single" ? [{
+          id: uid(),
+          title,
+          category,
+          amount
+        }] : lines,
         note: els.noteInput.value.trim(),
         date: els.dateInput.value || todayISO(),
+        time: els.timeInput.value || currentTime(),
         updatedAt: now
       };
 
@@ -1706,6 +2156,101 @@
       renderAll();
     }
 
+    function setTransactionMode(mode) {
+      const type = els.transactionTypeInput.value;
+      const safeMode = type === "income" ? "single" : mode;
+      els.transactionModeInput.value = safeMode;
+
+      document.querySelectorAll("[data-expense-mode]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.expenseMode === safeMode);
+      });
+
+      const isSingle = safeMode === "single";
+      const isCategoryMode = safeMode === "single" || safeMode === "itemized";
+      els.amountBlock.hidden = !isSingle;
+      els.lineItemsBlock.hidden = isSingle;
+      els.categoryField.hidden = !isCategoryMode;
+      els.amountInput.required = isSingle;
+      els.categoryInput.required = isCategoryMode;
+
+      if (!isSingle && !state.transactionLines.length) {
+        state.transactionLines = [defaultLineForMode(safeMode)];
+      }
+      if (safeMode === "itemized") {
+        const category = els.categoryInput.value || defaultCategory("expense");
+        state.transactionLines = state.transactionLines.map((line) => ({ ...line, category }));
+      }
+      renderLineItems();
+    }
+
+    function defaultLineForMode(mode) {
+      const category = mode === "itemized" ? (els.categoryInput.value || defaultCategory("expense")) : defaultCategory("expense");
+      return {
+        id: uid(),
+        title: "",
+        category,
+        amount: 0
+      };
+    }
+
+    function addCurrentLineItem() {
+      state.transactionLines.push(defaultLineForMode(els.transactionModeInput.value));
+      renderLineItems();
+      requestAnimationFrame(() => els.lineItemsList.querySelector(".line-row:last-child input, .line-row:last-child select")?.focus());
+    }
+
+    function updateCurrentLine(id, field, value) {
+      state.transactionLines = state.transactionLines.map((line) => {
+        if (line.id !== id) return line;
+        const nextValue = field === "amount" ? clampMoney(value) : value;
+        return { ...line, [field]: nextValue };
+      });
+      if (els.transactionModeInput.value === "itemized") {
+        const category = els.categoryInput.value || defaultCategory("expense");
+        state.transactionLines = state.transactionLines.map((line) => ({ ...line, category }));
+      }
+      updateLineTotal();
+    }
+
+    function removeCurrentLine(id) {
+      state.transactionLines = state.transactionLines.filter((line) => line.id !== id);
+      if (!state.transactionLines.length) {
+        state.transactionLines = [defaultLineForMode(els.transactionModeInput.value)];
+      }
+      renderLineItems();
+    }
+
+    function updateLineTotal() {
+      const total = sum(state.transactionLines.map((line) => line.amount));
+      els.lineItemsTotal.textContent = formatCurrency(total);
+    }
+
+    function linesForSubmit(mode) {
+      if (mode === "single") return [];
+      const category = els.categoryInput.value || defaultCategory("expense");
+      return state.transactionLines
+        .map((line) => ({
+          id: line.id || uid(),
+          title: mode === "split" ? (line.category || category) : (String(line.title || "").trim() || line.category || category),
+          category: mode === "itemized" ? category : (line.category || category),
+          amount: clampMoney(line.amount)
+        }))
+        .filter((line) => line.amount > 0);
+    }
+
+    function categoryForPayload(mode, lines, fallback) {
+      if (mode === "single" || mode === "itemized") return fallback || defaultCategory("expense");
+      const categories = unique(lines.map((line) => line.category).filter(Boolean));
+      return categories.length === 1 ? categories[0] : "หลายหมวด";
+    }
+
+    function defaultTitleForMode(mode, category) {
+      if (mode === "itemized") return category || "แจกแจงรายการ";
+      if (mode === "split") return "แยกหมวด";
+      if (mode === "detailedSplit") return "บิลละเอียด";
+      return category || "รายการ";
+    }
+
     function deleteTransaction(id) {
       const transaction = state.transactions.find((item) => item.id === id);
       if (!transaction) return;
@@ -1723,17 +2268,168 @@
       state.transactions.unshift({
         id: uid(),
         type: quick.type,
+        mode: "single",
         amount: Number(quick.amount),
         title: quick.title,
         category: quick.category,
+        lines: [{
+          id: uid(),
+          title: quick.title,
+          category: quick.category,
+          amount: Number(quick.amount)
+        }],
         note: "",
         date: todayISO(),
+        time: currentTime(),
         createdAt: now,
         updatedAt: now
       });
       saveTransactions();
       renderAll();
       showToast(`บันทึก ${quick.title} แล้ว`);
+    }
+
+    function openBackfillSheet() {
+      state.backfill = {
+        incomes: [defaultBackfillLine("income")],
+        expenses: [defaultBackfillLine("expense")]
+      };
+      els.backfillDateInput.value = todayISO();
+      els.backfillTimeInput.value = currentTime();
+      renderBackfillRows();
+      els.backfillSheet.classList.add("open");
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(() => els.backfillDateInput.focus());
+    }
+
+    function closeBackfillSheet() {
+      els.backfillSheet.classList.remove("open");
+      document.body.style.overflow = "";
+      els.backfillForm.reset();
+      state.backfill = { incomes: [], expenses: [] };
+    }
+
+    function defaultBackfillLine(type) {
+      return {
+        id: uid(),
+        title: "",
+        category: defaultCategory(type),
+        amount: 0
+      };
+    }
+
+    function addBackfillRow(type) {
+      const key = type === "income" ? "incomes" : "expenses";
+      state.backfill[key].push(defaultBackfillLine(type));
+      renderBackfillRows();
+      requestAnimationFrame(() => {
+        const list = type === "income" ? els.backfillIncomeList : els.backfillExpenseList;
+        list.querySelector(".line-row:last-child input, .line-row:last-child select")?.focus();
+      });
+    }
+
+    function renderBackfillRows() {
+      if (!els.backfillIncomeList || !els.backfillExpenseList) return;
+      renderBackfillList("income", els.backfillIncomeList, state.backfill.incomes);
+      renderBackfillList("expense", els.backfillExpenseList, state.backfill.expenses);
+      updateBackfillTotal();
+    }
+
+    function renderBackfillList(type, container, rows) {
+      container.innerHTML = "";
+      rows.forEach((line) => {
+        const row = document.createElement("div");
+        row.className = "line-row with-category";
+        row.innerHTML = `
+          <input class="input" data-backfill-field="title" type="text" value="${escapeAttr(line.title)}" placeholder="${type === "income" ? "รายรับ" : "รายการ"}">
+          <select class="select" data-backfill-field="category" aria-label="หมวดหมู่">${categoryOptions(type, line.category)}</select>
+          <input class="input" data-backfill-field="amount" type="number" inputmode="decimal" min="0" step="1" value="${line.amount || ""}" placeholder="ยอด">
+          <button class="line-remove" type="button" aria-label="ลบแถว">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
+          </button>
+        `;
+        row.querySelectorAll("[data-backfill-field]").forEach((input) => {
+          input.addEventListener("input", () => updateBackfillLine(type, line.id, input.dataset.backfillField, input.value));
+          input.addEventListener("change", () => updateBackfillLine(type, line.id, input.dataset.backfillField, input.value));
+        });
+        row.querySelector(".line-remove").addEventListener("click", () => removeBackfillLine(type, line.id));
+        container.appendChild(row);
+      });
+    }
+
+    function updateBackfillLine(type, id, field, value) {
+      const key = type === "income" ? "incomes" : "expenses";
+      state.backfill[key] = state.backfill[key].map((line) => {
+        if (line.id !== id) return line;
+        return { ...line, [field]: field === "amount" ? clampMoney(value) : value };
+      });
+      updateBackfillTotal();
+    }
+
+    function removeBackfillLine(type, id) {
+      const key = type === "income" ? "incomes" : "expenses";
+      state.backfill[key] = state.backfill[key].filter((line) => line.id !== id);
+      if (!state.backfill[key].length) state.backfill[key].push(defaultBackfillLine(type));
+      renderBackfillRows();
+    }
+
+    function updateBackfillTotal() {
+      const income = sum(state.backfill.incomes.map((line) => line.amount));
+      const expense = sum(state.backfill.expenses.map((line) => line.amount));
+      els.backfillTotal.textContent = `รับ ${formatCurrency(income)} · จ่าย ${formatCurrency(expense)} · สุทธิ ${formatCurrency(income - expense)}`;
+    }
+
+    function handleBackfillSubmit(event) {
+      event.preventDefault();
+      const date = els.backfillDateInput.value || todayISO();
+      const startTime = els.backfillTimeInput.value || "09:00";
+      const incomeLines = cleanBackfillLines("income", state.backfill.incomes);
+      const expenseLines = cleanBackfillLines("expense", state.backfill.expenses);
+      const allLines = [...incomeLines, ...expenseLines];
+
+      if (!allLines.length) {
+        showToast("เพิ่มรายการย้อนหลังอย่างน้อย 1 รายการ");
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const created = allLines.map((line, index) => ({
+        id: uid(),
+        type: line.type,
+        mode: "single",
+        amount: line.amount,
+        title: line.title || line.category,
+        category: line.category,
+        lines: [{
+          id: uid(),
+          title: line.title || line.category,
+          category: line.category,
+          amount: line.amount
+        }],
+        note: "จดย้อนหลัง",
+        date,
+        time: addMinutesToTime(startTime, index * 5),
+        source: "backfill",
+        createdAt: now,
+        updatedAt: now
+      }));
+
+      state.transactions.unshift(...created);
+      saveTransactions();
+      closeBackfillSheet();
+      renderAll();
+      showToast(`บันทึกย้อนหลัง ${created.length} รายการแล้ว`);
+    }
+
+    function cleanBackfillLines(type, rows) {
+      return rows
+        .map((line) => ({
+          type,
+          title: String(line.title || "").trim(),
+          category: line.category || defaultCategory(type),
+          amount: clampMoney(line.amount)
+        }))
+        .filter((line) => line.amount > 0);
     }
 
     function saveCategoryFromSettings() {
@@ -1766,7 +2462,7 @@
       const category = state.categories.find((item) => item.id === id);
       if (!category) return;
 
-      const usedByTransaction = state.transactions.some((transaction) => transaction.category === category.name);
+      const usedByTransaction = state.transactions.some((transaction) => transactionMatchesCategory(transaction, category.name));
       const usedByQuick = state.quickAdds.some((quick) => quick.category === category.name);
       if (usedByTransaction || usedByQuick) {
         showToast("หมวดหมู่นี้ถูกใช้งานอยู่");
@@ -1861,14 +2557,17 @@
     }
 
     function exportCsv() {
-      const header = ["date", "type", "title", "category", "amount", "note"];
+      const header = ["date", "time", "type", "title", "category", "amount", "mode", "note", "details"];
       const rows = sortedTransactions().map((transaction) => [
         transaction.date,
+        transaction.time || "",
         transaction.type,
         transaction.title,
-        transaction.category,
+        categoryLabelForTransaction(transaction, transactionLines(transaction)),
         transaction.amount,
-        transaction.note || ""
+        modeLabel(transaction.mode),
+        transaction.note || "",
+        transactionLines(transaction).map((line) => `${line.category}:${line.title}:${line.amount}`).join(" | ")
       ]);
       const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
       downloadFile("\uFEFF" + csv, `jkj-transactions-${todayISO()}.csv`, "text/csv;charset=utf-8");
@@ -1904,6 +2603,7 @@
           state.categories = data.categories;
           state.quickAdds = data.quickAdds;
           state.budget = data.budget;
+          normalizeTransactions();
           saveTransactions();
           saveCategories();
           saveQuickAdds();
@@ -1944,6 +2644,8 @@
       return [...state.transactions].sort((a, b) => {
         const dateDiff = b.date.localeCompare(a.date);
         if (dateDiff !== 0) return dateDiff;
+        const timeDiff = (b.time || "00:00").localeCompare(a.time || "00:00");
+        if (timeDiff !== 0) return timeDiff;
         return (b.createdAt || "").localeCompare(a.createdAt || "");
       });
     }
@@ -1954,6 +2656,68 @@
         groups[transaction.date].push(transaction);
         return groups;
       }, {});
+    }
+
+    function defaultCategory(type) {
+      return state.categories.find((category) => category.type === type)?.name || "อื่นๆ";
+    }
+
+    function categoryOptions(type, selected) {
+      return state.categories
+        .filter((category) => category.type === type)
+        .map((category) => `<option value="${escapeAttr(category.name)}" ${category.name === selected ? "selected" : ""}>${escapeHtml(category.name)}</option>`)
+        .join("");
+    }
+
+    function modeLabel(mode) {
+      const labels = {
+        single: "รายการเดียว",
+        itemized: "แจกแจง",
+        split: "แยกหมวด",
+        detailedSplit: "บิลละเอียด"
+      };
+      return labels[mode] || "รายการเดียว";
+    }
+
+    function categoryLabelForTransaction(transaction, lines) {
+      if (transaction.mode === "split" || transaction.mode === "detailedSplit") {
+        const categories = unique(lines.map((line) => line.category).filter(Boolean));
+        if (categories.length === 1) return categories[0];
+        return `${categories.length} หมวด`;
+      }
+      return transaction.category || lines[0]?.category || "อื่นๆ";
+    }
+
+    function transactionDetailText(transaction, lines) {
+      if (transaction.mode === "single" || !lines.length) return "";
+      if (transaction.mode === "split") {
+        return lines.map((line) => `${line.category} ${formatPlainMoney(line.amount)}`).join(" · ");
+      }
+      return lines.map((line) => `${line.title || line.category} ${formatPlainMoney(line.amount)}`).join(" · ");
+    }
+
+    function unique(values) {
+      return [...new Set(values)];
+    }
+
+    function currentTime() {
+      const date = new Date();
+      return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    }
+
+    function timeFromIso(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    }
+
+    function addMinutesToTime(time, minutes) {
+      const [hour, minute] = String(time || "09:00").split(":").map(Number);
+      const date = new Date();
+      date.setHours(Number.isFinite(hour) ? hour : 9, Number.isFinite(minute) ? minute : 0, 0, 0);
+      date.setMinutes(date.getMinutes() + minutes);
+      return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
     }
 
     function progressClass(spent, budget) {
