@@ -218,6 +218,10 @@
       gap: 10px;
     }
 
+    .summary-grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .metric {
       padding-top: 12px;
       border-top: 1px solid var(--border);
@@ -245,11 +249,19 @@
       color: var(--expense);
     }
 
+    .amount-investment {
+      color: var(--accent);
+    }
+
     .action-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-top: 14px;
+    }
+
+    .action-row.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .primary-action,
@@ -477,7 +489,7 @@
 
     .segmented {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 4px;
       padding: 4px;
       border: 1px solid var(--border);
@@ -616,6 +628,127 @@
     .settings-grid {
       display: grid;
       gap: 16px;
+    }
+
+    .settings-menu {
+      display: grid;
+      gap: 10px;
+    }
+
+    .settings-entry {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 64px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      text-align: left;
+    }
+
+    .settings-entry-icon {
+      display: inline-flex;
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(40, 77, 59, 0.08);
+      color: var(--primary);
+    }
+
+    [data-theme="dark"] .settings-entry-icon {
+      color: #D8E7DC;
+      background: rgba(216, 231, 220, 0.1);
+    }
+
+    .settings-entry strong,
+    .settings-entry span {
+      display: block;
+    }
+
+    .settings-entry span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .settings-entry-arrow {
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .settings-panel {
+      display: none;
+    }
+
+    .settings-panel.active {
+      display: block;
+    }
+
+    .back-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .dashboard-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .dashboard-card {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .dashboard-card h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+    }
+
+    .dashboard-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .dashboard-metric {
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--background);
+    }
+
+    .dashboard-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .dashboard-metric strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 17px;
+    }
+
+    .category-breakdown {
+      display: grid;
+      gap: 8px;
+    }
+
+    .category-breakdown-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .settings-card h3 {
@@ -978,6 +1111,297 @@
       font-size: 13px;
     }
 
+    .calc-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px 10px 0;
+      background: rgba(17, 24, 39, 0.42);
+    }
+
+    .calc-overlay.open {
+      display: flex;
+    }
+
+    .calc-sheet {
+      width: min(100%, 560px);
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+      animation: sheetUp 180ms ease forwards;
+    }
+
+    .calc-header {
+      display: grid;
+      gap: 4px;
+      min-height: 82px;
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--background);
+      text-align: right;
+    }
+
+    .calc-display {
+      min-height: 34px;
+      color: var(--text);
+      font-size: 30px;
+      font-weight: 780;
+      line-height: 1.15;
+      word-break: break-all;
+    }
+
+    .calc-preview {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .calc-preview.err {
+      color: var(--expense);
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .calc-btn {
+      display: flex;
+      min-width: 0;
+      height: 58px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--background);
+      color: var(--text);
+      font-size: 22px;
+      font-weight: 760;
+      transition: transform 100ms ease, background 100ms ease;
+    }
+
+    .calc-btn:active {
+      transform: scale(0.96);
+      background: var(--border);
+    }
+
+    .calc-btn.op {
+      background: rgba(209, 163, 64, 0.16);
+      color: #9A711C;
+    }
+
+    .calc-btn.paren {
+      background: rgba(107, 114, 128, 0.12);
+      color: var(--muted);
+    }
+
+    .calc-btn.del {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--expense);
+      font-size: 19px;
+    }
+
+    .calc-btn.eq {
+      grid-column: span 2;
+      background: var(--primary);
+      color: #FFFFFF;
+      font-size: 24px;
+    }
+
+    .time-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px 10px 0;
+      background: rgba(17, 24, 39, 0.42);
+    }
+
+    .time-overlay.open {
+      display: flex;
+    }
+
+    .time-sheet {
+      width: min(100%, 560px);
+      max-height: min(88dvh, 720px);
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+      animation: sheetUp 180ms ease forwards;
+    }
+
+    .time-display {
+      margin: 8px 0 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--background);
+      text-align: center;
+    }
+
+    .time-value {
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 820;
+      color: var(--text);
+    }
+
+    .time-period {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .time-period button,
+    .time-mode button {
+      min-height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 760;
+    }
+
+    .time-period button.active,
+    .time-mode button.active {
+      border-color: var(--primary);
+      background: rgba(40, 77, 59, 0.1);
+      color: var(--primary);
+    }
+
+    .time-mode {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .clock-face {
+      position: relative;
+      width: min(82vw, 310px);
+      aspect-ratio: 1;
+      margin: 0 auto 14px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, var(--surface) 0 6px, transparent 7px),
+        radial-gradient(circle at center, rgba(40, 77, 59, 0.08), transparent 62%),
+        var(--background);
+      touch-action: manipulation;
+    }
+
+    .clock-face::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      transform: translate(-50%, -50%);
+      z-index: 4;
+    }
+
+    .clock-tick {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 38px;
+      height: 38px;
+      margin: -19px 0 0 -19px;
+      border-radius: 50%;
+      color: var(--text);
+      font-weight: 760;
+      transform: rotate(var(--angle)) translateY(-126px) rotate(calc(var(--angle) * -1));
+    }
+
+    .clock-tick.active {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    .clock-hand {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      z-index: 3;
+      border-radius: 999px;
+      transform-origin: bottom center;
+      transform: translateX(-50%) rotate(var(--deg));
+      pointer-events: none;
+    }
+
+    .clock-hand.hour {
+      width: 7px;
+      height: 27%;
+      background: var(--text);
+    }
+
+    .clock-hand.minute {
+      width: 4px;
+      height: 39%;
+      background: var(--primary);
+    }
+
+    .minute-chips {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .minute-chip {
+      min-height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--background);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .minute-chip.active {
+      border-color: var(--primary);
+      background: rgba(40, 77, 59, 0.1);
+      color: var(--primary);
+    }
+
+    .time-actions {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 10px;
+    }
+
+    .time-input {
+      cursor: pointer;
+      caret-color: transparent;
+    }
+
+    @media (max-width: 420px) {
+      .clock-tick {
+        transform: rotate(var(--angle)) translateY(-32vw) rotate(calc(var(--angle) * -1));
+      }
+
+      .minute-chips {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
     .toast {
       position: fixed;
       left: 50%;
@@ -1065,19 +1489,27 @@
           <div>
             <section class="section">
               <div class="balance-panel">
-                <p class="balance-label">ยอดคงเหลือเดือนนี้</p>
+                <p class="balance-label">ยอดเงินคงเหลือ</p>
                 <div class="balance-amount" id="balanceAmount">฿0</div>
-                <div class="summary-grid">
+                <div class="summary-grid three">
                   <div class="metric">
-                    <span>รายรับ</span>
+                    <span>รายรับเดือนนี้</span>
                     <strong class="amount-income" id="incomeAmount">฿0</strong>
                   </div>
                   <div class="metric">
-                    <span>รายจ่าย</span>
+                    <span>รายจ่ายเดือนนี้</span>
                     <strong class="amount-expense" id="expenseAmount">฿0</strong>
                   </div>
+                  <div class="metric">
+                    <span>ลงทุนเดือนนี้</span>
+                    <strong class="amount-investment" id="investmentAmount">฿0</strong>
+                  </div>
                 </div>
-                <div class="action-row">
+                <div class="metric" style="margin-top:12px;">
+                  <span>ลงทุนแล้วทั้งหมด</span>
+                  <strong class="amount-investment" id="investmentTotalAmount">฿0</strong>
+                </div>
+                <div class="action-row three">
                   <button class="primary-action" id="addIncomeButton" type="button">
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
                     รายรับ
@@ -1085,6 +1517,10 @@
                   <button class="secondary-action" id="addExpenseButton" type="button">
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
                     รายจ่าย
+                  </button>
+                  <button class="ghost-action" id="addInvestmentButton" type="button">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16"></path><path d="M7 15l4-4 3 3 5-7"></path></svg>
+                    ลงทุน
                   </button>
                 </div>
               </div>
@@ -1128,6 +1564,7 @@
               <button class="segment-button active" type="button" data-filter-type="all">ทั้งหมด</button>
               <button class="segment-button" type="button" data-filter-type="income">รายรับ</button>
               <button class="segment-button" type="button" data-filter-type="expense">รายจ่าย</button>
+              <button class="segment-button" type="button" data-filter-type="investment">ลงทุน</button>
             </div>
             <select class="select" id="categoryFilter" aria-label="Filter ตามหมวดหมู่"></select>
           </div>
@@ -1136,31 +1573,16 @@
         </section>
       </section>
 
-      <section class="view" id="view-budget" data-view="budget">
+      <section class="view" id="view-dashboard" data-view="dashboard">
         <section class="section">
           <div class="section-head">
             <div>
-              <h2 class="section-title">Budget</h2>
-              <p class="section-note">เดือนนี้</p>
+              <h2 class="section-title">Dashboard</h2>
+              <p class="section-note">สรุปรายเดือน</p>
             </div>
           </div>
 
-          <div class="budget-card section">
-            <div class="field">
-              <label for="totalBudgetInput">งบรวมรายเดือน</label>
-              <input class="input" id="totalBudgetInput" type="number" inputmode="decimal" min="0" step="1" placeholder="เช่น 15000">
-            </div>
-            <div class="budget-row">
-              <div class="budget-top">
-                <strong>ใช้ไปทั้งหมด</strong>
-                <span id="totalBudgetText">฿0 / ฿0</span>
-              </div>
-              <div class="progress" aria-hidden="true"><div class="progress-fill" id="totalBudgetProgress"></div></div>
-              <p class="section-note" id="budgetRemainingText">เหลือ ฿0</p>
-            </div>
-          </div>
-
-          <div class="budget-list" id="budgetList"></div>
+          <div class="dashboard-list" id="dashboardList"></div>
         </section>
       </section>
 
@@ -1173,9 +1595,64 @@
             </div>
           </div>
 
-          <div class="settings-grid">
+          <div class="settings-panel active" id="settingsMenuPanel" data-settings-panel="menu">
+            <div class="settings-menu">
+              <button class="settings-entry" type="button" data-settings-page="budget">
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"></path><path d="M5 19h14"></path><path d="M9 15v-4"></path><path d="M13 15V8"></path><path d="M17 15v-2"></path></svg></span>
+                <span><strong>Budget</strong><span>งบรายเดือนและงบตามหมวด</span></span>
+                <span class="settings-entry-arrow">›</span>
+              </button>
+              <button class="settings-entry" type="button" data-settings-page="categories">
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg></span>
+                <span><strong>หมวดหมู่</strong><span>รายรับและรายจ่าย</span></span>
+                <span class="settings-entry-arrow">›</span>
+              </button>
+              <button class="settings-entry" type="button" data-settings-page="quick">
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"></path></svg></span>
+                <span><strong>Quick Add</strong><span>รายการด่วนที่ใช้บ่อย</span></span>
+                <span class="settings-entry-arrow">›</span>
+              </button>
+              <button class="settings-entry" type="button" data-settings-page="data">
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg></span>
+                <span><strong>ข้อมูล</strong><span>Export, Backup, Restore</span></span>
+                <span class="settings-entry-arrow">›</span>
+              </button>
+              <button class="settings-entry" type="button" data-settings-page="app">
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path><path d="M19 12h2"></path><path d="M3 12h2"></path><path d="M12 3v2"></path><path d="M12 19v2"></path></svg></span>
+                <span><strong>แอป</strong><span>ธีมและสกุลเงิน</span></span>
+                <span class="settings-entry-arrow">›</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="settingsBudgetPanel" data-settings-panel="budget">
+            <div class="back-line">
+              <button class="ghost-action" type="button" data-settings-page="menu">‹ กลับ</button>
+              <h3 class="section-title">Budget</h3>
+            </div>
+            <div class="budget-card section">
+              <div class="field">
+                <label for="totalBudgetInput">งบรวมรายเดือน</label>
+                <input class="input" id="totalBudgetInput" type="number" inputmode="decimal" min="0" step="1" placeholder="เช่น 15000">
+              </div>
+              <div class="budget-row">
+                <div class="budget-top">
+                  <strong>ใช้ไปทั้งหมด</strong>
+                  <span id="totalBudgetText">฿0 / ฿0</span>
+                </div>
+                <div class="progress" aria-hidden="true"><div class="progress-fill" id="totalBudgetProgress"></div></div>
+                <p class="section-note" id="budgetRemainingText">เหลือ ฿0</p>
+              </div>
+            </div>
+            <div class="budget-list" id="budgetList"></div>
+          </div>
+
+          <div class="settings-panel" id="settingsCategoriesPanel" data-settings-panel="categories">
+            <div class="back-line">
+              <button class="ghost-action" type="button" data-settings-page="menu">‹ กลับ</button>
+              <h3 class="section-title">หมวดหมู่</h3>
+            </div>
             <div class="settings-card">
-              <h3>หมวดหมู่</h3>
               <div class="form-grid">
                 <div class="field">
                   <label for="categoryNameInput">ชื่อหมวดหมู่</label>
@@ -1192,9 +1669,14 @@
               <button class="primary-action" id="saveCategoryButton" type="button">เพิ่มหมวดหมู่</button>
               <div class="settings-list" id="categorySettingsList"></div>
             </div>
+          </div>
 
+          <div class="settings-panel" id="settingsQuickPanel" data-settings-panel="quick">
+            <div class="back-line">
+              <button class="ghost-action" type="button" data-settings-page="menu">‹ กลับ</button>
+              <h3 class="section-title">Quick Add</h3>
+            </div>
             <div class="settings-card">
-              <h3>Quick Add</h3>
               <input type="hidden" id="quickEditingId">
               <div class="form-grid">
                 <div class="field">
@@ -1223,9 +1705,14 @@
               </div>
               <div class="settings-list" id="quickSettingsList"></div>
             </div>
+          </div>
 
+          <div class="settings-panel" id="settingsDataPanel" data-settings-panel="data">
+            <div class="back-line">
+              <button class="ghost-action" type="button" data-settings-page="menu">‹ กลับ</button>
+              <h3 class="section-title">ข้อมูล</h3>
+            </div>
             <div class="settings-card">
-              <h3>ข้อมูล</h3>
               <div class="action-row">
                 <button class="primary-action" id="exportSettingsButton" type="button">
                   <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
@@ -1242,9 +1729,14 @@
               </div>
               <p class="section-note">Transaction CSV</p>
             </div>
+          </div>
 
+          <div class="settings-panel" id="settingsAppPanel" data-settings-panel="app">
+            <div class="back-line">
+              <button class="ghost-action" type="button" data-settings-page="menu">‹ กลับ</button>
+              <h3 class="section-title">แอป</h3>
+            </div>
             <div class="settings-card">
-              <h3>แอป</h3>
               <div class="switch-line">
                 <div>
                   <strong>Dark Mode</strong>
@@ -1278,9 +1770,9 @@
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg>
       History
     </button>
-    <button class="nav-button" type="button" data-nav="budget">
+    <button class="nav-button" type="button" data-nav="dashboard">
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"></path><path d="M5 19h14"></path><path d="M9 15v-4"></path><path d="M13 15V8"></path><path d="M17 15v-2"></path></svg>
-      Budget
+      Dashboard
     </button>
     <button class="nav-button" type="button" data-nav="settings">
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2.2 2.2 0 0 1-3.11 3.11l-.04-.04a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65V21.5a2.2 2.2 0 0 1-4.4 0v-.06a1.8 1.8 0 0 0-1.09-1.65 1.8 1.8 0 0 0-1.98.36l-.04.04a2.2 2.2 0 1 1-3.11-3.11l.04-.04A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.65-1.09H2.9a2.2 2.2 0 0 1 0-4.4h.06A1.8 1.8 0 0 0 4.6 8a1.8 1.8 0 0 0-.36-1.98l-.04-.04a2.2 2.2 0 1 1 3.11-3.11l.04.04A1.8 1.8 0 0 0 9.33 3.27a1.8 1.8 0 0 0 1.09-1.65V1.56a2.2 2.2 0 0 1 4.4 0v.06a1.8 1.8 0 0 0 1.09 1.65 1.8 1.8 0 0 0 1.98-.36l.04-.04a2.2 2.2 0 1 1 3.11 3.11l-.04.04A1.8 1.8 0 0 0 19.4 8c.23.52.75.86 1.35.86h.35a2.2 2.2 0 0 1 0 4.4h-.35A1.8 1.8 0 0 0 19.4 15Z"></path></svg>
@@ -1339,7 +1831,7 @@
         </div>
         <div class="field">
           <label for="timeInput">เวลา</label>
-          <input class="input" id="timeInput" type="time" required>
+          <input class="input time-input" id="timeInput" type="text" inputmode="none" autocomplete="off" required aria-haspopup="dialog" aria-readonly="true" maxlength="5" placeholder="เลือกเวลา">
         </div>
       </div>
 
@@ -1374,7 +1866,7 @@
         </div>
         <div class="field">
           <label for="backfillTimeInput">เวลาเริ่มต้น</label>
-          <input class="input" id="backfillTimeInput" type="time" required>
+          <input class="input time-input" id="backfillTimeInput" type="text" inputmode="none" autocomplete="off" required aria-haspopup="dialog" aria-readonly="true" maxlength="5" placeholder="เลือกเวลาเริ่มต้น">
         </div>
       </div>
 
@@ -1407,6 +1899,76 @@
 
       <button class="primary-action" id="saveBackfillButton" type="submit" style="width:100%; margin-top:14px;">บันทึกวันนี้</button>
     </form>
+  </div>
+
+  <div class="calc-overlay" id="calcOverlay" role="dialog" aria-modal="true" aria-labelledby="calcTitle">
+    <div class="calc-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="calcTitle">แป้นจำนวนเงิน</h2>
+        <button class="icon-button" id="closeCalcButton" type="button" title="ปิด" aria-label="ปิด">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <div class="calc-header">
+        <div class="calc-display" id="calcDisplay">0</div>
+        <div class="calc-preview" id="calcPreview"></div>
+      </div>
+      <div class="calc-grid" aria-label="แป้นคำนวณจำนวนเงิน">
+        <button class="calc-btn paren" type="button" data-calc-key="(">(</button>
+        <button class="calc-btn paren" type="button" data-calc-key=")">)</button>
+        <button class="calc-btn op" type="button" data-calc-key="/">÷</button>
+        <button class="calc-btn del" type="button" data-calc-key="⌫">⌫</button>
+        <button class="calc-btn" type="button" data-calc-key="7">7</button>
+        <button class="calc-btn" type="button" data-calc-key="8">8</button>
+        <button class="calc-btn" type="button" data-calc-key="9">9</button>
+        <button class="calc-btn op" type="button" data-calc-key="*">×</button>
+        <button class="calc-btn" type="button" data-calc-key="4">4</button>
+        <button class="calc-btn" type="button" data-calc-key="5">5</button>
+        <button class="calc-btn" type="button" data-calc-key="6">6</button>
+        <button class="calc-btn op" type="button" data-calc-key="-">−</button>
+        <button class="calc-btn" type="button" data-calc-key="1">1</button>
+        <button class="calc-btn" type="button" data-calc-key="2">2</button>
+        <button class="calc-btn" type="button" data-calc-key="3">3</button>
+        <button class="calc-btn op" type="button" data-calc-key="+">+</button>
+        <button class="calc-btn" type="button" data-calc-key="0">0</button>
+        <button class="calc-btn" type="button" data-calc-key=".">.</button>
+        <button class="calc-btn eq" type="button" data-calc-key="=">=</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="time-overlay" id="timeOverlay" role="dialog" aria-modal="true" aria-labelledby="timePickerTitle">
+    <div class="time-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="timePickerTitle">เลือกเวลา</h2>
+        <button class="icon-button" id="closeTimePickerButton" type="button" title="ปิด" aria-label="ปิด">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <div class="time-display">
+        <div class="time-value" id="timePickerValue">00:00</div>
+        <div class="time-period" aria-label="ช่วงเวลา">
+          <button type="button" data-time-period="am">00:00-11:59</button>
+          <button type="button" data-time-period="pm">12:00-23:59</button>
+        </div>
+      </div>
+      <div class="time-mode" aria-label="เลือกเข็ม">
+        <button type="button" data-time-mode="hour">ชั่วโมง</button>
+        <button type="button" data-time-mode="minute">นาที</button>
+      </div>
+      <div class="clock-face" id="clockFace" aria-label="หน้าปัดเลือกเวลา">
+        <div class="clock-hand hour" id="clockHourHand" aria-hidden="true"></div>
+        <div class="clock-hand minute" id="clockMinuteHand" aria-hidden="true"></div>
+        <div id="clockTicks"></div>
+      </div>
+      <div class="minute-chips" id="minuteChips" aria-label="นาทีแบบเร็ว"></div>
+      <div class="time-actions">
+        <button class="ghost-action" id="cancelTimePickerButton" type="button">ยกเลิก</button>
+        <button class="primary-action" id="applyTimePickerButton" type="button">ใช้เวลานี้</button>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1475,6 +2037,13 @@
         incomes: [],
         expenses: []
       },
+      calcEl: null,
+      timeTargetEl: null,
+      timePicker: {
+        hour: 0,
+        minute: 0,
+        mode: "hour"
+      },
       toastTimer: null
     };
 
@@ -1483,8 +2052,11 @@
       balanceAmount: document.getElementById("balanceAmount"),
       incomeAmount: document.getElementById("incomeAmount"),
       expenseAmount: document.getElementById("expenseAmount"),
+      investmentAmount: document.getElementById("investmentAmount"),
+      investmentTotalAmount: document.getElementById("investmentTotalAmount"),
       addIncomeButton: document.getElementById("addIncomeButton"),
       addExpenseButton: document.getElementById("addExpenseButton"),
+      addInvestmentButton: document.getElementById("addInvestmentButton"),
       openExpenseTopButton: document.getElementById("openExpenseTopButton"),
       exportTopButton: document.getElementById("exportTopButton"),
       quickAddGrid: document.getElementById("quickAddGrid"),
@@ -1499,6 +2071,7 @@
       totalBudgetProgress: document.getElementById("totalBudgetProgress"),
       budgetRemainingText: document.getElementById("budgetRemainingText"),
       budgetList: document.getElementById("budgetList"),
+      dashboardList: document.getElementById("dashboardList"),
       categoryNameInput: document.getElementById("categoryNameInput"),
       categoryTypeInput: document.getElementById("categoryTypeInput"),
       saveCategoryButton: document.getElementById("saveCategoryButton"),
@@ -1547,6 +2120,20 @@
       backfillIncomeList: document.getElementById("backfillIncomeList"),
       backfillExpenseList: document.getElementById("backfillExpenseList"),
       backfillTotal: document.getElementById("backfillTotal"),
+      calcOverlay: document.getElementById("calcOverlay"),
+      closeCalcButton: document.getElementById("closeCalcButton"),
+      calcDisplay: document.getElementById("calcDisplay"),
+      calcPreview: document.getElementById("calcPreview"),
+      timeOverlay: document.getElementById("timeOverlay"),
+      closeTimePickerButton: document.getElementById("closeTimePickerButton"),
+      cancelTimePickerButton: document.getElementById("cancelTimePickerButton"),
+      applyTimePickerButton: document.getElementById("applyTimePickerButton"),
+      timePickerValue: document.getElementById("timePickerValue"),
+      clockFace: document.getElementById("clockFace"),
+      clockHourHand: document.getElementById("clockHourHand"),
+      clockMinuteHand: document.getElementById("clockMinuteHand"),
+      clockTicks: document.getElementById("clockTicks"),
+      minuteChips: document.getElementById("minuteChips"),
       toast: document.getElementById("toast")
     };
 
@@ -1566,11 +2153,15 @@
 
     function bindEvents() {
       document.querySelectorAll("[data-nav]").forEach((button) => {
-        button.addEventListener("click", () => setView(button.dataset.nav));
+        button.addEventListener("click", () => {
+          setView(button.dataset.nav);
+          if (button.dataset.nav === "settings") showSettingsPage("menu");
+        });
       });
 
       els.addIncomeButton.addEventListener("click", () => openTransactionSheet("income"));
       els.addExpenseButton.addEventListener("click", () => openTransactionSheet("expense"));
+      els.addInvestmentButton.addEventListener("click", () => openTransactionSheet("investment"));
       els.openExpenseTopButton.addEventListener("click", () => openTransactionSheet("expense"));
       els.exportTopButton.addEventListener("click", exportCsv);
       els.exportSettingsButton.addEventListener("click", exportCsv);
@@ -1581,6 +2172,45 @@
       els.addLineItemButton.addEventListener("click", addCurrentLineItem);
       els.addBackfillIncomeButton.addEventListener("click", () => addBackfillRow("income"));
       els.addBackfillExpenseButton.addEventListener("click", () => addBackfillRow("expense"));
+      els.closeCalcButton.addEventListener("click", closeCalc);
+      els.closeTimePickerButton.addEventListener("click", closeTimePicker);
+      els.cancelTimePickerButton.addEventListener("click", closeTimePicker);
+      els.applyTimePickerButton.addEventListener("click", applyTimePicker);
+
+      [els.timeInput, els.backfillTimeInput].forEach((input) => {
+        input.addEventListener("click", (event) => {
+          event.preventDefault();
+          openTimePicker(input);
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openTimePicker(input);
+          }
+        });
+      });
+
+      els.calcOverlay.addEventListener("click", (event) => {
+        if (event.target === els.calcOverlay) closeCalc();
+      });
+
+      els.timeOverlay.addEventListener("click", (event) => {
+        if (event.target === els.timeOverlay) closeTimePicker();
+      });
+
+      document.querySelectorAll("[data-calc-key]").forEach((button) => {
+        button.addEventListener("click", () => calcPush(button.dataset.calcKey));
+      });
+
+      document.querySelectorAll("[data-time-period]").forEach((button) => {
+        button.addEventListener("click", () => setTimePeriod(button.dataset.timePeriod));
+      });
+
+      document.querySelectorAll("[data-time-mode]").forEach((button) => {
+        button.addEventListener("click", () => setTimeMode(button.dataset.timeMode));
+      });
+
+      els.clockFace.addEventListener("click", handleClockFaceClick);
 
       els.sheet.addEventListener("click", (event) => {
         if (event.target === els.sheet) closeTransactionSheet();
@@ -1591,6 +2221,15 @@
       });
 
       document.addEventListener("keydown", (event) => {
+        if (els.timeOverlay.classList.contains("open")) {
+          if (event.key === "Escape") closeTimePicker();
+          if (event.key === "Enter") applyTimePicker();
+          return;
+        }
+        if (els.calcOverlay.classList.contains("open")) {
+          handleCalcKeydown(event);
+          return;
+        }
         if (event.key === "Escape" && els.sheet.classList.contains("open")) {
           closeTransactionSheet();
         }
@@ -1610,6 +2249,10 @@
 
       document.querySelectorAll("[data-expense-mode]").forEach((button) => {
         button.addEventListener("click", () => setTransactionMode(button.dataset.expenseMode));
+      });
+
+      document.querySelectorAll("[data-settings-page]").forEach((button) => {
+        button.addEventListener("click", () => showSettingsPage(button.dataset.settingsPage));
       });
 
       els.searchInput.addEventListener("input", () => {
@@ -1669,12 +2312,355 @@
       renderHome();
       renderCategoryFilter();
       renderHistory();
+      renderDashboard();
       renderBudget();
       renderSettings();
       renderCategoryOptionsForSheet(els.transactionTypeInput.value);
       renderLineItems();
       renderBackfillRows();
       renderQuickCategoryOptions();
+      requestAnimationFrame(() => initMathFields(document));
+    }
+
+    function evalMath(expression) {
+      if (typeof expression !== "string") return NaN;
+      const cleaned = expression
+        .replace(/\s+/g, "")
+        .replace(/,/g, "")
+        .replace(/×/g, "*")
+        .replace(/÷/g, "/")
+        .replace(/−/g, "-");
+
+      if (!cleaned) return 0;
+      if (!/^[0-9+\-*/().]+$/.test(cleaned)) return NaN;
+
+      const tokens = cleaned.match(/[0-9.]+|[+\-*/()]/g);
+      if (!tokens) return NaN;
+      let i = 0;
+
+      const expr = () => {
+        let result = term();
+        while (i < tokens.length && (tokens[i] === "+" || tokens[i] === "-")) {
+          const op = tokens[i++];
+          result = op === "+" ? result + term() : result - term();
+        }
+        return result;
+      };
+
+      const term = () => {
+        let result = factor();
+        while (i < tokens.length && (tokens[i] === "*" || tokens[i] === "/")) {
+          const op = tokens[i++];
+          const next = factor();
+          if (op === "/" && next === 0) throw new Error("DivByZero");
+          result = op === "*" ? result * next : result / next;
+        }
+        return result;
+      };
+
+      const factor = () => {
+        const token = tokens[i++];
+        if (token === "(") {
+          const result = expr();
+          if (tokens[i] !== ")") throw new Error("MissingParen");
+          i++;
+          return result;
+        }
+        if (token === "-") return -factor();
+        if (token === "+") return factor();
+        if (!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(token || "")) throw new Error("BadNumber");
+        return Number(token);
+      };
+
+      try {
+        const result = expr();
+        if (i !== tokens.length || !Number.isFinite(result)) return NaN;
+        return +result.toFixed(2);
+      } catch (error) {
+        return NaN;
+      }
+    }
+
+    function initMathFields(container = document) {
+      container.querySelectorAll('input[inputmode="decimal"], input[inputmode="numeric"]').forEach((input) => {
+        if (input.dataset.mathInited === "true") return;
+        input.dataset.mathInited = "true";
+        input.autocomplete = "off";
+
+        input.addEventListener("focus", (event) => {
+          event.preventDefault();
+          requestAnimationFrame(() => input.blur());
+          openCalc(input);
+        });
+
+        input.addEventListener("click", (event) => {
+          event.preventDefault();
+          openCalc(input);
+        });
+      });
+    }
+
+    function openCalc(input) {
+      state.calcEl = input;
+      els.calcDisplay.textContent = calcInitialValue(input.value);
+      els.calcPreview.textContent = "";
+      els.calcPreview.classList.remove("err");
+      els.calcOverlay.classList.add("open");
+      updateCalcPreview();
+    }
+
+    function closeCalc() {
+      els.calcOverlay.classList.remove("open");
+      state.calcEl = null;
+      els.calcPreview.classList.remove("err");
+    }
+
+    function calcPush(key) {
+      let current = els.calcDisplay.textContent || "0";
+
+      if (key === "⌫") {
+        els.calcDisplay.textContent = current.length > 1 ? current.slice(0, -1) : "0";
+        updateCalcPreview();
+        return;
+      }
+
+      if (key === "=") {
+        commitCalc();
+        return;
+      }
+
+      if (current === "0") {
+        if (/[0-9(]/.test(key)) current = key;
+        else if (key === ".") current = "0.";
+        else current = `0${key}`;
+      } else {
+        current += key;
+      }
+
+      els.calcDisplay.textContent = current;
+      updateCalcPreview();
+    }
+
+    function commitCalc() {
+      const result = evalMath(els.calcDisplay.textContent);
+      if (Number.isNaN(result)) {
+        els.calcPreview.textContent = "คำนวณไม่ได้";
+        els.calcPreview.classList.add("err");
+        showToast("สูตรคำนวณไม่ถูกต้อง");
+        return;
+      }
+
+      if (state.calcEl) {
+        state.calcEl.value = String(result);
+        state.calcEl.dispatchEvent(new Event("input", { bubbles: true }));
+        state.calcEl.dispatchEvent(new Event("change", { bubbles: true }));
+        state.calcEl.dispatchEvent(new Event("blur", { bubbles: true }));
+      }
+      closeCalc();
+    }
+
+    function updateCalcPreview() {
+      const current = els.calcDisplay.textContent || "0";
+      if (current === "0" || !/[+\-*/()]/.test(current)) {
+        els.calcPreview.textContent = "";
+        els.calcPreview.classList.remove("err");
+        return;
+      }
+
+      const result = evalMath(current);
+      if (Number.isNaN(result)) {
+        els.calcPreview.textContent = "คำนวณไม่ได้";
+        els.calcPreview.classList.add("err");
+      } else {
+        els.calcPreview.textContent = `= ${formatPlainMoney(result)}`;
+        els.calcPreview.classList.remove("err");
+      }
+    }
+
+    function handleCalcKeydown(event) {
+      if (/[0-9+\-*/().]/.test(event.key)) {
+        event.preventDefault();
+        calcPush(event.key);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        calcPush("=");
+      } else if (event.key === "Backspace") {
+        event.preventDefault();
+        calcPush("⌫");
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        closeCalc();
+      }
+    }
+
+    function calcInitialValue(value) {
+      const text = String(value || "").replace(/,/g, "").trim();
+      return text || "0";
+    }
+
+    function openTimePicker(input) {
+      if (!input) return;
+      if (els.calcOverlay.classList.contains("open")) closeCalc();
+      state.timeTargetEl = input;
+      const time = parseTimeValue(input.value) || parseTimeValue(currentTime());
+      state.timePicker.hour = time.hour;
+      state.timePicker.minute = time.minute;
+      state.timePicker.mode = "hour";
+      renderTimePicker();
+      els.timeOverlay.classList.add("open");
+      requestAnimationFrame(() => els.applyTimePickerButton.focus());
+    }
+
+    function closeTimePicker() {
+      els.timeOverlay.classList.remove("open");
+      state.timeTargetEl?.blur();
+      state.timeTargetEl = null;
+    }
+
+    function applyTimePicker() {
+      if (state.timeTargetEl) {
+        state.timeTargetEl.value = formatTimeValue(state.timePicker.hour, state.timePicker.minute);
+        state.timeTargetEl.dispatchEvent(new Event("input", { bubbles: true }));
+        state.timeTargetEl.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      closeTimePicker();
+    }
+
+    function setTimePeriod(period) {
+      const isPm = state.timePicker.hour >= 12;
+      if (period === "pm" && !isPm) state.timePicker.hour += 12;
+      if (period === "am" && isPm) state.timePicker.hour -= 12;
+      renderTimePicker();
+    }
+
+    function setTimeMode(mode) {
+      state.timePicker.mode = mode === "minute" ? "minute" : "hour";
+      renderTimePicker();
+    }
+
+    function handleClockFaceClick(event) {
+      const tick = event.target.closest("[data-clock-value]");
+      if (tick) {
+        selectClockValue(Number(tick.dataset.clockValue));
+        return;
+      }
+
+      const angle = clockAngleFromPoint(event.clientX, event.clientY);
+      if (state.timePicker.mode === "hour") {
+        const faceHour = Math.round(angle / 30) || 12;
+        setHourFromFace(faceHour);
+        state.timePicker.mode = "minute";
+      } else {
+        state.timePicker.minute = Math.round(angle / 6) % 60;
+      }
+      renderTimePicker();
+    }
+
+    function selectClockValue(value) {
+      if (!Number.isFinite(value)) return;
+      if (state.timePicker.mode === "hour") {
+        setHourFromFace(value);
+        state.timePicker.mode = "minute";
+      } else {
+        state.timePicker.minute = clampMinute(value);
+      }
+      renderTimePicker();
+    }
+
+    function setHourFromFace(faceHour) {
+      const hour12 = Number(faceHour) % 12;
+      state.timePicker.hour = state.timePicker.hour >= 12 ? hour12 + 12 : hour12;
+    }
+
+    function renderTimePicker() {
+      const { hour, minute, mode } = state.timePicker;
+      els.timePickerValue.textContent = formatTimeValue(hour, minute);
+
+      document.querySelectorAll("[data-time-period]").forEach((button) => {
+        const active = hour >= 12 ? button.dataset.timePeriod === "pm" : button.dataset.timePeriod === "am";
+        button.classList.toggle("active", active);
+      });
+
+      document.querySelectorAll("[data-time-mode]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.timeMode === mode);
+      });
+
+      const hourDeg = ((hour % 12) + minute / 60) * 30;
+      const minuteDeg = minute * 6;
+      els.clockHourHand.style.setProperty("--deg", `${hourDeg}deg`);
+      els.clockMinuteHand.style.setProperty("--deg", `${minuteDeg}deg`);
+      els.clockHourHand.style.opacity = mode === "hour" ? "1" : "0.52";
+      els.clockMinuteHand.style.opacity = mode === "minute" ? "1" : "0.72";
+      renderClockTicks();
+      renderMinuteChips();
+    }
+
+    function renderClockTicks() {
+      const mode = state.timePicker.mode;
+      const activeHour = state.timePicker.hour % 12 || 12;
+      const activeMinute = state.timePicker.minute;
+      const ticks = [];
+
+      for (let index = 0; index < 12; index += 1) {
+        const value = mode === "hour" ? (index === 0 ? 12 : index) : index * 5;
+        const angle = mode === "hour" ? (value % 12) * 30 : value * 6;
+        const label = mode === "hour" ? String(value) : String(value).padStart(2, "0");
+        const active = mode === "hour" ? value === activeHour : value === activeMinute;
+        ticks.push(`<button class="clock-tick ${active ? "active" : ""}" type="button" data-clock-value="${value}" style="--angle:${angle}deg">${label}</button>`);
+      }
+
+      els.clockTicks.innerHTML = ticks.join("");
+    }
+
+    function renderMinuteChips() {
+      const minute = state.timePicker.minute;
+      const chips = Array.from({ length: 12 }, (_, index) => index * 5).map((value) => `
+        <button class="minute-chip ${value === minute ? "active" : ""}" type="button" data-minute-chip="${value}">
+          ${String(value).padStart(2, "0")}
+        </button>
+      `);
+      els.minuteChips.innerHTML = chips.join("");
+      els.minuteChips.querySelectorAll("[data-minute-chip]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.timePicker.mode = "minute";
+          state.timePicker.minute = clampMinute(button.dataset.minuteChip);
+          renderTimePicker();
+        });
+      });
+    }
+
+    function clockAngleFromPoint(clientX, clientY) {
+      const rect = els.clockFace.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = clientX - centerX;
+      const dy = clientY - centerY;
+      return (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
+    }
+
+    function parseTimeValue(value) {
+      const match = String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+      if (!match) return null;
+      return {
+        hour: clampHour(match[1]),
+        minute: clampMinute(match[2])
+      };
+    }
+
+    function formatTimeValue(hour, minute) {
+      return `${String(clampHour(hour)).padStart(2, "0")}:${String(clampMinute(minute)).padStart(2, "0")}`;
+    }
+
+    function clampHour(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return 0;
+      return Math.max(0, Math.min(23, Math.round(number)));
+    }
+
+    function clampMinute(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return 0;
+      return Math.max(0, Math.min(59, Math.round(number)));
     }
 
     function normalizeTransactions() {
@@ -1685,6 +2671,10 @@
           normalized.mode = "single";
           changed = true;
         }
+        if (normalized.type === "investment" && normalized.category !== "ลงทุน") {
+          normalized.category = "ลงทุน";
+          changed = true;
+        }
         if (!normalized.time) {
           normalized.time = timeFromIso(normalized.createdAt) || "12:00";
           changed = true;
@@ -1693,7 +2683,7 @@
           normalized.lines = [{
             id: uid(),
             title: normalized.title || normalized.category,
-            category: normalized.category,
+            category: normalized.category || (normalized.type === "investment" ? "ลงทุน" : "อื่นๆ"),
             amount: Number(normalized.amount) || 0
           }];
           changed = true;
@@ -1725,7 +2715,7 @@
       const lineText = transactionLines(transaction)
         .map((line) => `${line.title} ${line.category} ${line.amount}`)
         .join(" ");
-      return `${transaction.title} ${transaction.category} ${transaction.note || ""} ${modeLabel(transaction.mode)} ${lineText}`.toLowerCase();
+      return `${transaction.type} ${transaction.title} ${transaction.category} ${transaction.note || ""} ${transactionModeText(transaction)} ${lineText}`.toLowerCase();
     }
 
     function transactionMatchesCategory(transaction, category) {
@@ -1745,9 +2735,12 @@
 
     function renderHome() {
       const summary = getMonthlySummary();
-      els.balanceAmount.textContent = formatCurrency(summary.balance);
+      const cash = getCashSummary();
+      els.balanceAmount.textContent = formatCurrency(cash.balance);
       els.incomeAmount.textContent = formatCurrency(summary.income);
       els.expenseAmount.textContent = formatCurrency(summary.expense);
+      els.investmentAmount.textContent = formatCurrency(summary.investment);
+      els.investmentTotalAmount.textContent = formatCurrency(cash.investment);
 
       els.quickAddGrid.innerHTML = "";
       state.quickAdds.forEach((quick) => {
@@ -1780,7 +2773,9 @@
     function renderCategoryFilter() {
       const currentValue = state.historyFilter.category;
       const type = state.historyFilter.type;
-      const categories = state.categories.filter((category) => type === "all" || category.type === type);
+      const categories = type === "investment"
+        ? [{ id: "investment", name: "ลงทุน", type: "investment" }]
+        : state.categories.filter((category) => type === "all" || category.type === type);
       els.categoryFilter.innerHTML = `<option value="all">ทุกหมวดหมู่</option>` + categories
         .map((category) => `<option value="${escapeAttr(category.name)}">${escapeHtml(category.name)}</option>`)
         .join("");
@@ -1816,6 +2811,54 @@
         list.className = "transaction-list";
         transactions.forEach((transaction) => list.appendChild(transactionRow(transaction, true)));
         els.historyList.appendChild(list);
+      });
+    }
+
+    function renderDashboard() {
+      if (!els.dashboardList) return;
+      els.dashboardList.innerHTML = "";
+      const summaries = monthlySummaries();
+
+      if (!summaries.length) {
+        els.dashboardList.appendChild(emptyState("ยังไม่มีข้อมูลรายเดือน", "เมื่อเริ่มบันทึกรายการ Dashboard จะแสดงสรุปให้เอง", "เพิ่มรายจ่าย", () => openTransactionSheet("expense")));
+        return;
+      }
+
+      summaries.forEach((summary) => {
+        const card = document.createElement("div");
+        card.className = "dashboard-card";
+        const categoryRows = summary.categoryBreakdown.length
+          ? summary.categoryBreakdown.slice(0, 5).map((item) => `
+            <div class="category-breakdown-row">
+              <span>${escapeHtml(item.category)}</span>
+              <strong>${formatCurrency(item.amount)}</strong>
+            </div>
+          `).join("")
+          : `<p class="section-note">ยังไม่มีรายจ่ายในเดือนนี้</p>`;
+
+        card.innerHTML = `
+          <h3>${escapeHtml(monthLabelFromKey(summary.month))}</h3>
+          <div class="dashboard-metrics">
+            <div class="dashboard-metric">
+              <span>รายรับ</span>
+              <strong class="amount-income">${formatCurrency(summary.income)}</strong>
+            </div>
+            <div class="dashboard-metric">
+              <span>รายจ่าย</span>
+              <strong class="amount-expense">${formatCurrency(summary.expense)}</strong>
+            </div>
+            <div class="dashboard-metric">
+              <span>ลงทุน</span>
+              <strong class="amount-investment">${formatCurrency(summary.investment)}</strong>
+            </div>
+            <div class="dashboard-metric">
+              <span>สุทธิเงินสด</span>
+              <strong>${formatCurrency(summary.netCash)}</strong>
+            </div>
+          </div>
+          <div class="category-breakdown">${categoryRows}</div>
+        `;
+        els.dashboardList.appendChild(card);
       });
     }
 
@@ -1863,6 +2906,7 @@
         });
         els.budgetList.appendChild(card);
       });
+      requestAnimationFrame(() => initMathFields(els.budgetList));
     }
 
     function renderSettings() {
@@ -1898,6 +2942,16 @@
       renderQuickSettings();
     }
 
+    function showSettingsPage(page) {
+      const safePage = page || "menu";
+      document.querySelectorAll("[data-settings-panel]").forEach((panel) => {
+        panel.classList.toggle("active", panel.dataset.settingsPanel === safePage);
+      });
+      if (state.activeView === "settings") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+
     function renderQuickSettings() {
       els.quickSettingsList.innerHTML = "";
       state.quickAdds.forEach((quick) => {
@@ -1925,6 +2979,10 @@
     }
 
     function renderCategoryOptionsForSheet(type) {
+      if (type === "investment") {
+        els.categoryInput.innerHTML = `<option value="ลงทุน">ลงทุน</option>`;
+        return;
+      }
       const categories = state.categories.filter((category) => category.type === type);
       els.categoryInput.innerHTML = categories
         .map((category) => `<option value="${escapeAttr(category.name)}">${escapeHtml(category.name)}</option>`)
@@ -1987,6 +3045,7 @@
       });
 
       updateLineTotal();
+      requestAnimationFrame(() => initMathFields(els.lineItemsList));
     }
 
     function expenseCategoryOptions(selected) {
@@ -2009,13 +3068,14 @@
       const lines = transactionLines(transaction);
       const detail = transactionDetailText(transaction, lines);
       const categoryLabel = categoryLabelForTransaction(transaction, lines);
+      const amountClass = transaction.type === "income" ? "amount-income" : (transaction.type === "investment" ? "amount-investment" : "amount-expense");
       row.innerHTML = `
         <div class="transaction-main">
           <div class="transaction-title">
             <span>${escapeHtml(transaction.title || transaction.category)}</span>
             <span class="pill">${escapeHtml(categoryLabel)}</span>
           </div>
-          <div class="transaction-meta">${escapeHtml(transaction.time || "--:--")} · ${formatDateShort(transaction.date)} · ${escapeHtml(modeLabel(transaction.mode))}${transaction.note ? " · " + escapeHtml(transaction.note) : ""}</div>
+          <div class="transaction-meta">${escapeHtml(transaction.time || "--:--")} · ${formatDateShort(transaction.date)} · ${escapeHtml(transactionModeText(transaction))}${transaction.note ? " · " + escapeHtml(transaction.note) : ""}</div>
           ${detail ? `<div class="transaction-detail">${escapeHtml(detail)}</div>` : ""}
           ${withActions ? `
             <div class="row-actions">
@@ -2028,7 +3088,7 @@
             </div>
           ` : ""}
         </div>
-        <div class="transaction-amount ${transaction.type === "income" ? "amount-income" : "amount-expense"}">
+        <div class="transaction-amount ${amountClass}">
           ${transaction.type === "income" ? "+" : "-"}${formatPlainMoney(transaction.amount)}
         </div>
       `;
@@ -2055,18 +3115,20 @@
 
     function openTransactionSheet(type, transaction = null) {
       const isIncome = type === "income";
-      els.sheetTitle.textContent = transaction ? "แก้ไขรายการ" : (isIncome ? "รายรับ" : "รายจ่าย");
+      const isInvestment = type === "investment";
+      els.sheetTitle.textContent = transaction ? "แก้ไขรายการ" : (isIncome ? "รายรับ" : (isInvestment ? "ลงทุน" : "รายจ่าย"));
       els.transactionTypeInput.value = type;
       renderCategoryOptionsForSheet(type);
-      els.expenseModeTabs.hidden = isIncome;
+      els.expenseModeTabs.hidden = type !== "expense";
 
-      const mode = isIncome ? "single" : (transaction?.mode || "single");
+      const mode = type === "expense" ? (transaction?.mode || "single") : "single";
       els.editingTransactionId.value = transaction?.id || "";
       els.amountInput.value = transaction?.amount || "";
-      els.categoryInput.value = transaction?.category || state.categories.find((category) => category.type === type)?.name || "";
+      els.categoryInput.value = transaction?.category || state.categories.find((category) => category.type === type)?.name || (isInvestment ? "ลงทุน" : "");
       els.dateInput.value = transaction?.date || todayISO();
       els.timeInput.value = transaction?.time || currentTime();
       els.titleInput.value = transaction?.title || "";
+      els.titleInput.placeholder = isInvestment ? "เช่น ลงทุนกองทุน" : "เช่น ชาเย็น";
       els.noteInput.value = transaction?.note || "";
       state.transactionLines = transaction ? transactionLines(transaction).map((line) => ({ ...line, id: line.id || uid() })) : [defaultLineForMode(mode)];
       setTransactionMode(mode);
@@ -2092,6 +3154,7 @@
       els.editingTransactionId.value = "";
       els.transactionTypeInput.value = "expense";
       els.transactionModeInput.value = "single";
+      els.titleInput.placeholder = "เช่น ชาเย็น";
       els.dateInput.value = todayISO();
       els.timeInput.value = currentTime();
       state.transactionLines = [];
@@ -2102,7 +3165,7 @@
       event.preventDefault();
       const now = new Date().toISOString();
       const type = els.transactionTypeInput.value;
-      const mode = type === "income" ? "single" : els.transactionModeInput.value;
+      const mode = type === "expense" ? els.transactionModeInput.value : "single";
       const lines = linesForSubmit(mode);
       const amount = mode === "single" ? clampMoney(els.amountInput.value) : sum(lines.map((line) => line.amount));
       if (!amount) {
@@ -2116,7 +3179,7 @@
         return;
       }
 
-      const category = categoryForPayload(mode, lines, els.categoryInput.value);
+      const category = type === "investment" ? "ลงทุน" : categoryForPayload(mode, lines, els.categoryInput.value);
       const title = els.titleInput.value.trim() || defaultTitleForMode(mode, category);
       const payload = {
         type,
@@ -2158,7 +3221,7 @@
 
     function setTransactionMode(mode) {
       const type = els.transactionTypeInput.value;
-      const safeMode = type === "income" ? "single" : mode;
+      const safeMode = type === "expense" ? mode : "single";
       els.transactionModeInput.value = safeMode;
 
       document.querySelectorAll("[data-expense-mode]").forEach((button) => {
@@ -2166,7 +3229,7 @@
       });
 
       const isSingle = safeMode === "single";
-      const isCategoryMode = safeMode === "single" || safeMode === "itemized";
+      const isCategoryMode = type !== "investment" && (safeMode === "single" || safeMode === "itemized");
       els.amountBlock.hidden = !isSingle;
       els.lineItemsBlock.hidden = isSingle;
       els.categoryField.hidden = !isCategoryMode;
@@ -2333,6 +3396,7 @@
       renderBackfillList("income", els.backfillIncomeList, state.backfill.incomes);
       renderBackfillList("expense", els.backfillExpenseList, state.backfill.expenses);
       updateBackfillTotal();
+      requestAnimationFrame(() => initMathFields(els.backfillForm));
     }
 
     function renderBackfillList(type, container, rows) {
@@ -2628,11 +3692,53 @@
       const transactions = getCurrentMonthTransactions();
       const income = sum(transactions.filter((transaction) => transaction.type === "income").map((transaction) => transaction.amount));
       const expense = sum(transactions.filter((transaction) => transaction.type === "expense").map((transaction) => transaction.amount));
+      const investment = sum(transactions.filter((transaction) => transaction.type === "investment").map((transaction) => transaction.amount));
       return {
         income,
         expense,
-        balance: income - expense
+        investment,
+        balance: income - expense - investment
       };
+    }
+
+    function getCashSummary() {
+      const income = sum(state.transactions.filter((transaction) => transaction.type === "income").map((transaction) => transaction.amount));
+      const expense = sum(state.transactions.filter((transaction) => transaction.type === "expense").map((transaction) => transaction.amount));
+      const investment = sum(state.transactions.filter((transaction) => transaction.type === "investment").map((transaction) => transaction.amount));
+      return {
+        income,
+        expense,
+        investment,
+        balance: income - expense - investment
+      };
+    }
+
+    function monthlySummaries() {
+      const months = unique(state.transactions.map((transaction) => transaction.date?.slice(0, 7)).filter(Boolean)).sort().reverse();
+      return months.map((month) => {
+        const transactions = state.transactions.filter((transaction) => transaction.date.slice(0, 7) === month);
+        const income = sum(transactions.filter((transaction) => transaction.type === "income").map((transaction) => transaction.amount));
+        const expense = sum(transactions.filter((transaction) => transaction.type === "expense").map((transaction) => transaction.amount));
+        const investment = sum(transactions.filter((transaction) => transaction.type === "investment").map((transaction) => transaction.amount));
+        const expenseEntries = expenseLedgerEntries(transactions);
+        const categories = unique(expenseEntries.map((entry) => entry.category).filter(Boolean));
+        const categoryBreakdown = categories
+          .map((category) => ({
+            category,
+            amount: sum(expenseEntries.filter((entry) => entry.category === category).map((entry) => entry.amount))
+          }))
+          .filter((item) => item.amount > 0)
+          .sort((a, b) => b.amount - a.amount);
+
+        return {
+          month,
+          income,
+          expense,
+          investment,
+          netCash: income - expense - investment,
+          categoryBreakdown
+        };
+      });
     }
 
     function getCurrentMonthTransactions() {
@@ -2659,10 +3765,14 @@
     }
 
     function defaultCategory(type) {
+      if (type === "investment") return "ลงทุน";
       return state.categories.find((category) => category.type === type)?.name || "อื่นๆ";
     }
 
     function categoryOptions(type, selected) {
+      if (type === "investment") {
+        return `<option value="ลงทุน" ${selected === "ลงทุน" ? "selected" : ""}>ลงทุน</option>`;
+      }
       return state.categories
         .filter((category) => category.type === type)
         .map((category) => `<option value="${escapeAttr(category.name)}" ${category.name === selected ? "selected" : ""}>${escapeHtml(category.name)}</option>`)
@@ -2679,7 +3789,14 @@
       return labels[mode] || "รายการเดียว";
     }
 
+    function transactionModeText(transaction) {
+      if (transaction.type === "income") return "รายรับ";
+      if (transaction.type === "investment") return "ลงทุน";
+      return modeLabel(transaction.mode);
+    }
+
     function categoryLabelForTransaction(transaction, lines) {
+      if (transaction.type === "investment") return "ลงทุน";
       if (transaction.mode === "split" || transaction.mode === "detailedSplit") {
         const categories = unique(lines.map((line) => line.category).filter(Boolean));
         if (categories.length === 1) return categories[0];
@@ -2774,6 +3891,11 @@
 
     function monthLabel() {
       const [year, month] = getMonthKey().split("-").map(Number);
+      return new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" }).format(new Date(year, month - 1, 1));
+    }
+
+    function monthLabelFromKey(monthKey) {
+      const [year, month] = String(monthKey || getMonthKey()).split("-").map(Number);
       return new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" }).format(new Date(year, month - 1, 1));
     }
 
