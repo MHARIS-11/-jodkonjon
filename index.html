@@ -219,10 +219,11 @@
     }
 
     .summary-grid.three {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(72px, 1fr));
     }
 
     .metric {
+      min-width: 0;
       padding-top: 12px;
       border-top: 1px solid var(--border);
     }
@@ -231,13 +232,19 @@
       display: block;
       color: var(--muted);
       font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .metric strong {
       display: block;
       margin-top: 3px;
-      font-size: 19px;
+      font-size: clamp(15px, 4vw, 19px);
       line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       overflow-wrap: anywhere;
     }
 
@@ -262,6 +269,15 @@
 
     .action-row.three {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .action-row.three .primary-action,
+    .action-row.three .secondary-action,
+    .action-row.three .ghost-action {
+      min-width: 0;
+      padding-inline: 8px;
+      gap: 6px;
+      white-space: nowrap;
     }
 
     .primary-action,
@@ -1221,9 +1237,9 @@
       inset: 0;
       z-index: 1100;
       display: none;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
-      padding: 16px 10px 0;
+      padding: 16px 10px;
       background: rgba(17, 24, 39, 0.42);
     }
 
@@ -1232,76 +1248,81 @@
     }
 
     .time-sheet {
-      width: min(100%, 560px);
-      max-height: min(88dvh, 720px);
+      width: min(100%, 430px);
+      max-height: min(92dvh, 720px);
       overflow: auto;
-      border: 1px solid var(--border);
-      border-radius: 8px 8px 0 0;
-      background: var(--surface);
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      border-radius: 28px;
+      background: #FFF9F6;
       box-shadow: var(--shadow);
-      padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+      padding: 0;
       animation: sheetUp 180ms ease forwards;
     }
 
+    .time-sheet .sheet-handle,
+    .time-sheet .sheet-head {
+      display: none;
+    }
+
     .time-display {
-      margin: 8px 0 12px;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--background);
+      margin: 0 0 22px;
+      padding: 32px 22px 28px;
+      border: 0;
+      border-radius: 0;
+      background: #966008;
       text-align: center;
     }
 
     .time-value {
-      font-size: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: clamp(64px, 18vw, 96px);
       line-height: 1;
       font-weight: 820;
-      color: var(--text);
+      color: #FFF8ED;
     }
 
-    .time-period {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 12px;
+    .time-value button {
+      min-width: 0;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      line-height: 1;
+      padding: 0 4px 6px;
     }
 
-    .time-period button,
-    .time-mode button {
-      min-height: 40px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
-      color: var(--muted);
-      font-weight: 760;
+    .time-value button.active {
+      background: rgba(255, 255, 255, 0.14);
     }
 
-    .time-period button.active,
-    .time-mode button.active {
-      border-color: var(--primary);
-      background: rgba(40, 77, 59, 0.1);
-      color: var(--primary);
-    }
-
+    .time-period,
     .time-mode {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-bottom: 14px;
+      display: none;
+    }
+
+    [data-theme="dark"] .time-sheet {
+      background: #161B18;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="dark"] .time-display {
+      background: #7A510D;
     }
 
     .clock-face {
       position: relative;
-      width: min(82vw, 310px);
+      width: min(72vw, 300px);
       aspect-ratio: 1;
-      margin: 0 auto 14px;
-      border: 1px solid var(--border);
+      margin: 0 auto 22px;
+      border: 0;
       border-radius: 50%;
-      background:
-        radial-gradient(circle at center, var(--surface) 0 6px, transparent 7px),
-        radial-gradient(circle at center, rgba(40, 77, 59, 0.08), transparent 62%),
-        var(--background);
-      touch-action: manipulation;
+      background: #F1F2F1;
+      touch-action: none;
+      user-select: none;
     }
 
     .clock-face::after {
@@ -1309,10 +1330,10 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: var(--primary);
+      background: #966008;
       transform: translate(-50%, -50%);
       z-index: 4;
     }
@@ -1321,17 +1342,27 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 38px;
-      height: 38px;
-      margin: -19px 0 0 -19px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      color: var(--text);
-      font-weight: 760;
-      transform: rotate(var(--angle)) translateY(-126px) rotate(calc(var(--angle) * -1));
+      background: transparent;
+      color: #141414;
+      font-size: 28px;
+      font-weight: 500;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--radius))) rotate(calc(var(--angle) * -1));
+      z-index: 5;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .clock-tick.inner {
+      width: 34px;
+      height: 34px;
+      color: #4F4F4F;
+      font-size: 18px;
     }
 
     .clock-tick.active {
-      background: var(--primary);
+      background: #966008;
       color: #FFFFFF;
     }
 
@@ -1340,51 +1371,83 @@
       left: 50%;
       bottom: 50%;
       z-index: 3;
+      width: 4px;
+      height: var(--hand-length);
       border-radius: 999px;
+      background: #966008;
       transform-origin: bottom center;
       transform: translateX(-50%) rotate(var(--deg));
       pointer-events: none;
     }
 
-    .clock-hand.hour {
-      width: 7px;
-      height: 27%;
-      background: var(--text);
-    }
-
-    .clock-hand.minute {
-      width: 4px;
-      height: 39%;
-      background: var(--primary);
+    .clock-thumb {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 6;
+      display: flex;
+      width: 58px;
+      height: 58px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #966008;
+      color: #FFFFFF;
+      font-size: 21px;
+      font-weight: 600;
+      transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--radius))) rotate(calc(var(--angle) * -1));
+      pointer-events: none;
     }
 
     .minute-chips {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 7px;
-      margin-bottom: 14px;
-    }
-
-    .minute-chip {
-      min-height: 34px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--background);
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 760;
-    }
-
-    .minute-chip.active {
-      border-color: var(--primary);
-      background: rgba(40, 77, 59, 0.1);
-      color: var(--primary);
+      display: none;
     }
 
     .time-actions {
       display: grid;
-      grid-template-columns: 1fr 1.6fr;
-      gap: 10px;
+      grid-template-columns: 44px 1fr 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+      padding: 0 18px 20px;
+    }
+
+    .time-action-text,
+    .time-keyboard {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #966008;
+      font-size: 16px;
+      font-weight: 760;
+    }
+
+    .time-keyboard {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #322B22;
+    }
+
+    .time-action-text:active,
+    .time-keyboard:active {
+      background: rgba(150, 96, 8, 0.08);
+    }
+
+    [data-theme="dark"] .clock-face {
+      background: #2A2F2B;
+    }
+
+    [data-theme="dark"] .clock-tick {
+      color: #ECEDEB;
+    }
+
+    [data-theme="dark"] .clock-tick.inner {
+      color: #BFC3BF;
+    }
+
+    [data-theme="dark"] .time-keyboard {
+      color: #EFE8DD;
     }
 
     .time-input {
@@ -1393,12 +1456,79 @@
     }
 
     @media (max-width: 420px) {
-      .clock-tick {
-        transform: rotate(var(--angle)) translateY(-32vw) rotate(calc(var(--angle) * -1));
+      .balance-panel {
+        padding: 16px;
       }
 
-      .minute-chips {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+      .summary-grid {
+        gap: 8px;
+      }
+
+      .summary-grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .metric span {
+        font-size: 12px;
+      }
+
+      .metric strong {
+        font-size: clamp(13px, 3.7vw, 16px);
+      }
+
+      .action-row.three {
+        gap: 7px;
+      }
+
+      .action-row.three .primary-action,
+      .action-row.three .secondary-action,
+      .action-row.three .ghost-action {
+        min-height: 42px;
+        padding-inline: 6px;
+        font-size: 13px;
+      }
+
+      .action-row.three .icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      .time-overlay {
+        padding: 10px;
+      }
+
+      .time-sheet {
+        width: min(100%, 392px);
+      }
+
+      .time-display {
+        padding: 30px 18px 26px;
+      }
+
+      .time-value {
+        font-size: clamp(60px, 19vw, 88px);
+      }
+
+      .clock-face {
+        width: min(74vw, 286px);
+      }
+
+      .clock-tick {
+        width: 42px;
+        height: 42px;
+        font-size: 25px;
+      }
+
+      .clock-tick.inner {
+        width: 32px;
+        height: 32px;
+        font-size: 17px;
+      }
+
+      .clock-thumb {
+        width: 54px;
+        height: 54px;
+        font-size: 20px;
       }
     }
 
@@ -1493,15 +1623,15 @@
                 <div class="balance-amount" id="balanceAmount">฿0</div>
                 <div class="summary-grid three">
                   <div class="metric">
-                    <span>รายรับเดือนนี้</span>
+                    <span>รายรับ</span>
                     <strong class="amount-income" id="incomeAmount">฿0</strong>
                   </div>
                   <div class="metric">
-                    <span>รายจ่ายเดือนนี้</span>
+                    <span>รายจ่าย</span>
                     <strong class="amount-expense" id="expenseAmount">฿0</strong>
                   </div>
                   <div class="metric">
-                    <span>ลงทุนเดือนนี้</span>
+                    <span>ลงทุน</span>
                     <strong class="amount-investment" id="investmentAmount">฿0</strong>
                   </div>
                 </div>
@@ -1948,7 +2078,11 @@
         </button>
       </div>
       <div class="time-display">
-        <div class="time-value" id="timePickerValue">00:00</div>
+        <div class="time-value" id="timePickerValue">
+          <button type="button" id="timeHourButton" data-time-mode="hour">00</button>
+          <span>:</span>
+          <button type="button" id="timeMinuteButton" data-time-mode="minute">00</button>
+        </div>
         <div class="time-period" aria-label="ช่วงเวลา">
           <button type="button" data-time-period="am">00:00-11:59</button>
           <button type="button" data-time-period="pm">12:00-23:59</button>
@@ -1959,14 +2093,18 @@
         <button type="button" data-time-mode="minute">นาที</button>
       </div>
       <div class="clock-face" id="clockFace" aria-label="หน้าปัดเลือกเวลา">
-        <div class="clock-hand hour" id="clockHourHand" aria-hidden="true"></div>
-        <div class="clock-hand minute" id="clockMinuteHand" aria-hidden="true"></div>
+        <div class="clock-hand" id="clockHand" aria-hidden="true"></div>
+        <div class="clock-thumb" id="clockThumb" aria-hidden="true"></div>
         <div id="clockTicks"></div>
       </div>
       <div class="minute-chips" id="minuteChips" aria-label="นาทีแบบเร็ว"></div>
       <div class="time-actions">
-        <button class="ghost-action" id="cancelTimePickerButton" type="button">ยกเลิก</button>
-        <button class="primary-action" id="applyTimePickerButton" type="button">ใช้เวลานี้</button>
+        <button class="time-keyboard" id="timeKeyboardButton" type="button" aria-label="แป้นพิมพ์เวลา">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3Z"></path><path d="M7 9h.01"></path><path d="M11 9h.01"></path><path d="M15 9h.01"></path><path d="M19 9h.01"></path><path d="M7 13h.01"></path><path d="M11 13h.01"></path><path d="M15 13h.01"></path><path d="M7 17h10"></path></svg>
+        </button>
+        <button class="time-action-text" id="clearTimePickerButton" type="button">ล้าง</button>
+        <button class="time-action-text" id="cancelTimePickerButton" type="button">ยกเลิก</button>
+        <button class="time-action-text" id="applyTimePickerButton" type="button">ตั้งค่า</button>
       </div>
     </div>
   </div>
@@ -2042,7 +2180,9 @@
       timePicker: {
         hour: 0,
         minute: 0,
-        mode: "hour"
+        mode: "hour",
+        dragging: false,
+        dragStartMode: "hour"
       },
       toastTimer: null
     };
@@ -2127,11 +2267,15 @@
       timeOverlay: document.getElementById("timeOverlay"),
       closeTimePickerButton: document.getElementById("closeTimePickerButton"),
       cancelTimePickerButton: document.getElementById("cancelTimePickerButton"),
+      clearTimePickerButton: document.getElementById("clearTimePickerButton"),
+      timeKeyboardButton: document.getElementById("timeKeyboardButton"),
       applyTimePickerButton: document.getElementById("applyTimePickerButton"),
       timePickerValue: document.getElementById("timePickerValue"),
+      timeHourButton: document.getElementById("timeHourButton"),
+      timeMinuteButton: document.getElementById("timeMinuteButton"),
       clockFace: document.getElementById("clockFace"),
-      clockHourHand: document.getElementById("clockHourHand"),
-      clockMinuteHand: document.getElementById("clockMinuteHand"),
+      clockHand: document.getElementById("clockHand"),
+      clockThumb: document.getElementById("clockThumb"),
       clockTicks: document.getElementById("clockTicks"),
       minuteChips: document.getElementById("minuteChips"),
       toast: document.getElementById("toast")
@@ -2175,6 +2319,8 @@
       els.closeCalcButton.addEventListener("click", closeCalc);
       els.closeTimePickerButton.addEventListener("click", closeTimePicker);
       els.cancelTimePickerButton.addEventListener("click", closeTimePicker);
+      els.clearTimePickerButton.addEventListener("click", clearTimePicker);
+      els.timeKeyboardButton.addEventListener("click", () => showToast("ลากเข็มเพื่อเลือกเวลา"));
       els.applyTimePickerButton.addEventListener("click", applyTimePicker);
 
       [els.timeInput, els.backfillTimeInput].forEach((input) => {
@@ -2210,7 +2356,10 @@
         button.addEventListener("click", () => setTimeMode(button.dataset.timeMode));
       });
 
-      els.clockFace.addEventListener("click", handleClockFaceClick);
+      els.clockFace.addEventListener("pointerdown", handleClockPointerDown);
+      els.clockFace.addEventListener("pointermove", handleClockPointerMove);
+      els.clockFace.addEventListener("pointerup", handleClockPointerUp);
+      els.clockFace.addEventListener("pointercancel", handleClockPointerUp);
 
       els.sheet.addEventListener("click", (event) => {
         if (event.target === els.sheet) closeTransactionSheet();
@@ -2506,9 +2655,12 @@
       state.timePicker.hour = time.hour;
       state.timePicker.minute = time.minute;
       state.timePicker.mode = "hour";
-      renderTimePicker();
       els.timeOverlay.classList.add("open");
-      requestAnimationFrame(() => els.applyTimePickerButton.focus());
+      renderTimePicker();
+      requestAnimationFrame(() => {
+        renderTimePicker();
+        els.applyTimePickerButton.focus();
+      });
     }
 
     function closeTimePicker() {
@@ -2526,6 +2678,13 @@
       closeTimePicker();
     }
 
+    function clearTimePicker() {
+      state.timePicker.hour = 0;
+      state.timePicker.minute = 0;
+      state.timePicker.mode = "hour";
+      renderTimePicker();
+    }
+
     function setTimePeriod(period) {
       const isPm = state.timePicker.hour >= 12;
       if (period === "pm" && !isPm) state.timePicker.hour += 12;
@@ -2538,43 +2697,67 @@
       renderTimePicker();
     }
 
-    function handleClockFaceClick(event) {
-      const tick = event.target.closest("[data-clock-value]");
-      if (tick) {
-        selectClockValue(Number(tick.dataset.clockValue));
-        return;
-      }
+    function handleClockPointerDown(event) {
+      event.preventDefault();
+      state.timePicker.dragging = true;
+      state.timePicker.dragStartMode = state.timePicker.mode;
+      els.clockFace.setPointerCapture?.(event.pointerId);
+      updateTimeFromPointer(event);
+    }
 
-      const angle = clockAngleFromPoint(event.clientX, event.clientY);
-      if (state.timePicker.mode === "hour") {
-        const faceHour = Math.round(angle / 30) || 12;
-        setHourFromFace(faceHour);
+    function handleClockPointerMove(event) {
+      if (!state.timePicker.dragging) return;
+      event.preventDefault();
+      updateTimeFromPointer(event);
+    }
+
+    function handleClockPointerUp(event) {
+      if (!state.timePicker.dragging) return;
+      event.preventDefault();
+      updateTimeFromPointer(event);
+      els.clockFace.releasePointerCapture?.(event.pointerId);
+      state.timePicker.dragging = false;
+      if (state.timePicker.dragStartMode === "hour") {
         state.timePicker.mode = "minute";
-      } else {
-        state.timePicker.minute = Math.round(angle / 6) % 60;
       }
       renderTimePicker();
     }
 
-    function selectClockValue(value) {
+    function updateTimeFromPointer(event) {
+      const tick = event.target.closest?.("[data-clock-value]");
+      if (tick) {
+        selectClockValue(Number(tick.dataset.clockValue), false);
+        return;
+      }
+
+      const point = clockPoint(event.clientX, event.clientY);
+      if (state.timePicker.mode === "hour") {
+        const slot = Math.round(point.angle / 30) % 12;
+        const outerHour = slot === 0 ? 12 : slot;
+        const innerHour = slot === 0 ? 0 : slot + 12;
+        const innerCutoff = point.faceRadius * 0.31;
+        state.timePicker.hour = point.distance < innerCutoff ? innerHour : outerHour;
+      } else {
+        state.timePicker.minute = Math.round(point.angle / 6) % 60;
+      }
+      renderTimePicker();
+    }
+
+    function selectClockValue(value, advanceMode = true) {
       if (!Number.isFinite(value)) return;
       if (state.timePicker.mode === "hour") {
-        setHourFromFace(value);
-        state.timePicker.mode = "minute";
+        state.timePicker.hour = clampHour(value);
+        if (advanceMode) state.timePicker.mode = "minute";
       } else {
         state.timePicker.minute = clampMinute(value);
       }
       renderTimePicker();
     }
 
-    function setHourFromFace(faceHour) {
-      const hour12 = Number(faceHour) % 12;
-      state.timePicker.hour = state.timePicker.hour >= 12 ? hour12 + 12 : hour12;
-    }
-
     function renderTimePicker() {
       const { hour, minute, mode } = state.timePicker;
-      els.timePickerValue.textContent = formatTimeValue(hour, minute);
+      els.timeHourButton.textContent = String(clampHour(hour)).padStart(2, "0");
+      els.timeMinuteButton.textContent = String(clampMinute(minute)).padStart(2, "0");
 
       document.querySelectorAll("[data-time-period]").forEach((button) => {
         const active = hour >= 12 ? button.dataset.timePeriod === "pm" : button.dataset.timePeriod === "am";
@@ -2585,57 +2768,95 @@
         button.classList.toggle("active", button.dataset.timeMode === mode);
       });
 
-      const hourDeg = ((hour % 12) + minute / 60) * 30;
-      const minuteDeg = minute * 6;
-      els.clockHourHand.style.setProperty("--deg", `${hourDeg}deg`);
-      els.clockMinuteHand.style.setProperty("--deg", `${minuteDeg}deg`);
-      els.clockHourHand.style.opacity = mode === "hour" ? "1" : "0.52";
-      els.clockMinuteHand.style.opacity = mode === "minute" ? "1" : "0.72";
-      renderClockTicks();
-      renderMinuteChips();
+      const geometry = clockGeometry();
+      const selected = selectedClockPosition(geometry);
+      els.clockHand.style.setProperty("--deg", `${selected.angle}deg`);
+      els.clockHand.style.setProperty("--hand-length", `${Math.max(selected.radius - 24, 24)}px`);
+      els.clockThumb.style.setProperty("--angle", `${selected.angle}deg`);
+      els.clockThumb.style.setProperty("--radius", `${selected.radius}px`);
+      els.clockThumb.textContent = selected.label;
+      renderClockTicks(geometry);
     }
 
-    function renderClockTicks() {
+    function renderClockTicks(geometry = clockGeometry()) {
       const mode = state.timePicker.mode;
-      const activeHour = state.timePicker.hour % 12 || 12;
+      const activeHour = state.timePicker.hour;
       const activeMinute = state.timePicker.minute;
       const ticks = [];
 
-      for (let index = 0; index < 12; index += 1) {
-        const value = mode === "hour" ? (index === 0 ? 12 : index) : index * 5;
-        const angle = mode === "hour" ? (value % 12) * 30 : value * 6;
-        const label = mode === "hour" ? String(value) : String(value).padStart(2, "0");
-        const active = mode === "hour" ? value === activeHour : value === activeMinute;
-        ticks.push(`<button class="clock-tick ${active ? "active" : ""}" type="button" data-clock-value="${value}" style="--angle:${angle}deg">${label}</button>`);
+      if (mode === "hour") {
+        for (let slot = 0; slot < 12; slot += 1) {
+          const value = slot === 0 ? 12 : slot;
+          const angle = (value % 12) * 30;
+          const active = value === activeHour;
+          ticks.push(clockTickHtml(value, value, angle, geometry.outerRadius, active, ""));
+        }
+
+        for (let slot = 0; slot < 12; slot += 1) {
+          const value = slot === 0 ? 0 : slot + 12;
+          const angle = slot * 30;
+          const label = value === 0 ? "00" : String(value);
+          const active = value === activeHour;
+          ticks.push(clockTickHtml(label, value, angle, geometry.innerRadius, active, "inner"));
+        }
+      } else {
+        for (let value = 0; value < 60; value += 5) {
+          const angle = value * 6;
+          const label = String(value).padStart(2, "0");
+          const active = value === activeMinute;
+          ticks.push(clockTickHtml(label, value, angle, geometry.minuteRadius, active, ""));
+        }
       }
 
       els.clockTicks.innerHTML = ticks.join("");
     }
 
-    function renderMinuteChips() {
-      const minute = state.timePicker.minute;
-      const chips = Array.from({ length: 12 }, (_, index) => index * 5).map((value) => `
-        <button class="minute-chip ${value === minute ? "active" : ""}" type="button" data-minute-chip="${value}">
-          ${String(value).padStart(2, "0")}
-        </button>
-      `);
-      els.minuteChips.innerHTML = chips.join("");
-      els.minuteChips.querySelectorAll("[data-minute-chip]").forEach((button) => {
-        button.addEventListener("click", () => {
-          state.timePicker.mode = "minute";
-          state.timePicker.minute = clampMinute(button.dataset.minuteChip);
-          renderTimePicker();
-        });
-      });
+    function clockTickHtml(label, value, angle, radius, active, extraClass) {
+      return `<button class="clock-tick ${extraClass} ${active ? "active" : ""}" type="button" data-clock-value="${value}" style="--angle:${angle}deg; --radius:${radius}px">${label}</button>`;
     }
 
-    function clockAngleFromPoint(clientX, clientY) {
+    function selectedClockPosition(geometry = clockGeometry()) {
+      if (state.timePicker.mode === "hour") {
+        const hour = clampHour(state.timePicker.hour);
+        const angle = (hour % 12) * 30;
+        const isInner = hour === 0 || hour > 12;
+        return {
+          angle,
+          radius: isInner ? geometry.innerRadius : geometry.outerRadius,
+          label: hour === 0 ? "00" : String(hour)
+        };
+      }
+
+      const minute = clampMinute(state.timePicker.minute);
+      return {
+        angle: minute * 6,
+        radius: geometry.minuteRadius,
+        label: String(minute).padStart(2, "0")
+      };
+    }
+
+    function clockGeometry() {
+      const rect = els.clockFace.getBoundingClientRect();
+      const faceRadius = Math.max(rect.width, 220) / 2;
+      return {
+        faceRadius,
+        outerRadius: faceRadius * 0.78,
+        innerRadius: faceRadius * 0.47,
+        minuteRadius: faceRadius * 0.78
+      };
+    }
+
+    function clockPoint(clientX, clientY) {
       const rect = els.clockFace.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       const dx = clientX - centerX;
       const dy = clientY - centerY;
-      return (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
+      return {
+        angle: (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360,
+        distance: Math.hypot(dx, dy),
+        faceRadius: rect.width / 2
+      };
     }
 
     function parseTimeValue(value) {
