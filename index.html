@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JodKonJon (JKJ)</title>
   <meta name="theme-color" content="#284D3B">
   <style>
@@ -61,6 +61,8 @@
     button {
       cursor: pointer;
       border: 0;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     button:disabled {
@@ -1136,6 +1138,7 @@
       justify-content: center;
       padding: 16px 10px 0;
       background: rgba(17, 24, 39, 0.42);
+      touch-action: manipulation;
     }
 
     .calc-overlay.open {
@@ -1165,12 +1168,22 @@
     }
 
     .calc-display {
+      width: 100%;
       min-height: 34px;
+      border: 0;
+      outline: 0;
+      background: transparent;
       color: var(--text);
       font-size: 30px;
       font-weight: 780;
       line-height: 1.15;
       word-break: break-all;
+      text-align: right;
+      caret-color: var(--primary);
+      direction: ltr;
+      touch-action: manipulation;
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     .calc-preview {
@@ -1202,6 +1215,10 @@
       font-size: 22px;
       font-weight: 760;
       transition: transform 100ms ease, background 100ms ease;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .calc-btn:active {
@@ -1763,7 +1780,7 @@
             <div class="budget-card section">
               <div class="field">
                 <label for="totalBudgetInput">งบรวมรายเดือน</label>
-                <input class="input" id="totalBudgetInput" type="number" inputmode="decimal" min="0" step="1" placeholder="เช่น 15000">
+                <input class="input" id="totalBudgetInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="เช่น 15000">
               </div>
               <div class="budget-row">
                 <div class="budget-top">
@@ -1815,7 +1832,7 @@
                 </div>
                 <div class="field">
                   <label for="quickAmountInput">จำนวนเงิน</label>
-                  <input class="input" id="quickAmountInput" type="number" inputmode="decimal" min="0" step="1" placeholder="50">
+                  <input class="input" id="quickAmountInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="50">
                 </div>
                 <div class="field">
                   <label for="quickTypeInput">ประเภท</label>
@@ -1932,7 +1949,7 @@
 
       <div class="amount-field" id="amountBlock">
         <label for="amountInput">จำนวนเงิน</label>
-        <input id="amountInput" type="number" inputmode="decimal" min="0" step="1" placeholder="0" required>
+        <input id="amountInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0" required>
       </div>
 
       <div class="line-panel" id="lineItemsBlock" hidden>
@@ -2041,7 +2058,7 @@
         </button>
       </div>
       <div class="calc-header">
-        <div class="calc-display" id="calcDisplay">0</div>
+        <input class="calc-display" id="calcDisplay" type="text" inputmode="decimal" autocomplete="off" data-no-math="true" spellcheck="false" dir="ltr" value="0" aria-label="สูตรคำนวณจำนวนเงิน">
         <div class="calc-preview" id="calcPreview"></div>
       </div>
       <div class="calc-grid" aria-label="แป้นคำนวณจำนวนเงิน">
@@ -2345,8 +2362,17 @@
       });
 
       document.querySelectorAll("[data-calc-key]").forEach((button) => {
-        button.addEventListener("click", () => calcPush(button.dataset.calcKey));
+        button.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          calcPush(button.dataset.calcKey);
+        });
+        button.addEventListener("click", (event) => {
+          if (event.detail === 0) calcPush(button.dataset.calcKey);
+        });
       });
+
+      els.calcDisplay.addEventListener("input", updateCalcPreview);
+      els.calcDisplay.addEventListener("keydown", handleCalcKeydown);
 
       document.querySelectorAll("[data-time-period]").forEach((button) => {
         button.addEventListener("click", () => setTimePeriod(button.dataset.timePeriod));
@@ -2376,7 +2402,7 @@
           return;
         }
         if (els.calcOverlay.classList.contains("open")) {
-          handleCalcKeydown(event);
+          if (event.target !== els.calcDisplay) handleCalcKeydown(event);
           return;
         }
         if (event.key === "Escape" && els.sheet.classList.contains("open")) {
@@ -2531,7 +2557,7 @@
     }
 
     function initMathFields(container = document) {
-      container.querySelectorAll('input[inputmode="decimal"], input[inputmode="numeric"]').forEach((input) => {
+      container.querySelectorAll('input[inputmode="decimal"]:not([data-no-math]), input[inputmode="numeric"]:not([data-no-math])').forEach((input) => {
         if (input.dataset.mathInited === "true") return;
         input.dataset.mathInited = "true";
         input.autocomplete = "off";
@@ -2551,11 +2577,16 @@
 
     function openCalc(input) {
       state.calcEl = input;
-      els.calcDisplay.textContent = calcInitialValue(input.value);
+      els.calcDisplay.value = calcInitialValue(input.value);
       els.calcPreview.textContent = "";
       els.calcPreview.classList.remove("err");
       els.calcOverlay.classList.add("open");
       updateCalcPreview();
+      requestAnimationFrame(() => {
+        els.calcDisplay.focus();
+        const end = els.calcDisplay.value.length;
+        els.calcDisplay.setSelectionRange(end, end);
+      });
     }
 
     function closeCalc() {
@@ -2565,10 +2596,8 @@
     }
 
     function calcPush(key) {
-      let current = els.calcDisplay.textContent || "0";
-
       if (key === "⌫") {
-        els.calcDisplay.textContent = current.length > 1 ? current.slice(0, -1) : "0";
+        calcBackspace();
         updateCalcPreview();
         return;
       }
@@ -2578,20 +2607,12 @@
         return;
       }
 
-      if (current === "0") {
-        if (/[0-9(]/.test(key)) current = key;
-        else if (key === ".") current = "0.";
-        else current = `0${key}`;
-      } else {
-        current += key;
-      }
-
-      els.calcDisplay.textContent = current;
+      calcInsert(key);
       updateCalcPreview();
     }
 
     function commitCalc() {
-      const result = evalMath(els.calcDisplay.textContent);
+      const result = evalMath(els.calcDisplay.value);
       if (Number.isNaN(result)) {
         els.calcPreview.textContent = "คำนวณไม่ได้";
         els.calcPreview.classList.add("err");
@@ -2600,7 +2621,7 @@
       }
 
       if (state.calcEl) {
-        state.calcEl.value = String(result);
+        state.calcEl.value = formatInputMoney(result);
         state.calcEl.dispatchEvent(new Event("input", { bubbles: true }));
         state.calcEl.dispatchEvent(new Event("change", { bubbles: true }));
         state.calcEl.dispatchEvent(new Event("blur", { bubbles: true }));
@@ -2609,7 +2630,7 @@
     }
 
     function updateCalcPreview() {
-      const current = els.calcDisplay.textContent || "0";
+      const current = els.calcDisplay.value || "0";
       if (current === "0" || !/[+\-*/()]/.test(current)) {
         els.calcPreview.textContent = "";
         els.calcPreview.classList.remove("err");
@@ -2628,23 +2649,92 @@
 
     function handleCalcKeydown(event) {
       if (/[0-9+\-*/().]/.test(event.key)) {
-        event.preventDefault();
-        calcPush(event.key);
+        requestAnimationFrame(updateCalcPreview);
       } else if (event.key === "Enter") {
         event.preventDefault();
         calcPush("=");
       } else if (event.key === "Backspace") {
-        event.preventDefault();
-        calcPush("⌫");
+        requestAnimationFrame(updateCalcPreview);
       } else if (event.key === "Escape") {
         event.preventDefault();
         closeCalc();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        moveCalcCaret(-1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        moveCalcCaret(1);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        setCalcCaret(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        setCalcCaret((els.calcDisplay.value || "").length);
       }
+    }
+
+    function calcInsert(key) {
+      const current = els.calcDisplay.value || "0";
+      const start = els.calcDisplay.selectionStart ?? current.length;
+      const end = els.calcDisplay.selectionEnd ?? current.length;
+      let insert = key;
+      let prefix = current.slice(0, start);
+      const suffix = current.slice(end);
+
+      if (current === "0" && start === 1 && end === 1 && /[0-9(]/.test(key)) {
+        prefix = "";
+      } else if (current === "0" && start === 1 && end === 1 && key === ".") {
+        insert = ".";
+      }
+
+      const next = `${prefix}${insert}${suffix}` || "0";
+      const caret = prefix.length + insert.length;
+      els.calcDisplay.value = next;
+      els.calcDisplay.focus();
+      els.calcDisplay.setSelectionRange(caret, caret);
+    }
+
+    function calcBackspace() {
+      const current = els.calcDisplay.value || "0";
+      const start = els.calcDisplay.selectionStart ?? current.length;
+      const end = els.calcDisplay.selectionEnd ?? current.length;
+      if (start !== end) {
+        const next = `${current.slice(0, start)}${current.slice(end)}` || "0";
+        els.calcDisplay.value = next;
+        els.calcDisplay.focus();
+        els.calcDisplay.setSelectionRange(start, start);
+        return;
+      }
+
+      if (start <= 0) return;
+      const next = `${current.slice(0, start - 1)}${current.slice(start)}` || "0";
+      const caret = Math.max(start - 1, 0);
+      els.calcDisplay.value = next;
+      els.calcDisplay.focus();
+      els.calcDisplay.setSelectionRange(caret, caret);
+    }
+
+    function moveCalcCaret(delta) {
+      const current = els.calcDisplay.value || "";
+      const start = els.calcDisplay.selectionStart ?? current.length;
+      setCalcCaret(start + delta);
+    }
+
+    function setCalcCaret(position) {
+      const current = els.calcDisplay.value || "";
+      const next = Math.max(0, Math.min(current.length, position));
+      els.calcDisplay.focus();
+      els.calcDisplay.setSelectionRange(next, next);
     }
 
     function calcInitialValue(value) {
       const text = String(value || "").replace(/,/g, "").trim();
       return text || "0";
+    }
+
+    function formatInputMoney(value) {
+      const rounded = clampMoney(value);
+      return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
     }
 
     function openTimePicker(input) {
@@ -3115,7 +3205,7 @@
             </div>
             <div class="progress" aria-hidden="true"><div class="${progressClass(spent, budget)}" style="width:${percent}%"></div></div>
             <div class="budget-edit">
-              <input class="input" type="number" inputmode="decimal" min="0" step="1" value="${budget || ""}" aria-label="งบ ${escapeAttr(category.name)}">
+              <input class="input" type="number" inputmode="decimal" min="0" step="0.01" value="${budget || ""}" aria-label="งบ ${escapeAttr(category.name)}">
               <small class="section-note">เหลือ ${formatCurrency(Math.max(budget - spent, 0))}</small>
             </div>
           </div>
@@ -3233,7 +3323,7 @@
         if (isSplit) {
           row.innerHTML = `
             <select class="select" data-line-field="category" aria-label="หมวดหมู่">${expenseCategoryOptions(line.category)}</select>
-            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="1" value="${line.amount || ""}" placeholder="ยอด">
+            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.amount || ""}" placeholder="ยอด">
             <button class="line-remove" type="button" aria-label="ลบแถว">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
             </button>
@@ -3242,7 +3332,7 @@
           row.innerHTML = `
             <input class="input" data-line-field="title" type="text" value="${escapeAttr(line.title)}" placeholder="รายการ">
             <select class="select" data-line-field="category" aria-label="หมวดหมู่">${expenseCategoryOptions(line.category)}</select>
-            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="1" value="${line.amount || ""}" placeholder="ยอด">
+            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.amount || ""}" placeholder="ยอด">
             <button class="line-remove" type="button" aria-label="ลบแถว">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
             </button>
@@ -3250,7 +3340,7 @@
         } else {
           row.innerHTML = `
             <input class="input" data-line-field="title" type="text" value="${escapeAttr(line.title)}" placeholder="รายการ">
-            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="1" value="${line.amount || ""}" placeholder="ยอด">
+            <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.amount || ""}" placeholder="ยอด">
             <button class="line-remove" type="button" aria-label="ลบแถว">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
             </button>
@@ -3357,7 +3447,7 @@
       els.sheet.classList.add("open");
       document.body.style.overflow = "hidden";
       requestAnimationFrame(() => {
-        if (mode === "single") els.amountInput.focus();
+        if (mode === "single") openCalc(els.amountInput);
         else els.lineItemsList.querySelector("input, select")?.focus();
       });
     }
@@ -3628,7 +3718,7 @@
         row.innerHTML = `
           <input class="input" data-backfill-field="title" type="text" value="${escapeAttr(line.title)}" placeholder="${type === "income" ? "รายรับ" : "รายการ"}">
           <select class="select" data-backfill-field="category" aria-label="หมวดหมู่">${categoryOptions(type, line.category)}</select>
-          <input class="input" data-backfill-field="amount" type="number" inputmode="decimal" min="0" step="1" value="${line.amount || ""}" placeholder="ยอด">
+          <input class="input" data-backfill-field="amount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.amount || ""}" placeholder="ยอด">
           <button class="line-remove" type="button" aria-label="ลบแถว">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
           </button>
@@ -4136,17 +4226,23 @@
     }
 
     function formatCurrency(value) {
+      const number = Number(value) || 0;
+      const hasCents = Math.round(number * 100) % 100 !== 0;
       return new Intl.NumberFormat("th-TH", {
         style: "currency",
         currency: "THB",
-        maximumFractionDigits: 0
-      }).format(Number(value) || 0);
+        minimumFractionDigits: hasCents ? 2 : 0,
+        maximumFractionDigits: 2
+      }).format(number);
     }
 
     function formatPlainMoney(value) {
+      const number = Number(value) || 0;
+      const hasCents = Math.round(number * 100) % 100 !== 0;
       return new Intl.NumberFormat("th-TH", {
-        maximumFractionDigits: 0
-      }).format(Number(value) || 0);
+        minimumFractionDigits: hasCents ? 2 : 0,
+        maximumFractionDigits: 2
+      }).format(number);
     }
 
     function clampMoney(value) {
