@@ -940,7 +940,7 @@
       display: grid;
       width: min(100%, 820px);
       min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 4px;
       padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
       border-top: 1px solid var(--border);
@@ -966,7 +966,7 @@
       border-radius: 8px;
       background: transparent;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
     }
 
@@ -1227,6 +1227,132 @@
       color: #FFFFFF;
     }
 
+    #historyEditToggle {
+      position: sticky;
+      top: 10px;
+      z-index: 12;
+      box-shadow: 0 8px 18px rgba(17, 24, 39, 0.08);
+    }
+
+    body[data-active-view="history"] #historyEditToggle {
+      position: fixed;
+      top: calc(12px + env(safe-area-inset-top));
+      right: max(12px, calc((100vw - 820px) / 2 + 12px));
+      z-index: 35;
+    }
+
+    .money-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .money-summary-card {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .money-summary-card.primary {
+      grid-column: 1 / -1;
+      background: rgba(40, 77, 59, 0.08);
+    }
+
+    .money-summary-card span,
+    .money-item small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .money-summary-card strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 20px;
+      overflow-wrap: anywhere;
+    }
+
+    .money-order {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin: 10px 0 12px;
+    }
+
+    .money-panels {
+      display: grid;
+      gap: 12px;
+    }
+
+    .money-panel {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .money-panel h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .money-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .money-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .money-item:last-child {
+      border-bottom: 0;
+    }
+
+    .money-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .calc-visual {
+      min-height: 34px;
+      color: var(--text);
+      font-size: 30px;
+      font-weight: 780;
+      line-height: 1.15;
+      text-align: right;
+      word-break: break-all;
+      user-select: none;
+    }
+
+    .calc-visual mark {
+      border-radius: 4px;
+      background: rgba(40, 77, 59, 0.14);
+      color: inherit;
+    }
+
+    .calc-caret {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      margin: 0 1px;
+      border-radius: 999px;
+      background: var(--primary);
+      vertical-align: -0.12em;
+      animation: caretPulse 900ms steps(1) infinite;
+    }
+
+    @keyframes caretPulse {
+      50% { opacity: 0.25; }
+    }
+
     .calc-overlay {
       position: fixed;
       inset: 0;
@@ -1263,6 +1389,14 @@
       border-radius: 8px;
       background: var(--background);
       text-align: right;
+    }
+
+    .calc-display {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .calc-display {
@@ -1720,6 +1854,9 @@
         <span class="brand-subtitle" id="monthLabel">เดือนนี้</span>
       </div>
       <div class="header-actions">
+        <button class="icon-button" id="themeTopButton" type="button" title="สลับโหมดกลางวันกลางคืน" aria-label="สลับโหมดกลางวันกลางคืน">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+        </button>
         <button class="icon-button" id="exportTopButton" type="button" title="Export CSV" aria-label="Export CSV">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
         </button>
@@ -1733,7 +1870,7 @@
       <section class="view active" id="view-home" data-view="home">
         <div class="desktop-grid">
           <div>
-            <section class="section">
+            <section class="section" id="quickAddSection">
               <div class="balance-panel">
                 <p class="balance-label">ยอดเงินคงเหลือ</p>
                 <div class="balance-amount" id="balanceAmount">฿0</div>
@@ -1835,6 +1972,85 @@
 
           <div id="dashboardChart"></div>
           <div class="dashboard-list" id="dashboardList"></div>
+        </section>
+      </section>
+
+      <section class="view" id="view-money" data-view="money">
+        <section class="section">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">เคลียร์เงิน</h2>
+              <p class="section-note">เงินจริงที่ควรมี</p>
+            </div>
+          </div>
+
+          <div class="money-summary-grid">
+            <div class="money-summary-card primary">
+              <span>เงินที่ควรมี</span>
+              <strong id="moneyNetAmount">฿0</strong>
+            </div>
+            <div class="money-summary-card">
+              <span>เงินคงเหลือ</span>
+              <strong id="moneyCashAmount">฿0</strong>
+            </div>
+            <div class="money-summary-card">
+              <span>เขาค้างเรา</span>
+              <strong class="amount-income" id="moneyOwedToMeAmount">฿0</strong>
+            </div>
+            <div class="money-summary-card">
+              <span>เราค้างเขา</span>
+              <strong class="amount-expense" id="moneyIOweAmount">฿0</strong>
+            </div>
+          </div>
+
+          <form class="settings-card section" id="moneyForm">
+            <input type="hidden" id="moneyEditingId">
+            <div class="form-grid">
+              <div class="field">
+                <label for="moneyTypeInput">ประเภท</label>
+                <select class="select" id="moneyTypeInput">
+                  <option value="owedToMe">เขาค้างเรา</option>
+                  <option value="iOwe">เราค้างเขา</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="moneyPersonInput">ชื่อคน</label>
+                <input class="input" id="moneyPersonInput" type="text" placeholder="เช่น เจม" required>
+              </div>
+              <div class="field">
+                <label for="moneyAmountInput">จำนวนเงิน</label>
+                <input class="input" id="moneyAmountInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0" required>
+              </div>
+              <div class="field">
+                <label for="moneyDateInput">วันที่ยืม/วันที่ค้าง</label>
+                <input class="input" id="moneyDateInput" type="date" required>
+              </div>
+              <div class="field">
+                <label for="moneyTimeInput">เวลาที่ยืม/เวลาที่ค้าง</label>
+                <input class="input time-input" id="moneyTimeInput" type="text" inputmode="none" autocomplete="off" required aria-haspopup="dialog" aria-readonly="true" maxlength="5" placeholder="เลือกเวลา">
+              </div>
+            </div>
+            <div class="field">
+              <label for="moneyNoteInput">บันทึกเพิ่มเติม</label>
+              <textarea class="textarea" id="moneyNoteInput" placeholder="ไม่บังคับ"></textarea>
+            </div>
+            <button class="primary-action" id="saveMoneyItemButton" type="submit" style="width:100%;">บันทึกเคลียร์เงิน</button>
+          </form>
+
+          <div class="money-order" aria-label="เลือกช่องที่ขึ้นก่อน">
+            <button class="segment-button active" type="button" data-money-order="owedToMe">เขาค้างเราก่อน</button>
+            <button class="segment-button" type="button" data-money-order="iOwe">เราค้างเขาก่อน</button>
+          </div>
+
+          <div class="money-panels" id="moneyPanels"></div>
+
+          <section class="section">
+            <div class="section-head">
+              <h2 class="section-title">ประวัติเคลียร์เงิน</h2>
+              <p class="section-note">รายการที่ติ๊กถูกแล้ว</p>
+            </div>
+            <div class="money-list" id="moneyHistoryList"></div>
+          </section>
         </section>
       </section>
 
@@ -1991,6 +2207,16 @@
             <div class="settings-card">
               <div class="switch-line">
                 <div>
+                  <strong>Quick Add หน้า Home</strong>
+                  <p class="section-note">เปิดหรือซ่อนรายการด่วนบนหน้า Home</p>
+                </div>
+                <label class="switch" aria-label="เปิดหรือปิด Quick Add หน้า Home">
+                  <input id="quickAddHomeToggle" type="checkbox">
+                  <span></span>
+                </label>
+              </div>
+              <div class="switch-line">
+                <div>
                   <strong>Dark Mode</strong>
                   <p class="section-note">เตรียมไว้สำหรับใช้งานตอนกลางคืน</p>
                 </div>
@@ -2025,6 +2251,10 @@
     <button class="nav-button" type="button" data-nav="dashboard">
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"></path><path d="M5 19h14"></path><path d="M9 15v-4"></path><path d="M13 15V8"></path><path d="M17 15v-2"></path></svg>
       Dashboard
+    </button>
+    <button class="nav-button" type="button" data-nav="money">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11h10"></path><path d="M7 15h7"></path><path d="M5 5h14v14H5Z"></path><path d="m9 9 2-2 2 2"></path></svg>
+      เคลียร์เงิน
     </button>
     <button class="nav-button" type="button" data-nav="settings">
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.04.04a2.2 2.2 0 0 1-3.11 3.11l-.04-.04a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65V21.5a2.2 2.2 0 0 1-4.4 0v-.06a1.8 1.8 0 0 0-1.09-1.65 1.8 1.8 0 0 0-1.98.36l-.04.04a2.2 2.2 0 1 1-3.11-3.11l.04-.04A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.65-1.09H2.9a2.2 2.2 0 0 1 0-4.4h.06A1.8 1.8 0 0 0 4.6 8a1.8 1.8 0 0 0-.36-1.98l-.04-.04a2.2 2.2 0 1 1 3.11-3.11l.04.04A1.8 1.8 0 0 0 9.33 3.27a1.8 1.8 0 0 0 1.09-1.65V1.56a2.2 2.2 0 0 1 4.4 0v.06a1.8 1.8 0 0 0 1.09 1.65 1.8 1.8 0 0 0 1.98-.36l.04-.04a2.2 2.2 0 1 1 3.11 3.11l-.04.04A1.8 1.8 0 0 0 19.4 8c.23.52.75.86 1.35.86h.35a2.2 2.2 0 0 1 0 4.4h-.35A1.8 1.8 0 0 0 19.4 15Z"></path></svg>
@@ -2166,6 +2396,7 @@
         </button>
       </div>
       <div class="calc-header">
+        <div class="calc-visual" id="calcVisual" dir="ltr" aria-hidden="true"></div>
         <input class="calc-display" id="calcDisplay" type="text" inputmode="none" autocomplete="off" data-no-math="true" spellcheck="false" dir="ltr" readonly value="0" aria-label="สูตรคำนวณจำนวนเงิน">
         <div class="calc-preview" id="calcPreview"></div>
       </div>
@@ -2244,6 +2475,8 @@
       quickAdds: "jkj.quickAdds.v1",
       budget: "jkj.budget.v1",
       expenseDraft: "jkj.expenseDraft.v1",
+      appSettings: "jkj.appSettings.v1",
+      moneyClear: "jkj.moneyClear.v1",
       theme: "jkj.theme.v1"
     };
 
@@ -2282,6 +2515,11 @@
       categories: readStorage(STORAGE_KEYS.categories, DEFAULT_CATEGORIES),
       quickAdds: readStorage(STORAGE_KEYS.quickAdds, DEFAULT_QUICK_ADDS),
       expenseDraft: readStorage(STORAGE_KEYS.expenseDraft, null),
+      appSettings: readStorage(STORAGE_KEYS.appSettings, {
+        showQuickAdd: true,
+        moneyOrder: "owedToMe"
+      }),
+      moneyClear: readStorage(STORAGE_KEYS.moneyClear, { items: [] }),
       historyEditMode: false,
       budget: readStorage(STORAGE_KEYS.budget, {
         id: "budget-default",
@@ -2332,6 +2570,8 @@
       addInvestmentButton: document.getElementById("addInvestmentButton"),
       openExpenseTopButton: document.getElementById("openExpenseTopButton"),
       exportTopButton: document.getElementById("exportTopButton"),
+      themeTopButton: document.getElementById("themeTopButton"),
+      quickAddSection: document.getElementById("quickAddSection"),
       quickAddGrid: document.getElementById("quickAddGrid"),
       todayList: document.getElementById("todayList"),
       todayCount: document.getElementById("todayCount"),
@@ -2347,6 +2587,21 @@
       budgetList: document.getElementById("budgetList"),
       dashboardList: document.getElementById("dashboardList"),
       dashboardChart: document.getElementById("dashboardChart"),
+      moneyNetAmount: document.getElementById("moneyNetAmount"),
+      moneyCashAmount: document.getElementById("moneyCashAmount"),
+      moneyOwedToMeAmount: document.getElementById("moneyOwedToMeAmount"),
+      moneyIOweAmount: document.getElementById("moneyIOweAmount"),
+      moneyForm: document.getElementById("moneyForm"),
+      moneyEditingId: document.getElementById("moneyEditingId"),
+      moneyTypeInput: document.getElementById("moneyTypeInput"),
+      moneyPersonInput: document.getElementById("moneyPersonInput"),
+      moneyAmountInput: document.getElementById("moneyAmountInput"),
+      moneyDateInput: document.getElementById("moneyDateInput"),
+      moneyTimeInput: document.getElementById("moneyTimeInput"),
+      moneyNoteInput: document.getElementById("moneyNoteInput"),
+      saveMoneyItemButton: document.getElementById("saveMoneyItemButton"),
+      moneyPanels: document.getElementById("moneyPanels"),
+      moneyHistoryList: document.getElementById("moneyHistoryList"),
       categoryNameInput: document.getElementById("categoryNameInput"),
       categoryTypeInput: document.getElementById("categoryTypeInput"),
       saveCategoryButton: document.getElementById("saveCategoryButton"),
@@ -2363,6 +2618,7 @@
       backupButton: document.getElementById("backupButton"),
       restoreInput: document.getElementById("restoreInput"),
       themeToggle: document.getElementById("themeToggle"),
+      quickAddHomeToggle: document.getElementById("quickAddHomeToggle"),
       sheet: document.getElementById("transactionSheet"),
       form: document.getElementById("transactionForm"),
       sheetTitle: document.getElementById("sheetTitle"),
@@ -2398,6 +2654,7 @@
       backfillTotal: document.getElementById("backfillTotal"),
       calcOverlay: document.getElementById("calcOverlay"),
       closeCalcButton: document.getElementById("closeCalcButton"),
+      calcVisual: document.getElementById("calcVisual"),
       calcDisplay: document.getElementById("calcDisplay"),
       calcPreview: document.getElementById("calcPreview"),
       timeOverlay: document.getElementById("timeOverlay"),
@@ -2426,9 +2683,20 @@
         saveBudget();
       }
 
+      state.appSettings = {
+        showQuickAdd: true,
+        moneyOrder: "owedToMe",
+        ...state.appSettings
+      };
+      if (!["owedToMe", "iOwe"].includes(state.appSettings.moneyOrder)) {
+        state.appSettings.moneyOrder = "owedToMe";
+      }
       normalizeTransactions();
+      normalizeMoneyClear();
       applyTheme(readStorage(STORAGE_KEYS.theme, "light"));
       bindEvents();
+      resetMoneyForm();
+      document.body.dataset.activeView = state.activeView;
       renderAll();
     }
 
@@ -2445,6 +2713,7 @@
       els.addInvestmentButton.addEventListener("click", () => openTransactionSheet("investment"));
       els.openExpenseTopButton.addEventListener("click", () => openTransactionSheet("expense"));
       els.exportTopButton.addEventListener("click", exportCsv);
+      els.themeTopButton.addEventListener("click", toggleTheme);
       els.exportSettingsButton.addEventListener("click", exportCsv);
       els.backupButton.addEventListener("click", backupJson);
       els.closeSheetButton.addEventListener("click", closeTransactionSheet);
@@ -2462,7 +2731,7 @@
       els.timeKeyboardButton.addEventListener("click", () => showToast("ลากเข็มเพื่อเลือกเวลา"));
       els.applyTimePickerButton.addEventListener("click", applyTimePicker);
 
-      [els.timeInput, els.backfillTimeInput].forEach((input) => {
+      [els.timeInput, els.backfillTimeInput, els.moneyTimeInput].forEach((input) => {
         input.addEventListener("click", (event) => {
           event.preventDefault();
           openTimePicker(input);
@@ -2510,6 +2779,10 @@
       els.calcDisplay.addEventListener("input", updateCalcPreview);
       els.calcDisplay.addEventListener("keydown", handleCalcKeydown);
       els.calcDisplay.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        setCalcCaretFromPoint(event.clientX);
+      });
+      els.calcVisual.addEventListener("pointerdown", (event) => {
         event.preventDefault();
         setCalcCaretFromPoint(event.clientX);
       });
@@ -2624,14 +2897,26 @@
 
       els.restoreInput.addEventListener("change", restoreJson);
       els.themeToggle.addEventListener("change", () => {
-        const nextTheme = els.themeToggle.checked ? "dark" : "light";
-        localStorage.setItem(STORAGE_KEYS.theme, JSON.stringify(nextTheme));
-        applyTheme(nextTheme);
+        setTheme(els.themeToggle.checked ? "dark" : "light");
+      });
+      els.quickAddHomeToggle.addEventListener("change", () => {
+        state.appSettings.showQuickAdd = els.quickAddHomeToggle.checked;
+        saveAppSettings();
+        renderHome();
+      });
+      els.moneyForm.addEventListener("submit", saveMoneyItem);
+      document.querySelectorAll("[data-money-order]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.appSettings.moneyOrder = button.dataset.moneyOrder;
+          saveAppSettings();
+          renderMoneyClear();
+        });
       });
     }
 
     function setView(view) {
       state.activeView = view;
+      document.body.dataset.activeView = view;
       document.querySelectorAll(".view").forEach((section) => {
         section.classList.toggle("active", section.dataset.view === view);
       });
@@ -2648,6 +2933,7 @@
       renderCategoryFilter();
       renderHistory();
       renderDashboard();
+      renderMoneyClear();
       renderBudget();
       renderSettings();
       renderCategoryOptionsForSheet(els.transactionTypeInput.value);
@@ -2762,6 +3048,7 @@
         }
         const end = els.calcDisplay.value.length;
         els.calcDisplay.setSelectionRange(end, end);
+        renderCalcVisual();
       });
     }
 
@@ -2822,6 +3109,7 @@
 
     function updateCalcPreview() {
       const current = els.calcDisplay.value || "0";
+      renderCalcVisual();
       if (current === "0" || !/[+\-*/()]/.test(current)) {
         els.calcPreview.textContent = "";
         els.calcPreview.classList.remove("err");
@@ -2872,11 +3160,14 @@
       const end = els.calcDisplay.selectionEnd ?? current.length;
       let insert = key;
       let prefix = current.slice(0, start);
-      const suffix = current.slice(end);
+      let suffix = current.slice(end);
 
-      if (current === "0" && start === 1 && end === 1 && /[0-9(]/.test(key)) {
+      if (current === "0" && /[0-9(]/.test(key)) {
         prefix = "";
-      } else if (current === "0" && start === 1 && end === 1 && key === ".") {
+        suffix = "";
+      } else if (current === "0" && key === ".") {
+        prefix = "0";
+        suffix = "";
         insert = ".";
       }
 
@@ -2885,6 +3176,7 @@
       els.calcDisplay.value = next;
       els.calcDisplay.focus();
       els.calcDisplay.setSelectionRange(caret, caret);
+      renderCalcVisual();
     }
 
     function calcBackspace() {
@@ -2896,6 +3188,7 @@
         els.calcDisplay.value = next;
         els.calcDisplay.focus();
         els.calcDisplay.setSelectionRange(start, start);
+        renderCalcVisual();
         return;
       }
 
@@ -2905,6 +3198,7 @@
       els.calcDisplay.value = next;
       els.calcDisplay.focus();
       els.calcDisplay.setSelectionRange(caret, caret);
+      renderCalcVisual();
     }
 
     function moveCalcCaret(delta) {
@@ -2918,11 +3212,12 @@
       const next = Math.max(0, Math.min(current.length, position));
       els.calcDisplay.focus();
       els.calcDisplay.setSelectionRange(next, next);
+      renderCalcVisual();
     }
 
     function setCalcCaretFromPoint(clientX) {
-      const input = els.calcDisplay;
-      const value = input.value || "";
+      const input = els.calcVisual;
+      const value = els.calcDisplay.value || "";
       const style = getComputedStyle(input);
       const rect = input.getBoundingClientRect();
       const paddingLeft = parseFloat(style.paddingLeft) || 0;
@@ -2948,6 +3243,16 @@
       }
 
       setCalcCaret(bestIndex);
+    }
+
+    function renderCalcVisual() {
+      const value = els.calcDisplay.value || "0";
+      const start = els.calcDisplay.selectionStart ?? value.length;
+      const end = els.calcDisplay.selectionEnd ?? start;
+      const before = escapeHtml(value.slice(0, start));
+      const selected = end > start ? `<mark>${escapeHtml(value.slice(start, end))}</mark>` : "";
+      const after = escapeHtml(value.slice(end));
+      els.calcVisual.innerHTML = `${before}<span class="calc-caret"></span>${selected}${after}`;
     }
 
     function calcInitialValue(value) {
@@ -3356,6 +3661,7 @@
       const todayExpense = sum(todayTransactions.filter((transaction) => transaction.type === "expense").map((transaction) => transaction.amount));
       els.todayExpenseAmount.textContent = formatCurrency(todayExpense);
 
+      els.quickAddSection.hidden = state.appSettings.showQuickAdd === false;
       els.quickAddGrid.innerHTML = "";
       state.quickAdds.forEach((quick) => {
         const button = document.createElement("button");
@@ -3524,6 +3830,210 @@
       `;
     }
 
+    function normalizeMoneyClear() {
+      if (!state.moneyClear || !Array.isArray(state.moneyClear.items)) {
+        state.moneyClear = { items: [] };
+      }
+      state.moneyClear.items = state.moneyClear.items.map((item) => ({
+        id: item.id || uid(),
+        type: item.type === "iOwe" ? "iOwe" : "owedToMe",
+        person: item.person || "",
+        amount: clampMoney(item.amount),
+        date: item.date || todayISO(),
+        time: item.time || currentTime(),
+        note: item.note || "",
+        status: item.status === "cleared" ? "cleared" : "active",
+        clearedAt: item.clearedAt || "",
+        clearedDate: item.clearedDate || "",
+        clearedTime: item.clearedTime || "",
+        transactionId: item.transactionId || ""
+      }));
+      saveMoneyClear();
+    }
+
+    function renderMoneyClear() {
+      if (!els.moneyPanels) return;
+      const cash = getCashSummary();
+      const activeItems = state.moneyClear.items.filter((item) => item.status !== "cleared");
+      const owedToMe = activeItems.filter((item) => item.type === "owedToMe");
+      const iOwe = activeItems.filter((item) => item.type === "iOwe");
+      const owedTotal = sum(owedToMe.map((item) => item.amount));
+      const iOweTotal = sum(iOwe.map((item) => item.amount));
+
+      els.moneyCashAmount.textContent = formatCurrency(cash.balance);
+      els.moneyOwedToMeAmount.textContent = formatCurrency(owedTotal);
+      els.moneyIOweAmount.textContent = formatCurrency(iOweTotal);
+      els.moneyNetAmount.textContent = formatCurrency(cash.balance + owedTotal - iOweTotal);
+
+      document.querySelectorAll("[data-money-order]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.moneyOrder === state.appSettings.moneyOrder);
+      });
+
+      const first = state.appSettings.moneyOrder === "iOwe" ? "iOwe" : "owedToMe";
+      const panelOrder = first === "iOwe" ? ["iOwe", "owedToMe"] : ["owedToMe", "iOwe"];
+      els.moneyPanels.innerHTML = panelOrder.map((type) => moneyPanelHtml(type, type === "owedToMe" ? owedToMe : iOwe)).join("");
+      els.moneyPanels.querySelectorAll("[data-money-clear]").forEach((button) => button.addEventListener("click", () => clearMoneyItem(button.dataset.moneyClear)));
+      els.moneyPanels.querySelectorAll("[data-money-edit]").forEach((button) => button.addEventListener("click", () => editMoneyItem(button.dataset.moneyEdit)));
+      els.moneyPanels.querySelectorAll("[data-money-delete]").forEach((button) => button.addEventListener("click", () => deleteMoneyItem(button.dataset.moneyDelete)));
+
+      const history = state.moneyClear.items
+        .filter((item) => item.status === "cleared")
+        .sort((a, b) => (b.clearedAt || "").localeCompare(a.clearedAt || ""));
+      els.moneyHistoryList.innerHTML = history.length
+        ? history.slice(0, 12).map(moneyHistoryItemHtml).join("")
+        : `<p class="section-note">ยังไม่มีประวัติเคลียร์เงิน</p>`;
+    }
+
+    function moneyPanelHtml(type, items) {
+      const title = type === "owedToMe" ? "เขาค้างเรา" : "เราค้างเขา";
+      const empty = type === "owedToMe" ? "ยังไม่มีคนค้างเรา" : "ยังไม่มีรายการที่เราค้างเขา";
+      const body = items.length ? items.map(moneyItemHtml).join("") : `<p class="section-note">${empty}</p>`;
+      return `
+        <div class="money-panel">
+          <h3>${title}</h3>
+          <div class="money-list">${body}</div>
+        </div>
+      `;
+    }
+
+    function moneyItemHtml(item) {
+      const verb = item.type === "owedToMe" ? "ค้างเรา" : "เราค้าง";
+      return `
+        <div class="money-item">
+          <div>
+            <strong>${escapeHtml(item.person || "ไม่ระบุชื่อ")}</strong>
+            <small>${verb} · ${formatDateShort(item.date)} ${escapeHtml(item.time || "")}${item.note ? " · " + escapeHtml(item.note) : ""}</small>
+          </div>
+          <div>
+            <strong class="${item.type === "owedToMe" ? "amount-income" : "amount-expense"}">${formatCurrency(item.amount)}</strong>
+            <div class="money-actions">
+              <button class="small-icon-button" type="button" data-money-clear="${escapeAttr(item.id)}" title="เคลียร์" aria-label="เคลียร์">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>
+              </button>
+              <button class="small-icon-button" type="button" data-money-edit="${escapeAttr(item.id)}" title="แก้ไข" aria-label="แก้ไข">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.2 2.2 0 0 0-3-3L5 17l-1 3Z"></path><path d="m14 6 4 4"></path></svg>
+              </button>
+              <button class="small-icon-button delete" type="button" data-money-delete="${escapeAttr(item.id)}" title="ลบ" aria-label="ลบ">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 14h10l1-14"></path><path d="M9 7V4h6v3"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function moneyHistoryItemHtml(item) {
+      const text = item.type === "owedToMe" ? "รับคืนจาก" : "จ่ายคืนให้";
+      return `
+        <div class="money-item">
+          <div>
+            <strong>${text} ${escapeHtml(item.person || "ไม่ระบุชื่อ")}</strong>
+            <small>${formatDateShort(item.clearedDate)} ${escapeHtml(item.clearedTime || "")}${item.note ? " · " + escapeHtml(item.note) : ""}</small>
+          </div>
+          <strong>${formatCurrency(item.amount)}</strong>
+        </div>
+      `;
+    }
+
+    function saveMoneyItem(event) {
+      event.preventDefault();
+      const person = els.moneyPersonInput.value.trim();
+      const amount = clampMoney(els.moneyAmountInput.value);
+      if (!person || !amount) {
+        showToast("ใส่ชื่อและจำนวนเงินก่อน");
+        return;
+      }
+      const payload = {
+        type: els.moneyTypeInput.value === "iOwe" ? "iOwe" : "owedToMe",
+        person,
+        amount,
+        date: els.moneyDateInput.value || todayISO(),
+        time: els.moneyTimeInput.value || currentTime(),
+        note: els.moneyNoteInput.value.trim(),
+        status: "active"
+      };
+      const editingId = els.moneyEditingId.value;
+      if (editingId) {
+        state.moneyClear.items = state.moneyClear.items.map((item) => (
+          item.id === editingId ? { ...item, ...payload } : item
+        ));
+        showToast("แก้ไขรายการเคลียร์เงินแล้ว");
+      } else {
+        state.moneyClear.items.unshift({ id: uid(), ...payload, createdAt: new Date().toISOString() });
+        showToast("เพิ่มรายการเคลียร์เงินแล้ว");
+      }
+      saveMoneyClear();
+      resetMoneyForm();
+      renderMoneyClear();
+    }
+
+    function editMoneyItem(id) {
+      const item = state.moneyClear.items.find((entry) => entry.id === id && entry.status !== "cleared");
+      if (!item) return;
+      els.moneyEditingId.value = item.id;
+      els.moneyTypeInput.value = item.type;
+      els.moneyPersonInput.value = item.person;
+      els.moneyAmountInput.value = item.amount || "";
+      els.moneyDateInput.value = item.date || todayISO();
+      els.moneyTimeInput.value = item.time || currentTime();
+      els.moneyNoteInput.value = item.note || "";
+      els.saveMoneyItemButton?.focus?.();
+    }
+
+    function deleteMoneyItem(id) {
+      state.moneyClear.items = state.moneyClear.items.filter((item) => item.id !== id);
+      saveMoneyClear();
+      renderMoneyClear();
+      showToast("ลบรายการเคลียร์เงินแล้ว");
+    }
+
+    function clearMoneyItem(id) {
+      const item = state.moneyClear.items.find((entry) => entry.id === id && entry.status !== "cleared");
+      if (!item) return;
+      const now = new Date().toISOString();
+      const date = todayISO();
+      const time = currentTime();
+      const transactionType = item.type === "owedToMe" ? "income" : "expense";
+      const category = defaultCategory(transactionType);
+      const title = item.type === "owedToMe" ? `คืนเงิน ${item.person}` : `จ่ายคืน ${item.person}`;
+      const transaction = {
+        id: uid(),
+        type: transactionType,
+        mode: "single",
+        amount: item.amount,
+        title,
+        category,
+        lines: [{ id: uid(), title, category, amount: item.amount }],
+        note: item.note ? `เคลียร์เงิน · ${item.note}` : "เคลียร์เงิน",
+        date,
+        time,
+        source: "money-clear",
+        createdAt: now,
+        updatedAt: now
+      };
+      state.transactions.unshift(transaction);
+      state.moneyClear.items = state.moneyClear.items.map((entry) => (
+        entry.id === id
+          ? { ...entry, status: "cleared", clearedAt: now, clearedDate: date, clearedTime: time, transactionId: transaction.id }
+          : entry
+      ));
+      saveTransactions();
+      saveMoneyClear();
+      renderAll();
+      showToast(item.type === "owedToMe" ? "เคลียร์เป็นรายรับแล้ว" : "เคลียร์เป็นรายจ่ายแล้ว");
+    }
+
+    function resetMoneyForm() {
+      if (!els.moneyForm) return;
+      els.moneyEditingId.value = "";
+      els.moneyTypeInput.value = "owedToMe";
+      els.moneyPersonInput.value = "";
+      els.moneyAmountInput.value = "";
+      els.moneyDateInput.value = todayISO();
+      els.moneyTimeInput.value = currentTime();
+      els.moneyNoteInput.value = "";
+    }
+
     function renderBudget() {
       ensureBudgetCategories();
       const monthTransactions = getCurrentMonthTransactions();
@@ -3572,6 +4082,7 @@
     }
 
     function renderSettings() {
+      els.quickAddHomeToggle.checked = state.appSettings.showQuickAdd !== false;
       els.categorySettingsList.innerHTML = "";
       const categoryGroups = {
         income: state.categories.filter((category) => category.type === "income"),
@@ -4375,7 +4886,9 @@
         transactions: state.transactions,
         categories: state.categories,
         quickAdds: state.quickAdds,
-        budget: state.budget
+        budget: state.budget,
+        appSettings: state.appSettings,
+        moneyClear: state.moneyClear
       };
       downloadFile(JSON.stringify(payload, null, 2), `jkj-backup-${todayISO()}.json`, "application/json");
       showToast("Backup แล้ว");
@@ -4397,11 +4910,20 @@
           state.categories = data.categories;
           state.quickAdds = data.quickAdds;
           state.budget = data.budget;
+          state.appSettings = {
+            showQuickAdd: true,
+            moneyOrder: "owedToMe",
+            ...(data.appSettings || {})
+          };
+          state.moneyClear = data.moneyClear || { items: [] };
           normalizeTransactions();
+          normalizeMoneyClear();
           saveTransactions();
           saveCategories();
           saveQuickAdds();
           saveBudget();
+          saveAppSettings();
+          saveMoneyClear();
           renderAll();
           showToast("Restore ข้อมูลแล้ว");
         } catch (error) {
@@ -4416,6 +4938,21 @@
     function applyTheme(theme) {
       document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light";
       els.themeToggle.checked = theme === "dark";
+      els.themeTopButton.innerHTML = theme === "dark"
+        ? `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 7.5A9 9 0 1 1 12 3Z"></path></svg>`
+        : `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>`;
+      els.themeTopButton.title = theme === "dark" ? "สลับเป็นกลางวัน" : "สลับเป็นกลางคืน";
+      els.themeTopButton.setAttribute("aria-label", els.themeTopButton.title);
+    }
+
+    function setTheme(theme) {
+      const safeTheme = theme === "dark" ? "dark" : "light";
+      localStorage.setItem(STORAGE_KEYS.theme, JSON.stringify(safeTheme));
+      applyTheme(safeTheme);
+    }
+
+    function toggleTheme() {
+      setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
     }
 
     function getMonthlySummary() {
@@ -4593,6 +5130,14 @@
 
     function saveBudget() {
       localStorage.setItem(STORAGE_KEYS.budget, JSON.stringify(state.budget));
+    }
+
+    function saveAppSettings() {
+      localStorage.setItem(STORAGE_KEYS.appSettings, JSON.stringify(state.appSettings));
+    }
+
+    function saveMoneyClear() {
+      localStorage.setItem(STORAGE_KEYS.moneyClear, JSON.stringify(state.moneyClear));
     }
 
     function readStorage(key, fallback) {
