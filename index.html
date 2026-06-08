@@ -1295,9 +1295,10 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      font-size: clamp(64px, 18vw, 96px);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", sans-serif;
+      font-size: clamp(52px, 15vw, 78px);
       line-height: 1;
-      font-weight: 820;
+      font-weight: 680;
       color: #FFF8ED;
     }
 
@@ -1422,7 +1423,7 @@
 
     .time-actions {
       display: grid;
-      grid-template-columns: 44px 1fr 1fr 1fr;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
       align-items: center;
       padding: 0 18px 20px;
@@ -1440,7 +1441,7 @@
     }
 
     .time-keyboard {
-      display: inline-flex;
+      display: none;
       align-items: center;
       justify-content: center;
       color: #322B22;
@@ -1523,7 +1524,7 @@
       }
 
       .time-value {
-        font-size: clamp(60px, 19vw, 88px);
+        font-size: clamp(48px, 14.5vw, 68px);
       }
 
       .clock-face {
@@ -2058,7 +2059,7 @@
         </button>
       </div>
       <div class="calc-header">
-        <input class="calc-display" id="calcDisplay" type="text" inputmode="decimal" autocomplete="off" data-no-math="true" spellcheck="false" dir="ltr" value="0" aria-label="สูตรคำนวณจำนวนเงิน">
+        <input class="calc-display" id="calcDisplay" type="text" inputmode="none" autocomplete="off" data-no-math="true" spellcheck="false" dir="ltr" readonly value="0" aria-label="สูตรคำนวณจำนวนเงิน">
         <div class="calc-preview" id="calcPreview"></div>
       </div>
       <div class="calc-grid" aria-label="แป้นคำนวณจำนวนเงิน">
@@ -2116,6 +2117,7 @@
       </div>
       <div class="minute-chips" id="minuteChips" aria-label="นาทีแบบเร็ว"></div>
       <div class="time-actions">
+        <button class="time-action-text" id="timeNowButton" type="button">ตอนนี้</button>
         <button class="time-keyboard" id="timeKeyboardButton" type="button" aria-label="แป้นพิมพ์เวลา">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3Z"></path><path d="M7 9h.01"></path><path d="M11 9h.01"></path><path d="M15 9h.01"></path><path d="M19 9h.01"></path><path d="M7 13h.01"></path><path d="M11 13h.01"></path><path d="M15 13h.01"></path><path d="M7 17h10"></path></svg>
         </button>
@@ -2199,7 +2201,8 @@
         minute: 0,
         mode: "hour",
         dragging: false,
-        dragStartMode: "hour"
+        dragStartMode: "hour",
+        lastHapticValue: ""
       },
       toastTimer: null
     };
@@ -2285,6 +2288,7 @@
       closeTimePickerButton: document.getElementById("closeTimePickerButton"),
       cancelTimePickerButton: document.getElementById("cancelTimePickerButton"),
       clearTimePickerButton: document.getElementById("clearTimePickerButton"),
+      timeNowButton: document.getElementById("timeNowButton"),
       timeKeyboardButton: document.getElementById("timeKeyboardButton"),
       applyTimePickerButton: document.getElementById("applyTimePickerButton"),
       timePickerValue: document.getElementById("timePickerValue"),
@@ -2337,6 +2341,7 @@
       els.closeTimePickerButton.addEventListener("click", closeTimePicker);
       els.cancelTimePickerButton.addEventListener("click", closeTimePicker);
       els.clearTimePickerButton.addEventListener("click", clearTimePicker);
+      els.timeNowButton.addEventListener("click", setTimePickerToNow);
       els.timeKeyboardButton.addEventListener("click", () => showToast("ลากเข็มเพื่อเลือกเวลา"));
       els.applyTimePickerButton.addEventListener("click", applyTimePicker);
 
@@ -2373,6 +2378,10 @@
 
       els.calcDisplay.addEventListener("input", updateCalcPreview);
       els.calcDisplay.addEventListener("keydown", handleCalcKeydown);
+      els.calcDisplay.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        setCalcCaretFromPoint(event.clientX);
+      });
 
       document.querySelectorAll("[data-time-period]").forEach((button) => {
         button.addEventListener("click", () => setTimePeriod(button.dataset.timePeriod));
@@ -2561,16 +2570,24 @@
         if (input.dataset.mathInited === "true") return;
         input.dataset.mathInited = "true";
         input.autocomplete = "off";
+        input.readOnly = true;
+        input.setAttribute("aria-readonly", "true");
+
+        input.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          input.blur();
+          openCalc(input);
+        });
 
         input.addEventListener("focus", (event) => {
           event.preventDefault();
           requestAnimationFrame(() => input.blur());
-          openCalc(input);
+          if (state.calcEl !== input || !els.calcOverlay.classList.contains("open")) openCalc(input);
         });
 
         input.addEventListener("click", (event) => {
           event.preventDefault();
-          openCalc(input);
+          if (state.calcEl !== input || !els.calcOverlay.classList.contains("open")) openCalc(input);
         });
       });
     }
@@ -2583,7 +2600,11 @@
       els.calcOverlay.classList.add("open");
       updateCalcPreview();
       requestAnimationFrame(() => {
-        els.calcDisplay.focus();
+        try {
+          els.calcDisplay.focus({ preventScroll: true });
+        } catch (error) {
+          els.calcDisplay.focus();
+        }
         const end = els.calcDisplay.value.length;
         els.calcDisplay.setSelectionRange(end, end);
       });
@@ -2649,12 +2670,14 @@
 
     function handleCalcKeydown(event) {
       if (/[0-9+\-*/().]/.test(event.key)) {
-        requestAnimationFrame(updateCalcPreview);
+        event.preventDefault();
+        calcPush(event.key);
       } else if (event.key === "Enter") {
         event.preventDefault();
         calcPush("=");
       } else if (event.key === "Backspace") {
-        requestAnimationFrame(updateCalcPreview);
+        event.preventDefault();
+        calcPush("⌫");
       } else if (event.key === "Escape") {
         event.preventDefault();
         closeCalc();
@@ -2727,6 +2750,36 @@
       els.calcDisplay.setSelectionRange(next, next);
     }
 
+    function setCalcCaretFromPoint(clientX) {
+      const input = els.calcDisplay;
+      const value = input.value || "";
+      const style = getComputedStyle(input);
+      const rect = input.getBoundingClientRect();
+      const paddingLeft = parseFloat(style.paddingLeft) || 0;
+      const paddingRight = parseFloat(style.paddingRight) || 0;
+      const canvas = setCalcCaretFromPoint.canvas || (setCalcCaretFromPoint.canvas = document.createElement("canvas"));
+      const ctx = canvas.getContext("2d");
+      ctx.font = style.font || `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+
+      const right = rect.right - paddingRight;
+      const leftLimit = rect.left + paddingLeft;
+      const textWidth = ctx.measureText(value).width;
+      const textLeft = Math.max(leftLimit, right - textWidth);
+      let bestIndex = value.length;
+      let bestDistance = Infinity;
+
+      for (let index = 0; index <= value.length; index += 1) {
+        const x = textLeft + ctx.measureText(value.slice(0, index)).width;
+        const distance = Math.abs(clientX - x);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
+      }
+
+      setCalcCaret(bestIndex);
+    }
+
     function calcInitialValue(value) {
       const text = String(value || "").replace(/,/g, "").trim();
       return text || "0";
@@ -2745,6 +2798,7 @@
       state.timePicker.hour = time.hour;
       state.timePicker.minute = time.minute;
       state.timePicker.mode = "hour";
+      state.timePicker.lastHapticValue = "";
       els.timeOverlay.classList.add("open");
       renderTimePicker();
       requestAnimationFrame(() => {
@@ -2769,16 +2823,29 @@
     }
 
     function clearTimePicker() {
+      const previous = formatTimeValue(state.timePicker.hour, state.timePicker.minute);
       state.timePicker.hour = 0;
       state.timePicker.minute = 0;
       state.timePicker.mode = "hour";
+      pulseTimeHapticIfChanged(previous, "clear");
+      renderTimePicker();
+    }
+
+    function setTimePickerToNow() {
+      const now = new Date();
+      state.timePicker.hour = now.getHours();
+      state.timePicker.minute = now.getMinutes();
+      state.timePicker.mode = "hour";
+      pulseTimeHaptic(`now:${Date.now()}`);
       renderTimePicker();
     }
 
     function setTimePeriod(period) {
+      const previous = formatTimeValue(state.timePicker.hour, state.timePicker.minute);
       const isPm = state.timePicker.hour >= 12;
       if (period === "pm" && !isPm) state.timePicker.hour += 12;
       if (period === "am" && isPm) state.timePicker.hour -= 12;
+      pulseTimeHapticIfChanged(previous, `period:${period}`);
       renderTimePicker();
     }
 
@@ -2820,27 +2887,28 @@
         return;
       }
 
+      const previous = formatTimeValue(state.timePicker.hour, state.timePicker.minute);
       const point = clockPoint(event.clientX, event.clientY);
       if (state.timePicker.mode === "hour") {
-        const slot = Math.round(point.angle / 30) % 12;
-        const outerHour = slot === 0 ? 12 : slot;
-        const innerHour = slot === 0 ? 0 : slot + 12;
-        const innerCutoff = point.faceRadius * 0.31;
-        state.timePicker.hour = point.distance < innerCutoff ? innerHour : outerHour;
+        state.timePicker.hour = nearestClockHour(point, clockGeometry());
       } else {
         state.timePicker.minute = Math.round(point.angle / 6) % 60;
       }
+      pulseTimeHapticIfChanged(previous, `drag:${state.timePicker.mode}`);
       renderTimePicker();
     }
 
     function selectClockValue(value, advanceMode = true) {
       if (!Number.isFinite(value)) return;
+      const previous = formatTimeValue(state.timePicker.hour, state.timePicker.minute);
+      const mode = state.timePicker.mode;
       if (state.timePicker.mode === "hour") {
         state.timePicker.hour = clampHour(value);
         if (advanceMode) state.timePicker.mode = "minute";
       } else {
         state.timePicker.minute = clampMinute(value);
       }
+      pulseTimeHapticIfChanged(previous, `tap:${mode}`);
       renderTimePicker();
     }
 
@@ -2936,6 +3004,38 @@
       };
     }
 
+    function nearestClockHour(point, geometry) {
+      let selected = 0;
+      let bestDistance = Infinity;
+
+      for (let slot = 0; slot < 12; slot += 1) {
+        const outerValue = slot === 0 ? 12 : slot;
+        const outerAngle = (outerValue % 12) * 30;
+        const outerDistance = clockTargetDistance(point, outerAngle, geometry.outerRadius);
+        if (outerDistance < bestDistance) {
+          bestDistance = outerDistance;
+          selected = outerValue;
+        }
+
+        const innerValue = slot === 0 ? 0 : slot + 12;
+        const innerAngle = slot * 30;
+        const innerDistance = clockTargetDistance(point, innerAngle, geometry.innerRadius);
+        if (innerDistance < bestDistance) {
+          bestDistance = innerDistance;
+          selected = innerValue;
+        }
+      }
+
+      return selected;
+    }
+
+    function clockTargetDistance(point, angle, radius) {
+      const rad = angle * Math.PI / 180;
+      const x = Math.sin(rad) * radius;
+      const y = -Math.cos(rad) * radius;
+      return Math.hypot(point.dx - x, point.dy - y);
+    }
+
     function clockPoint(clientX, clientY) {
       const rect = els.clockFace.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -2943,10 +3043,28 @@
       const dx = clientX - centerX;
       const dy = clientY - centerY;
       return {
+        dx,
+        dy,
         angle: (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360,
         distance: Math.hypot(dx, dy),
         faceRadius: rect.width / 2
       };
+    }
+
+    function pulseTimeHapticIfChanged(previous, source) {
+      const current = formatTimeValue(state.timePicker.hour, state.timePicker.minute);
+      if (current !== previous) pulseTimeHaptic(`${source}:${current}`);
+    }
+
+    function pulseTimeHaptic(key) {
+      if (state.timePicker.lastHapticValue === key) return;
+      state.timePicker.lastHapticValue = key;
+      if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+      try {
+        navigator.vibrate(8);
+      } catch (error) {
+        // Some mobile browsers expose the API but block vibration in web views.
+      }
     }
 
     function parseTimeValue(value) {
