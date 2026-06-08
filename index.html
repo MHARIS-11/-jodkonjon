@@ -214,6 +214,23 @@
       color: #D8E7DC;
     }
 
+    .today-spent-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.08);
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    .today-spent-chip span {
+      color: var(--muted);
+    }
+
     .summary-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -372,8 +389,8 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
-      min-height: 58px;
-      padding: 12px 0;
+      min-height: 50px;
+      padding: 9px 0;
       border-bottom: 1px solid var(--border);
     }
 
@@ -422,6 +439,10 @@
       justify-content: flex-end;
       gap: 6px;
       margin-top: 8px;
+    }
+
+    .transaction-row:not(.with-actions) .row-actions {
+      display: none;
     }
 
     .small-icon-button {
@@ -719,6 +740,65 @@
       gap: 12px;
     }
 
+    .dashboard-chart-card {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .dashboard-chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .dashboard-chart-head h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .chart-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chart-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dot);
+    }
+
+    .dashboard-chart {
+      width: 100%;
+      min-height: 180px;
+      overflow: visible;
+    }
+
+    .chart-axis {
+      stroke: var(--border);
+      stroke-width: 1;
+    }
+
+    .chart-label {
+      fill: var(--muted);
+      font-size: 10px;
+    }
+
     .dashboard-card {
       padding: 14px;
       border: 1px solid var(--border);
@@ -950,6 +1030,19 @@
       margin-bottom: 12px;
     }
 
+    .sheet-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .sheet-hold-button {
+      min-height: 36px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
     .sheet-title {
       margin: 0;
       font-size: 21px;
@@ -1043,17 +1136,17 @@
 
     .line-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(86px, 0.45fr) auto;
+      grid-template-columns: minmax(0, 1fr) minmax(76px, 0.36fr) minmax(72px, 0.34fr) auto;
       gap: 8px;
       align-items: center;
     }
 
     .line-row.with-category {
-      grid-template-columns: minmax(0, 0.92fr) minmax(0, 0.82fr) minmax(82px, 0.44fr) auto;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.78fr) minmax(74px, 0.34fr) minmax(70px, 0.32fr) auto;
     }
 
     .line-row.category-only {
-      grid-template-columns: minmax(0, 1fr) minmax(92px, 0.45fr) auto;
+      grid-template-columns: minmax(0, 1fr) minmax(76px, 0.36fr) minmax(72px, 0.34fr) auto;
     }
 
     .line-row .input,
@@ -1127,6 +1220,11 @@
       min-height: 38px;
       padding: 7px 10px;
       font-size: 13px;
+    }
+
+    .history-head-actions .ghost-action.active {
+      background: var(--primary);
+      color: #FFFFFF;
     }
 
     .calc-overlay {
@@ -1657,6 +1755,10 @@
                   <span>ลงทุนแล้วทั้งหมด</span>
                   <strong class="amount-investment" id="investmentTotalAmount">฿0</strong>
                 </div>
+                <div class="today-spent-chip">
+                  <span>วันนี้จ่ายไป</span>
+                  <strong class="amount-expense" id="todayExpenseAmount">฿0</strong>
+                </div>
                 <div class="action-row three">
                   <button class="primary-action" id="addIncomeButton" type="button">
                     <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
@@ -1699,6 +1801,7 @@
             <h2 class="section-title">History</h2>
             <div class="history-head-actions">
               <p class="section-note" id="historyCount">0 รายการ</p>
+              <button class="ghost-action" id="historyEditToggle" type="button">แก้ไข</button>
               <button class="ghost-action" id="openBackfillButton" type="button">จดย้อนหลัง</button>
             </div>
           </div>
@@ -1730,6 +1833,7 @@
             </div>
           </div>
 
+          <div id="dashboardChart"></div>
           <div class="dashboard-list" id="dashboardList"></div>
         </section>
       </section>
@@ -1933,9 +2037,12 @@
       <div class="sheet-handle" aria-hidden="true"></div>
       <div class="sheet-head">
         <h2 class="sheet-title" id="sheetTitle">รายจ่าย</h2>
-        <button class="icon-button" id="closeSheetButton" type="button" title="ปิด" aria-label="ปิด">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
-        </button>
+        <div class="sheet-head-actions">
+          <button class="ghost-action sheet-hold-button" id="holdSheetButton" type="button">ค้างไว้ก่อน</button>
+          <button class="icon-button" id="closeSheetButton" type="button" title="ปิด" aria-label="ปิด">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+          </button>
+        </div>
       </div>
       <input type="hidden" id="editingTransactionId">
       <input type="hidden" id="transactionTypeInput" value="expense">
@@ -2136,6 +2243,7 @@
       categories: "jkj.categories.v1",
       quickAdds: "jkj.quickAdds.v1",
       budget: "jkj.budget.v1",
+      expenseDraft: "jkj.expenseDraft.v1",
       theme: "jkj.theme.v1"
     };
 
@@ -2173,6 +2281,8 @@
       transactions: readStorage(STORAGE_KEYS.transactions, []),
       categories: readStorage(STORAGE_KEYS.categories, DEFAULT_CATEGORIES),
       quickAdds: readStorage(STORAGE_KEYS.quickAdds, DEFAULT_QUICK_ADDS),
+      expenseDraft: readStorage(STORAGE_KEYS.expenseDraft, null),
+      historyEditMode: false,
       budget: readStorage(STORAGE_KEYS.budget, {
         id: "budget-default",
         month: getMonthKey(),
@@ -2216,6 +2326,7 @@
       expenseAmount: document.getElementById("expenseAmount"),
       investmentAmount: document.getElementById("investmentAmount"),
       investmentTotalAmount: document.getElementById("investmentTotalAmount"),
+      todayExpenseAmount: document.getElementById("todayExpenseAmount"),
       addIncomeButton: document.getElementById("addIncomeButton"),
       addExpenseButton: document.getElementById("addExpenseButton"),
       addInvestmentButton: document.getElementById("addInvestmentButton"),
@@ -2226,6 +2337,7 @@
       todayCount: document.getElementById("todayCount"),
       historyList: document.getElementById("historyList"),
       historyCount: document.getElementById("historyCount"),
+      historyEditToggle: document.getElementById("historyEditToggle"),
       searchInput: document.getElementById("searchInput"),
       categoryFilter: document.getElementById("categoryFilter"),
       totalBudgetInput: document.getElementById("totalBudgetInput"),
@@ -2234,6 +2346,7 @@
       budgetRemainingText: document.getElementById("budgetRemainingText"),
       budgetList: document.getElementById("budgetList"),
       dashboardList: document.getElementById("dashboardList"),
+      dashboardChart: document.getElementById("dashboardChart"),
       categoryNameInput: document.getElementById("categoryNameInput"),
       categoryTypeInput: document.getElementById("categoryTypeInput"),
       saveCategoryButton: document.getElementById("saveCategoryButton"),
@@ -2254,6 +2367,7 @@
       form: document.getElementById("transactionForm"),
       sheetTitle: document.getElementById("sheetTitle"),
       closeSheetButton: document.getElementById("closeSheetButton"),
+      holdSheetButton: document.getElementById("holdSheetButton"),
       editingTransactionId: document.getElementById("editingTransactionId"),
       transactionTypeInput: document.getElementById("transactionTypeInput"),
       transactionModeInput: document.getElementById("transactionModeInput"),
@@ -2334,6 +2448,7 @@
       els.exportSettingsButton.addEventListener("click", exportCsv);
       els.backupButton.addEventListener("click", backupJson);
       els.closeSheetButton.addEventListener("click", closeTransactionSheet);
+      els.holdSheetButton.addEventListener("click", holdTransactionDraft);
       els.openBackfillButton.addEventListener("click", openBackfillSheet);
       els.closeBackfillButton.addEventListener("click", closeBackfillSheet);
       els.addLineItemButton.addEventListener("click", addCurrentLineItem);
@@ -2489,6 +2604,10 @@
 
       els.categoryFilter.addEventListener("change", () => {
         state.historyFilter.category = els.categoryFilter.value;
+        renderHistory();
+      });
+      els.historyEditToggle.addEventListener("click", () => {
+        state.historyEditMode = !state.historyEditMode;
         renderHistory();
       });
 
@@ -3168,6 +3287,16 @@
           }];
           changed = true;
         }
+        normalized.lines = normalized.lines.map((line) => {
+          const discount = clampMoney(line.discount);
+          const grossAmount = clampMoney(line.grossAmount ?? (Number(line.amount) + discount));
+          return {
+            ...line,
+            grossAmount: grossAmount || clampMoney(line.amount),
+            discount,
+            amount: clampMoney(line.amount)
+          };
+        });
         normalized.amount = sum(normalized.lines.map((line) => line.amount)) || Number(normalized.amount) || 0;
         return normalized;
       });
@@ -3180,7 +3309,9 @@
           id: line.id || uid(),
           title: line.title || line.category || transaction.title,
           category: line.category || transaction.category,
-          amount: Number(line.amount) || 0
+          amount: Number(line.amount) || 0,
+          grossAmount: Number(line.grossAmount ?? line.amount) || 0,
+          discount: Number(line.discount) || 0
         }));
       }
       return [{
@@ -3221,6 +3352,9 @@
       els.expenseAmount.textContent = formatCurrency(summary.expense);
       els.investmentAmount.textContent = formatCurrency(summary.investment);
       els.investmentTotalAmount.textContent = formatCurrency(cash.investment);
+      const todayTransactions = sortedTransactions().filter((transaction) => transaction.date === todayISO());
+      const todayExpense = sum(todayTransactions.filter((transaction) => transaction.type === "expense").map((transaction) => transaction.amount));
+      els.todayExpenseAmount.textContent = formatCurrency(todayExpense);
 
       els.quickAddGrid.innerHTML = "";
       state.quickAdds.forEach((quick) => {
@@ -3235,7 +3369,6 @@
         els.quickAddGrid.appendChild(button);
       });
 
-      const todayTransactions = sortedTransactions().filter((transaction) => transaction.date === todayISO());
       els.todayCount.textContent = `${todayTransactions.length} รายการ`;
       els.todayList.innerHTML = "";
 
@@ -3273,6 +3406,8 @@
       });
 
       els.historyCount.textContent = `${filtered.length} รายการ`;
+      els.historyEditToggle.textContent = state.historyEditMode ? "เสร็จ" : "แก้ไข";
+      els.historyEditToggle.classList.toggle("active", state.historyEditMode);
       els.historyList.innerHTML = "";
 
       if (!filtered.length) {
@@ -3289,7 +3424,7 @@
 
         const list = document.createElement("div");
         list.className = "transaction-list";
-        transactions.forEach((transaction) => list.appendChild(transactionRow(transaction, true)));
+        transactions.forEach((transaction) => list.appendChild(transactionRow(transaction, state.historyEditMode)));
         els.historyList.appendChild(list);
       });
     }
@@ -3297,12 +3432,15 @@
     function renderDashboard() {
       if (!els.dashboardList) return;
       els.dashboardList.innerHTML = "";
+      els.dashboardChart.innerHTML = "";
       const summaries = monthlySummaries();
 
       if (!summaries.length) {
         els.dashboardList.appendChild(emptyState("ยังไม่มีข้อมูลรายเดือน", "เมื่อเริ่มบันทึกรายการ Dashboard จะแสดงสรุปให้เอง", "เพิ่มรายจ่าย", () => openTransactionSheet("expense")));
         return;
       }
+
+      renderDashboardChart(summaries);
 
       summaries.forEach((summary) => {
         const card = document.createElement("div");
@@ -3340,6 +3478,50 @@
         `;
         els.dashboardList.appendChild(card);
       });
+    }
+
+    function renderDashboardChart(summaries) {
+      const months = summaries.slice().reverse().slice(-6);
+      const series = [
+        { key: "income", label: "รายรับ", color: "#16A34A" },
+        { key: "expense", label: "รายจ่าย", color: "#EF4444" },
+        { key: "investment", label: "ลงทุน", color: "#8B5CF6" }
+      ];
+      const maxValue = Math.max(1, ...months.flatMap((summary) => series.map((item) => Number(summary[item.key]) || 0)));
+      const width = 320;
+      const height = 180;
+      const left = 36;
+      const right = 10;
+      const top = 16;
+      const bottom = 34;
+      const chartWidth = width - left - right;
+      const chartHeight = height - top - bottom;
+      const xFor = (index) => months.length <= 1 ? left + chartWidth / 2 : left + (chartWidth * index / (months.length - 1));
+      const yFor = (value) => top + chartHeight - ((Number(value) || 0) / maxValue) * chartHeight;
+      const lines = series.map((item) => {
+        const points = months.map((summary, index) => `${xFor(index).toFixed(1)},${yFor(summary[item.key]).toFixed(1)}`).join(" ");
+        const dots = months.map((summary, index) => `<circle cx="${xFor(index).toFixed(1)}" cy="${yFor(summary[item.key]).toFixed(1)}" r="2.8" fill="${item.color}"></circle>`).join("");
+        return `<polyline points="${points}" fill="none" stroke="${item.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></polyline>${dots}`;
+      }).join("");
+      const labels = months.map((summary, index) => `<text class="chart-label" x="${xFor(index).toFixed(1)}" y="170" text-anchor="middle">${escapeHtml(shortMonthFromKey(summary.month))}</text>`).join("");
+
+      els.dashboardChart.innerHTML = `
+        <div class="dashboard-chart-card">
+          <div class="dashboard-chart-head">
+            <h3>แนวโน้มรายเดือน</h3>
+            <div class="chart-legend">
+              ${series.map((item) => `<span><i class="chart-dot" style="--dot:${item.color}"></i>${item.label}</span>`).join("")}
+            </div>
+          </div>
+          <svg class="dashboard-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="กราฟรายรับ รายจ่าย และลงทุน">
+            <line class="chart-axis" x1="${left}" y1="${top + chartHeight}" x2="${width - right}" y2="${top + chartHeight}"></line>
+            <line class="chart-axis" x1="${left}" y1="${top}" x2="${left}" y2="${top + chartHeight}"></line>
+            <text class="chart-label" x="${left}" y="12" text-anchor="start">${formatPlainMoney(maxValue)}</text>
+            ${lines}
+            ${labels}
+          </svg>
+        </div>
+      `;
     }
 
     function renderBudget() {
@@ -3493,6 +3675,7 @@
           row.innerHTML = `
             <select class="select" data-line-field="category" aria-label="หมวดหมู่">${expenseCategoryOptions(line.category)}</select>
             <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.amount || ""}" placeholder="ยอด">
+            <input class="input" data-line-field="discount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.discount || ""}" placeholder="ลด">
             <button class="line-remove" type="button" aria-label="ลบแถว">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
             </button>
@@ -3502,6 +3685,7 @@
             <input class="input" data-line-field="title" type="text" value="${escapeAttr(line.title)}" placeholder="รายการ">
             <select class="select" data-line-field="category" aria-label="หมวดหมู่">${expenseCategoryOptions(line.category)}</select>
             <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.amount || ""}" placeholder="ยอด">
+            <input class="input" data-line-field="discount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.discount || ""}" placeholder="ลด">
             <button class="line-remove" type="button" aria-label="ลบแถว">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
             </button>
@@ -3510,6 +3694,7 @@
           row.innerHTML = `
             <input class="input" data-line-field="title" type="text" value="${escapeAttr(line.title)}" placeholder="รายการ">
             <input class="input" data-line-field="amount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.amount || ""}" placeholder="ยอด">
+            <input class="input" data-line-field="discount" type="number" inputmode="decimal" min="0" step="0.01" value="${line.discount || ""}" placeholder="ลด">
             <button class="line-remove" type="button" aria-label="ลบแถว">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
             </button>
@@ -3549,6 +3734,7 @@
       const detail = transactionDetailText(transaction, lines);
       const categoryLabel = categoryLabelForTransaction(transaction, lines);
       const amountClass = transaction.type === "income" ? "amount-income" : (transaction.type === "investment" ? "amount-investment" : "amount-expense");
+      row.classList.toggle("with-actions", withActions);
       row.innerHTML = `
         <div class="transaction-main">
           <div class="transaction-title">
@@ -3601,23 +3787,26 @@
       renderCategoryOptionsForSheet(type);
       els.expenseModeTabs.hidden = type !== "expense";
 
-      const mode = type === "expense" ? (transaction?.mode || "single") : "single";
+      const draft = !transaction && type === "expense" ? state.expenseDraft : null;
+      const mode = type === "expense" ? (transaction?.mode || draft?.mode || "single") : "single";
       els.editingTransactionId.value = transaction?.id || "";
-      els.amountInput.value = transaction?.amount || "";
-      els.categoryInput.value = transaction?.category || state.categories.find((category) => category.type === type)?.name || (isInvestment ? "ลงทุน" : "");
-      els.dateInput.value = transaction?.date || todayISO();
-      els.timeInput.value = transaction?.time || currentTime();
-      els.titleInput.value = transaction?.title || "";
+      els.amountInput.value = transaction?.amount || draft?.amount || "";
+      els.categoryInput.value = transaction?.category || draft?.category || state.categories.find((category) => category.type === type)?.name || (isInvestment ? "ลงทุน" : "");
+      els.dateInput.value = transaction?.date || draft?.date || todayISO();
+      els.timeInput.value = transaction?.time || draft?.time || currentTime();
+      els.titleInput.value = transaction?.title || draft?.title || "";
       els.titleInput.placeholder = isInvestment ? "เช่น ลงทุนกองทุน" : "เช่น ชาเย็น";
-      els.noteInput.value = transaction?.note || "";
-      state.transactionLines = transaction ? transactionLines(transaction).map((line) => ({ ...line, id: line.id || uid() })) : [defaultLineForMode(mode)];
+      els.noteInput.value = transaction?.note || draft?.note || "";
+      els.holdSheetButton.hidden = type !== "expense" || !!transaction;
+      state.transactionLines = transaction
+        ? transactionLines(transaction).map(lineForEditing)
+        : (draft?.lines?.length ? draft.lines.map((line) => ({ ...line, id: line.id || uid() })) : [defaultLineForMode(mode)]);
       setTransactionMode(mode);
 
       els.sheet.classList.add("open");
       document.body.style.overflow = "hidden";
       requestAnimationFrame(() => {
-        if (mode === "single") openCalc(els.amountInput);
-        else els.lineItemsList.querySelector("input, select")?.focus();
+        if (mode !== "single") els.lineItemsList.querySelector("input, select")?.focus();
       });
     }
 
@@ -3627,7 +3816,11 @@
       openTransactionSheet(transaction.type, transaction);
     }
 
-    function closeTransactionSheet() {
+    function closeTransactionSheet(options = {}) {
+      const keepDraft = options.keepDraft === true;
+      if (!keepDraft && els.transactionTypeInput.value === "expense" && !els.editingTransactionId.value) {
+        clearExpenseDraft();
+      }
       els.sheet.classList.remove("open");
       document.body.style.overflow = "";
       els.form.reset();
@@ -3639,6 +3832,36 @@
       els.timeInput.value = currentTime();
       state.transactionLines = [];
       setTransactionMode("single");
+    }
+
+    function holdTransactionDraft() {
+      if (els.transactionTypeInput.value !== "expense" || els.editingTransactionId.value) return;
+      saveExpenseDraft();
+      closeTransactionSheet({ keepDraft: true });
+      showToast("ค้างรายการไว้แล้ว");
+    }
+
+    function collectExpenseDraft() {
+      return {
+        mode: els.transactionModeInput.value || "single",
+        amount: els.amountInput.value || "",
+        category: els.categoryInput.value || "",
+        date: els.dateInput.value || todayISO(),
+        time: els.timeInput.value || currentTime(),
+        title: els.titleInput.value || "",
+        note: els.noteInput.value || "",
+        lines: state.transactionLines.map((line) => ({ ...line, id: line.id || uid() }))
+      };
+    }
+
+    function saveExpenseDraft() {
+      state.expenseDraft = collectExpenseDraft();
+      localStorage.setItem(STORAGE_KEYS.expenseDraft, JSON.stringify(state.expenseDraft));
+    }
+
+    function clearExpenseDraft() {
+      state.expenseDraft = null;
+      localStorage.removeItem(STORAGE_KEYS.expenseDraft);
     }
 
     function handleTransactionSubmit(event) {
@@ -3733,7 +3956,18 @@
         id: uid(),
         title: "",
         category,
-        amount: 0
+        amount: 0,
+        discount: 0
+      };
+    }
+
+    function lineForEditing(line) {
+      const discount = clampMoney(line.discount);
+      return {
+        ...line,
+        id: line.id || uid(),
+        amount: clampMoney(line.grossAmount ?? (Number(line.amount) + discount)),
+        discount
       };
     }
 
@@ -3746,7 +3980,7 @@
     function updateCurrentLine(id, field, value) {
       state.transactionLines = state.transactionLines.map((line) => {
         if (line.id !== id) return line;
-        const nextValue = field === "amount" ? clampMoney(value) : value;
+        const nextValue = (field === "amount" || field === "discount") ? clampMoney(value) : value;
         return { ...line, [field]: nextValue };
       });
       if (els.transactionModeInput.value === "itemized") {
@@ -3765,20 +3999,30 @@
     }
 
     function updateLineTotal() {
-      const total = sum(state.transactionLines.map((line) => line.amount));
+      const total = sum(state.transactionLines.map(lineNetAmount));
       els.lineItemsTotal.textContent = formatCurrency(total);
+    }
+
+    function lineNetAmount(line) {
+      return Math.max(clampMoney(line.amount) - clampMoney(line.discount), 0);
     }
 
     function linesForSubmit(mode) {
       if (mode === "single") return [];
       const category = els.categoryInput.value || defaultCategory("expense");
       return state.transactionLines
-        .map((line) => ({
-          id: line.id || uid(),
-          title: mode === "split" ? (line.category || category) : (String(line.title || "").trim() || line.category || category),
-          category: mode === "itemized" ? category : (line.category || category),
-          amount: clampMoney(line.amount)
-        }))
+        .map((line) => {
+          const grossAmount = clampMoney(line.amount);
+          const discount = Math.min(clampMoney(line.discount), grossAmount);
+          return {
+            id: line.id || uid(),
+            title: mode === "split" ? (line.category || category) : (String(line.title || "").trim() || line.category || category),
+            category: mode === "itemized" ? category : (line.category || category),
+            grossAmount,
+            discount,
+            amount: Math.max(grossAmount - discount, 0)
+          };
+        })
         .filter((line) => line.amount > 0);
     }
 
@@ -4113,7 +4357,11 @@
         transaction.amount,
         modeLabel(transaction.mode),
         transaction.note || "",
-        transactionLines(transaction).map((line) => `${line.category}:${line.title}:${line.amount}`).join(" | ")
+        transactionLines(transaction).map((line) => {
+          const discount = clampMoney(line.discount);
+          const gross = clampMoney(line.grossAmount || line.amount + discount);
+          return `${line.category}:${line.title}:${line.amount}${discount ? ` (gross ${gross}, discount ${discount})` : ""}`;
+        }).join(" | ")
       ]);
       const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
       downloadFile("\uFEFF" + csv, `jkj-transactions-${todayISO()}.csv`, "text/csv;charset=utf-8");
@@ -4289,10 +4537,15 @@
 
     function transactionDetailText(transaction, lines) {
       if (transaction.mode === "single" || !lines.length) return "";
+      const lineAmountText = (line) => {
+        const discount = clampMoney(line.discount);
+        if (!discount) return formatPlainMoney(line.amount);
+        return `${formatPlainMoney(line.grossAmount || line.amount + discount)} -${formatPlainMoney(discount)} = ${formatPlainMoney(line.amount)}`;
+      };
       if (transaction.mode === "split") {
-        return lines.map((line) => `${line.category} ${formatPlainMoney(line.amount)}`).join(" · ");
+        return lines.map((line) => `${line.category} ${lineAmountText(line)}`).join(" · ");
       }
-      return lines.map((line) => `${line.title || line.category} ${formatPlainMoney(line.amount)}`).join(" · ");
+      return lines.map((line) => `${line.title || line.category} ${lineAmountText(line)}`).join(" · ");
     }
 
     function unique(values) {
@@ -4379,6 +4632,11 @@
     function monthLabelFromKey(monthKey) {
       const [year, month] = String(monthKey || getMonthKey()).split("-").map(Number);
       return new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" }).format(new Date(year, month - 1, 1));
+    }
+
+    function shortMonthFromKey(monthKey) {
+      const [year, month] = String(monthKey || getMonthKey()).split("-").map(Number);
+      return new Intl.DateTimeFormat("th-TH", { month: "short" }).format(new Date(year, month - 1, 1));
     }
 
     function formatDateThai(isoDate) {
