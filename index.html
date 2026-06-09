@@ -676,11 +676,11 @@
 
     .settings-entry {
       display: grid;
-      grid-template-columns: 44px minmax(0, 1fr) auto;
-      gap: 12px;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      gap: 10px;
       align-items: center;
-      min-height: 64px;
-      padding: 10px 12px;
+      min-height: 58px;
+      padding: 9px 11px;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: var(--surface);
@@ -690,18 +690,26 @@
 
     .settings-entry-icon {
       display: inline-flex;
-      width: 40px;
-      height: 40px;
+      width: 34px;
+      height: 34px;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
-      background: rgba(40, 77, 59, 0.08);
+      border: 1px solid rgba(40, 77, 59, 0.14);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(40, 77, 59, 0.08), rgba(40, 77, 59, 0.03));
       color: var(--primary);
+    }
+
+    .settings-entry-icon .icon {
+      width: 18px;
+      height: 18px;
+      stroke-width: 1.9;
     }
 
     [data-theme="dark"] .settings-entry-icon {
       color: #D8E7DC;
-      background: rgba(216, 231, 220, 0.1);
+      border-color: rgba(216, 231, 220, 0.18);
+      background: rgba(216, 231, 220, 0.08);
     }
 
     .settings-entry strong,
@@ -773,6 +781,13 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+    }
+
+    .chart-periods {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin: 8px 0 10px;
     }
 
     .chart-dot {
@@ -1294,8 +1309,54 @@
     }
 
     .money-panel h3 {
-      margin: 0 0 10px;
+      margin: 0;
       font-size: 16px;
+    }
+
+    .money-person-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .money-person-head small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .money-person-totals {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .money-person-totals span {
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(107, 114, 128, 0.08);
+    }
+
+    .money-person-totals strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 14px;
+    }
+
+    .money-person-section {
+      margin-top: 10px;
+    }
+
+    .money-person-section h4 {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .money-list {
@@ -2015,7 +2076,8 @@
               </div>
               <div class="field">
                 <label for="moneyPersonInput">ชื่อคน</label>
-                <input class="input" id="moneyPersonInput" type="text" placeholder="เช่น เจม" required>
+                <input class="input" id="moneyPersonInput" type="text" list="moneyPersonOptions" placeholder="เช่น เจม" required>
+                <datalist id="moneyPersonOptions"></datalist>
               </div>
               <div class="field">
                 <label for="moneyAmountInput">จำนวนเงิน</label>
@@ -2517,7 +2579,8 @@
       expenseDraft: readStorage(STORAGE_KEYS.expenseDraft, null),
       appSettings: readStorage(STORAGE_KEYS.appSettings, {
         showQuickAdd: true,
-        moneyOrder: "owedToMe"
+        moneyOrder: "owedToMe",
+        chartPeriod: "month"
       }),
       moneyClear: readStorage(STORAGE_KEYS.moneyClear, { items: [] }),
       historyEditMode: false,
@@ -2595,6 +2658,7 @@
       moneyEditingId: document.getElementById("moneyEditingId"),
       moneyTypeInput: document.getElementById("moneyTypeInput"),
       moneyPersonInput: document.getElementById("moneyPersonInput"),
+      moneyPersonOptions: document.getElementById("moneyPersonOptions"),
       moneyAmountInput: document.getElementById("moneyAmountInput"),
       moneyDateInput: document.getElementById("moneyDateInput"),
       moneyTimeInput: document.getElementById("moneyTimeInput"),
@@ -2686,10 +2750,14 @@
       state.appSettings = {
         showQuickAdd: true,
         moneyOrder: "owedToMe",
+        chartPeriod: "month",
         ...state.appSettings
       };
       if (!["owedToMe", "iOwe"].includes(state.appSettings.moneyOrder)) {
         state.appSettings.moneyOrder = "owedToMe";
+      }
+      if (!["day", "week", "month"].includes(state.appSettings.chartPeriod)) {
+        state.appSettings.chartPeriod = "month";
       }
       normalizeTransactions();
       normalizeMoneyClear();
@@ -3787,13 +3855,14 @@
     }
 
     function renderDashboardChart(summaries) {
-      const months = summaries.slice().reverse().slice(-6);
+      const period = state.appSettings.chartPeriod || "month";
+      const points = dashboardChartPoints(period, summaries);
       const series = [
         { key: "income", label: "รายรับ", color: "#16A34A" },
         { key: "expense", label: "รายจ่าย", color: "#EF4444" },
         { key: "investment", label: "ลงทุน", color: "#8B5CF6" }
       ];
-      const maxValue = Math.max(1, ...months.flatMap((summary) => series.map((item) => Number(summary[item.key]) || 0)));
+      const maxValue = Math.max(1, ...points.flatMap((point) => series.map((item) => Number(point[item.key]) || 0)));
       const width = 320;
       const height = 180;
       const left = 36;
@@ -3802,22 +3871,28 @@
       const bottom = 34;
       const chartWidth = width - left - right;
       const chartHeight = height - top - bottom;
-      const xFor = (index) => months.length <= 1 ? left + chartWidth / 2 : left + (chartWidth * index / (months.length - 1));
+      const xFor = (index) => points.length <= 1 ? left + chartWidth / 2 : left + (chartWidth * index / (points.length - 1));
       const yFor = (value) => top + chartHeight - ((Number(value) || 0) / maxValue) * chartHeight;
       const lines = series.map((item) => {
-        const points = months.map((summary, index) => `${xFor(index).toFixed(1)},${yFor(summary[item.key]).toFixed(1)}`).join(" ");
-        const dots = months.map((summary, index) => `<circle cx="${xFor(index).toFixed(1)}" cy="${yFor(summary[item.key]).toFixed(1)}" r="2.8" fill="${item.color}"></circle>`).join("");
-        return `<polyline points="${points}" fill="none" stroke="${item.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></polyline>${dots}`;
+        const linePoints = points.map((point, index) => `${xFor(index).toFixed(1)},${yFor(point[item.key]).toFixed(1)}`).join(" ");
+        const dots = points.map((point, index) => `<circle cx="${xFor(index).toFixed(1)}" cy="${yFor(point[item.key]).toFixed(1)}" r="2.8" fill="${item.color}"></circle>`).join("");
+        return `<polyline points="${linePoints}" fill="none" stroke="${item.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></polyline>${dots}`;
       }).join("");
-      const labels = months.map((summary, index) => `<text class="chart-label" x="${xFor(index).toFixed(1)}" y="170" text-anchor="middle">${escapeHtml(shortMonthFromKey(summary.month))}</text>`).join("");
+      const labels = points.map((point, index) => `<text class="chart-label" x="${xFor(index).toFixed(1)}" y="170" text-anchor="middle">${escapeHtml(point.label)}</text>`).join("");
+      const periodTitle = period === "day" ? "แนวโน้มรายวัน" : (period === "week" ? "แนวโน้มรายสัปดาห์" : "แนวโน้มรายเดือน");
 
       els.dashboardChart.innerHTML = `
         <div class="dashboard-chart-card">
           <div class="dashboard-chart-head">
-            <h3>แนวโน้มรายเดือน</h3>
+            <h3>${periodTitle}</h3>
             <div class="chart-legend">
               ${series.map((item) => `<span><i class="chart-dot" style="--dot:${item.color}"></i>${item.label}</span>`).join("")}
             </div>
+          </div>
+          <div class="chart-periods" aria-label="เลือกช่วงกราฟ">
+            <button class="segment-button ${period === "day" ? "active" : ""}" type="button" data-chart-period="day">รายวัน</button>
+            <button class="segment-button ${period === "week" ? "active" : ""}" type="button" data-chart-period="week">รายสัปดาห์</button>
+            <button class="segment-button ${period === "month" ? "active" : ""}" type="button" data-chart-period="month">รายเดือน</button>
           </div>
           <svg class="dashboard-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="กราฟรายรับ รายจ่าย และลงทุน">
             <line class="chart-axis" x1="${left}" y1="${top + chartHeight}" x2="${width - right}" y2="${top + chartHeight}"></line>
@@ -3828,6 +3903,65 @@
           </svg>
         </div>
       `;
+      els.dashboardChart.querySelectorAll("[data-chart-period]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.appSettings.chartPeriod = button.dataset.chartPeriod;
+          saveAppSettings();
+          renderDashboard();
+        });
+      });
+    }
+
+    function dashboardChartPoints(period, summaries) {
+      if (period === "day") return dailyChartPoints();
+      if (period === "week") return weeklyChartPoints();
+      return summaries.slice().reverse().slice(-6).map((summary) => ({
+        label: shortMonthFromKey(summary.month),
+        income: summary.income,
+        expense: summary.expense,
+        investment: summary.investment
+      }));
+    }
+
+    function dailyChartPoints() {
+      const today = new Date(`${todayISO()}T00:00:00`);
+      return Array.from({ length: 14 }, (_, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - (13 - index));
+        const iso = localDateISO(date);
+        return summarizeTransactionsForLabel(
+          iso,
+          String(date.getDate()),
+          state.transactions.filter((transaction) => transaction.date === iso)
+        );
+      });
+    }
+
+    function weeklyChartPoints() {
+      const today = new Date(`${todayISO()}T00:00:00`);
+      return Array.from({ length: 8 }, (_, index) => {
+        const end = new Date(today);
+        end.setDate(today.getDate() - ((7 - index) * 7));
+        const start = new Date(end);
+        start.setDate(end.getDate() - 6);
+        const startIso = localDateISO(start);
+        const endIso = localDateISO(end);
+        return summarizeTransactionsForLabel(
+          `${startIso}-${endIso}`,
+          `${start.getDate()}-${end.getDate()}`,
+          state.transactions.filter((transaction) => transaction.date >= startIso && transaction.date <= endIso)
+        );
+      });
+    }
+
+    function summarizeTransactionsForLabel(key, label, transactions) {
+      return {
+        key,
+        label,
+        income: sum(transactions.filter((transaction) => transaction.type === "income").map((transaction) => transaction.amount)),
+        expense: sum(transactions.filter((transaction) => transaction.type === "expense").map((transaction) => transaction.amount)),
+        investment: sum(transactions.filter((transaction) => transaction.type === "investment").map((transaction) => transaction.amount))
+      };
     }
 
     function normalizeMoneyClear() {
@@ -3846,7 +3980,9 @@
         clearedAt: item.clearedAt || "",
         clearedDate: item.clearedDate || "",
         clearedTime: item.clearedTime || "",
-        transactionId: item.transactionId || ""
+        initialTransactionId: item.initialTransactionId || "",
+        clearedTransactionId: item.clearedTransactionId || item.transactionId || "",
+        transactionId: ""
       }));
       saveMoneyClear();
     }
@@ -3869,9 +4005,11 @@
         button.classList.toggle("active", button.dataset.moneyOrder === state.appSettings.moneyOrder);
       });
 
-      const first = state.appSettings.moneyOrder === "iOwe" ? "iOwe" : "owedToMe";
-      const panelOrder = first === "iOwe" ? ["iOwe", "owedToMe"] : ["owedToMe", "iOwe"];
-      els.moneyPanels.innerHTML = panelOrder.map((type) => moneyPanelHtml(type, type === "owedToMe" ? owedToMe : iOwe)).join("");
+      renderMoneyPersonOptions();
+      const groups = moneyPersonGroups(activeItems);
+      els.moneyPanels.innerHTML = groups.length
+        ? groups.map(moneyPersonBlockHtml).join("")
+        : `<div class="money-panel"><p class="section-note">ยังไม่มีรายการค้างเงิน</p></div>`;
       els.moneyPanels.querySelectorAll("[data-money-clear]").forEach((button) => button.addEventListener("click", () => clearMoneyItem(button.dataset.moneyClear)));
       els.moneyPanels.querySelectorAll("[data-money-edit]").forEach((button) => button.addEventListener("click", () => editMoneyItem(button.dataset.moneyEdit)));
       els.moneyPanels.querySelectorAll("[data-money-delete]").forEach((button) => button.addEventListener("click", () => deleteMoneyItem(button.dataset.moneyDelete)));
@@ -3882,27 +4020,84 @@
       els.moneyHistoryList.innerHTML = history.length
         ? history.slice(0, 12).map(moneyHistoryItemHtml).join("")
         : `<p class="section-note">ยังไม่มีประวัติเคลียร์เงิน</p>`;
+      els.moneyHistoryList.querySelectorAll("[data-money-undo]").forEach((button) => button.addEventListener("click", () => undoMoneyClear(button.dataset.moneyUndo)));
     }
 
-    function moneyPanelHtml(type, items) {
-      const title = type === "owedToMe" ? "เขาค้างเรา" : "เราค้างเขา";
-      const empty = type === "owedToMe" ? "ยังไม่มีคนค้างเรา" : "ยังไม่มีรายการที่เราค้างเขา";
-      const body = items.length ? items.map(moneyItemHtml).join("") : `<p class="section-note">${empty}</p>`;
+    function renderMoneyPersonOptions() {
+      if (!els.moneyPersonOptions) return;
+      const names = unique(state.moneyClear.items.map((item) => String(item.person || "").trim()).filter(Boolean));
+      els.moneyPersonOptions.innerHTML = names.map((name) => `<option value="${escapeAttr(name)}"></option>`).join("");
+    }
+
+    function moneyPersonGroups(items) {
+      const map = new Map();
+      items.forEach((item) => {
+        const key = moneyPersonKey(item.person);
+        if (!map.has(key)) {
+          map.set(key, { key, person: item.person || "ไม่ระบุชื่อ", owedToMe: [], iOwe: [] });
+        }
+        map.get(key)[item.type === "iOwe" ? "iOwe" : "owedToMe"].push(item);
+      });
+      const preferred = state.appSettings.moneyOrder === "iOwe" ? "iOwe" : "owedToMe";
+      return Array.from(map.values()).map((group) => ({
+        ...group,
+        owedTotal: sum(group.owedToMe.map((item) => item.amount)),
+        iOweTotal: sum(group.iOwe.map((item) => item.amount))
+      })).sort((a, b) => {
+        const preferredDiff = (b[`${preferred === "iOwe" ? "iOwe" : "owed"}Total`] || 0) - (a[`${preferred === "iOwe" ? "iOwe" : "owed"}Total`] || 0);
+        if (preferredDiff) return preferredDiff;
+        return a.person.localeCompare(b.person, "th");
+      });
+    }
+
+    function moneyPersonKey(person) {
+      return String(person || "ไม่ระบุชื่อ").trim().toLowerCase() || "ไม่ระบุชื่อ";
+    }
+
+    function moneyPersonBlockHtml(group) {
+      const net = group.owedTotal - group.iOweTotal;
+      const netClass = net >= 0 ? "amount-income" : "amount-expense";
+      const netText = net > 0
+        ? `${escapeHtml(group.person)}ควรจ่ายเรา`
+        : (net < 0 ? `เราควรจ่าย${escapeHtml(group.person)}` : "หักลบกันพอดี");
+      const first = state.appSettings.moneyOrder === "iOwe" ? "iOwe" : "owedToMe";
+      const sectionOrder = first === "iOwe" ? ["iOwe", "owedToMe"] : ["owedToMe", "iOwe"];
       return `
         <div class="money-panel">
-          <h3>${title}</h3>
-          <div class="money-list">${body}</div>
+          <div class="money-person-head">
+            <div>
+              <h3>${escapeHtml(group.person)}</h3>
+              <small>${netText}</small>
+            </div>
+            <strong class="${netClass}">${formatCurrency(Math.abs(net))}</strong>
+          </div>
+          <div class="money-person-totals">
+            <span>เขาค้างเรา <strong class="amount-income">${formatCurrency(group.owedTotal)}</strong></span>
+            <span>เราค้างเขา <strong class="amount-expense">${formatCurrency(group.iOweTotal)}</strong></span>
+          </div>
+          ${sectionOrder.map((type) => moneyGroupSectionHtml(type, group[type])).join("")}
+        </div>
+      `;
+    }
+
+    function moneyGroupSectionHtml(type, items) {
+      if (!items.length) return "";
+      const title = type === "owedToMe" ? "เขาค้างเรา" : "เราค้างเขา";
+      return `
+        <div class="money-person-section">
+          <h4>${title}</h4>
+          <div class="money-list">${items.map(moneyItemHtml).join("")}</div>
         </div>
       `;
     }
 
     function moneyItemHtml(item) {
-      const verb = item.type === "owedToMe" ? "ค้างเรา" : "เราค้าง";
+      const verb = item.type === "owedToMe" ? "ยืมจากเรา" : "เราค้างไว้";
       return `
         <div class="money-item">
           <div>
-            <strong>${escapeHtml(item.person || "ไม่ระบุชื่อ")}</strong>
-            <small>${verb} · ${formatDateShort(item.date)} ${escapeHtml(item.time || "")}${item.note ? " · " + escapeHtml(item.note) : ""}</small>
+            <strong>${verb}</strong>
+            <small>${formatDateShort(item.date)} ${escapeHtml(item.time || "")}${item.note ? " · " + escapeHtml(item.note) : ""}</small>
           </div>
           <div>
             <strong class="${item.type === "owedToMe" ? "amount-income" : "amount-expense"}">${formatCurrency(item.amount)}</strong>
@@ -3930,7 +4125,14 @@
             <strong>${text} ${escapeHtml(item.person || "ไม่ระบุชื่อ")}</strong>
             <small>${formatDateShort(item.clearedDate)} ${escapeHtml(item.clearedTime || "")}${item.note ? " · " + escapeHtml(item.note) : ""}</small>
           </div>
-          <strong>${formatCurrency(item.amount)}</strong>
+          <div>
+            <strong>${formatCurrency(item.amount)}</strong>
+            <div class="money-actions">
+              <button class="small-icon-button" type="button" data-money-undo="${escapeAttr(item.id)}" title="ย้อนกลับ" aria-label="ย้อนกลับ">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-1"></path></svg>
+              </button>
+            </div>
+          </div>
         </div>
       `;
     }
@@ -3953,18 +4155,25 @@
         status: "active"
       };
       const editingId = els.moneyEditingId.value;
+      let transactionsChanged = false;
       if (editingId) {
-        state.moneyClear.items = state.moneyClear.items.map((item) => (
-          item.id === editingId ? { ...item, ...payload } : item
-        ));
+        state.moneyClear.items = state.moneyClear.items.map((item) => {
+          if (item.id !== editingId) return item;
+          const next = { ...item, ...payload };
+          transactionsChanged = syncInitialMoneyTransaction(next, item) || transactionsChanged;
+          return next;
+        });
         showToast("แก้ไขรายการเคลียร์เงินแล้ว");
       } else {
-        state.moneyClear.items.unshift({ id: uid(), ...payload, createdAt: new Date().toISOString() });
+        const item = { id: uid(), ...payload, initialTransactionId: "", clearedTransactionId: "", createdAt: new Date().toISOString() };
+        transactionsChanged = syncInitialMoneyTransaction(item) || transactionsChanged;
+        state.moneyClear.items.unshift(item);
         showToast("เพิ่มรายการเคลียร์เงินแล้ว");
       }
+      if (transactionsChanged) saveTransactions();
       saveMoneyClear();
       resetMoneyForm();
-      renderMoneyClear();
+      renderAll();
     }
 
     function editMoneyItem(id) {
@@ -3981,9 +4190,16 @@
     }
 
     function deleteMoneyItem(id) {
+      const item = state.moneyClear.items.find((entry) => entry.id === id);
+      if (item) {
+        removeTransactionSilently(item.initialTransactionId);
+        removeTransactionSilently(item.clearedTransactionId);
+        removeTransactionSilently(item.transactionId);
+        saveTransactions();
+      }
       state.moneyClear.items = state.moneyClear.items.filter((item) => item.id !== id);
       saveMoneyClear();
-      renderMoneyClear();
+      renderAll();
       showToast("ลบรายการเคลียร์เงินแล้ว");
     }
 
@@ -3993,34 +4209,135 @@
       const now = new Date().toISOString();
       const date = todayISO();
       const time = currentTime();
-      const transactionType = item.type === "owedToMe" ? "income" : "expense";
-      const category = defaultCategory(transactionType);
-      const title = item.type === "owedToMe" ? `คืนเงิน ${item.person}` : `จ่ายคืน ${item.person}`;
-      const transaction = {
-        id: uid(),
-        type: transactionType,
-        mode: "single",
-        amount: item.amount,
-        title,
-        category,
-        lines: [{ id: uid(), title, category, amount: item.amount }],
-        note: item.note ? `เคลียร์เงิน · ${item.note}` : "เคลียร์เงิน",
-        date,
-        time,
-        source: "money-clear",
-        createdAt: now,
-        updatedAt: now
-      };
+      const transaction = createMoneyTransaction(item, "payback", { date, time, now });
       state.transactions.unshift(transaction);
       state.moneyClear.items = state.moneyClear.items.map((entry) => (
         entry.id === id
-          ? { ...entry, status: "cleared", clearedAt: now, clearedDate: date, clearedTime: time, transactionId: transaction.id }
+          ? { ...entry, status: "cleared", clearedAt: now, clearedDate: date, clearedTime: time, clearedTransactionId: transaction.id, transactionId: "" }
           : entry
       ));
       saveTransactions();
       saveMoneyClear();
       renderAll();
       showToast(item.type === "owedToMe" ? "เคลียร์เป็นรายรับแล้ว" : "เคลียร์เป็นรายจ่ายแล้ว");
+    }
+
+    function undoMoneyClear(id) {
+      const item = state.moneyClear.items.find((entry) => entry.id === id && entry.status === "cleared");
+      if (!item) return;
+      removeTransactionSilently(item.clearedTransactionId || item.transactionId);
+      state.moneyClear.items = state.moneyClear.items.map((entry) => (
+        entry.id === id
+          ? { ...entry, status: "active", clearedAt: "", clearedDate: "", clearedTime: "", clearedTransactionId: "", transactionId: "" }
+          : entry
+      ));
+      saveTransactions();
+      saveMoneyClear();
+      renderAll();
+      showToast("ย้อนกลับรายการเคลียร์เงินแล้ว");
+    }
+
+    function syncInitialMoneyTransaction(item, previous = null) {
+      let changed = false;
+      const oldInitialId = previous?.initialTransactionId || "";
+      if (item.type !== "owedToMe") {
+        if (oldInitialId) {
+          removeTransactionSilently(oldInitialId);
+          item.initialTransactionId = "";
+          changed = true;
+        }
+        return changed;
+      }
+      const transaction = createMoneyTransaction(item, "loanOut");
+      const hasInitialTransaction = oldInitialId && state.transactions.some((entry) => entry.id === oldInitialId);
+      if (hasInitialTransaction) {
+        state.transactions = state.transactions.map((entry) => (
+          entry.id === oldInitialId ? { ...entry, ...transaction, id: oldInitialId, createdAt: entry.createdAt || transaction.createdAt } : entry
+        ));
+        item.initialTransactionId = oldInitialId;
+      } else {
+        state.transactions.unshift(transaction);
+        item.initialTransactionId = transaction.id;
+      }
+      return true;
+    }
+
+    function createMoneyTransaction(item, phase, options = {}) {
+      const now = options.now || new Date().toISOString();
+      const isLoanOut = phase === "loanOut";
+      const isOwedToMePayback = item.type === "owedToMe" && phase === "payback";
+      const type = isLoanOut || item.type === "iOwe" ? "expense" : "income";
+      const title = isLoanOut
+        ? `${item.person}ยืมเงิน`
+        : (isOwedToMePayback ? `${item.person}จ่ายคืนแล้ว` : `จ่ายคืน${item.person}แล้ว`);
+      const category = defaultCategory(type);
+      const date = isLoanOut ? (item.date || todayISO()) : (options.date || todayISO());
+      const time = isLoanOut ? (item.time || currentTime()) : (options.time || currentTime());
+      return {
+        id: uid(),
+        type,
+        mode: "single",
+        amount: clampMoney(item.amount),
+        title,
+        category,
+        lines: [{ id: uid(), title, category, amount: clampMoney(item.amount) }],
+        note: item.note ? `เคลียร์เงิน · ${item.note}` : "เคลียร์เงิน",
+        date,
+        time,
+        source: isLoanOut ? "money-clear-loan" : "money-clear-payback",
+        moneyClearId: item.id,
+        moneyClearPhase: phase,
+        createdAt: now,
+        updatedAt: now
+      };
+    }
+
+    function removeTransactionSilently(id) {
+      if (!id) return false;
+      const before = state.transactions.length;
+      state.transactions = state.transactions.filter((transaction) => transaction.id !== id);
+      return state.transactions.length !== before;
+    }
+
+    function syncMoneyOnTransactionDelete(id) {
+      let changed = false;
+      state.moneyClear.items = state.moneyClear.items.flatMap((item) => {
+        if (item.initialTransactionId === id) {
+          removeTransactionSilently(item.clearedTransactionId);
+          changed = true;
+          return [];
+        }
+        if (item.clearedTransactionId === id || item.transactionId === id) {
+          changed = true;
+          return [{ ...item, status: "active", clearedAt: "", clearedDate: "", clearedTime: "", clearedTransactionId: "", transactionId: "" }];
+        }
+        return [item];
+      });
+      if (changed) saveMoneyClear();
+      return changed;
+    }
+
+    function syncMoneyOnTransactionEdit(transaction) {
+      if (!transaction) return false;
+      let changed = false;
+      state.moneyClear.items = state.moneyClear.items.map((item) => {
+        if (item.initialTransactionId === transaction.id) {
+          changed = true;
+          return { ...item, amount: clampMoney(transaction.amount), date: transaction.date || item.date, time: transaction.time || item.time };
+        }
+        if (item.clearedTransactionId === transaction.id || item.transactionId === transaction.id) {
+          changed = true;
+          return {
+            ...item,
+            amount: clampMoney(transaction.amount),
+            clearedDate: transaction.date || item.clearedDate,
+            clearedTime: transaction.time || item.clearedTime
+          };
+        }
+        return item;
+      });
+      if (changed) saveMoneyClear();
+      return changed;
     }
 
     function resetMoneyForm() {
@@ -4419,6 +4736,7 @@
         state.transactions = state.transactions.map((transaction) => (
           transaction.id === editingId ? { ...transaction, ...payload } : transaction
         ));
+        syncMoneyOnTransactionEdit(state.transactions.find((transaction) => transaction.id === editingId));
         showToast("แก้ไขรายการแล้ว");
       } else {
         state.transactions.unshift({
@@ -4555,6 +4873,7 @@
       if (!transaction) return;
       if (!confirm(`ลบรายการ "${transaction.title}"?`)) return;
       state.transactions = state.transactions.filter((item) => item.id !== id);
+      syncMoneyOnTransactionDelete(id);
       saveTransactions();
       renderAll();
       showToast("ลบรายการแล้ว");
@@ -4913,6 +5232,7 @@
           state.appSettings = {
             showQuickAdd: true,
             moneyOrder: "owedToMe",
+            chartPeriod: "month",
             ...(data.appSettings || {})
           };
           state.moneyClear = data.moneyClear || { items: [] };
@@ -5161,6 +5481,10 @@
 
     function todayISO() {
       const date = new Date();
+      return localDateISO(date);
+    }
+
+    function localDateISO(date) {
       const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
       return offsetDate.toISOString().slice(0, 10);
     }
