@@ -4186,7 +4186,9 @@
       els.moneyDateInput.value = item.date || todayISO();
       els.moneyTimeInput.value = item.time || currentTime();
       els.moneyNoteInput.value = item.note || "";
-      els.saveMoneyItemButton?.focus?.();
+      if (els.saveMoneyItemButton) els.saveMoneyItemButton.textContent = "บันทึกการแก้ไข";
+      els.moneyForm?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      els.moneyPersonInput?.focus?.();
     }
 
     function deleteMoneyItem(id) {
@@ -4238,17 +4240,9 @@
     }
 
     function syncInitialMoneyTransaction(item, previous = null) {
-      let changed = false;
       const oldInitialId = previous?.initialTransactionId || "";
-      if (item.type !== "owedToMe") {
-        if (oldInitialId) {
-          removeTransactionSilently(oldInitialId);
-          item.initialTransactionId = "";
-          changed = true;
-        }
-        return changed;
-      }
-      const transaction = createMoneyTransaction(item, "loanOut");
+      const initialPhase = item.type === "iOwe" ? "borrowIn" : "loanOut";
+      const transaction = createMoneyTransaction(item, initialPhase);
       const hasInitialTransaction = oldInitialId && state.transactions.some((entry) => entry.id === oldInitialId);
       if (hasInitialTransaction) {
         state.transactions = state.transactions.map((entry) => (
@@ -4265,14 +4259,17 @@
     function createMoneyTransaction(item, phase, options = {}) {
       const now = options.now || new Date().toISOString();
       const isLoanOut = phase === "loanOut";
+      const isBorrowIn = phase === "borrowIn";
+      const isPayback = phase === "payback";
       const isOwedToMePayback = item.type === "owedToMe" && phase === "payback";
-      const type = isLoanOut || item.type === "iOwe" ? "expense" : "income";
+      const type = isLoanOut || (isPayback && item.type === "iOwe") ? "expense" : "income";
       const title = isLoanOut
         ? `${item.person}ยืมเงิน`
-        : (isOwedToMePayback ? `${item.person}จ่ายคืนแล้ว` : `จ่ายคืน${item.person}แล้ว`);
+        : (isBorrowIn ? `ยืมเงิน${item.person}` : (isOwedToMePayback ? `${item.person}จ่ายคืนแล้ว` : `จ่ายคืน${item.person}แล้ว`));
       const category = defaultCategory(type);
-      const date = isLoanOut ? (item.date || todayISO()) : (options.date || todayISO());
-      const time = isLoanOut ? (item.time || currentTime()) : (options.time || currentTime());
+      const isInitial = isLoanOut || isBorrowIn;
+      const date = isInitial ? (item.date || todayISO()) : (options.date || todayISO());
+      const time = isInitial ? (item.time || currentTime()) : (options.time || currentTime());
       return {
         id: uid(),
         type,
@@ -4284,7 +4281,7 @@
         note: item.note ? `เคลียร์เงิน · ${item.note}` : "เคลียร์เงิน",
         date,
         time,
-        source: isLoanOut ? "money-clear-loan" : "money-clear-payback",
+        source: isInitial ? "money-clear-loan" : "money-clear-payback",
         moneyClearId: item.id,
         moneyClearPhase: phase,
         createdAt: now,
@@ -4349,6 +4346,7 @@
       els.moneyDateInput.value = todayISO();
       els.moneyTimeInput.value = currentTime();
       els.moneyNoteInput.value = "";
+      if (els.saveMoneyItemButton) els.saveMoneyItemButton.textContent = "บันทึกเคลียร์เงิน";
     }
 
     function renderBudget() {
