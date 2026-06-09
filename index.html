@@ -734,50 +734,77 @@
 
     .settings-entry {
       display: grid;
-      grid-template-columns: 38px minmax(0, 1fr) auto;
-      gap: 10px;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 12px;
       align-items: center;
-      min-height: 58px;
-      padding: 9px 11px;
+      min-height: 64px;
+      padding: 10px 12px;
       border: 1px solid color-mix(in srgb, var(--border) 74%, transparent);
-      border-radius: 8px;
-      background: color-mix(in srgb, var(--surface) 92%, var(--surface-warm));
+      border-radius: 10px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, var(--surface-warm)), var(--surface));
       color: var(--text);
-      box-shadow: 0 1px 0 rgba(17, 24, 39, 0.03);
+      box-shadow: 0 8px 20px rgba(17, 24, 39, 0.045);
       text-align: left;
       transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
     }
 
     .settings-entry-icon {
+      position: relative;
       display: inline-flex;
-      width: 34px;
-      height: 34px;
+      width: 40px;
+      height: 40px;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(40, 77, 59, 0.13);
-      border-radius: 10px;
-      background: linear-gradient(180deg, rgba(40, 77, 59, 0.08), rgba(209, 163, 64, 0.06));
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--settings-accent, var(--primary)) 22%, var(--border));
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.78), transparent 30%),
+        linear-gradient(145deg, color-mix(in srgb, var(--settings-accent, var(--primary)) 14%, var(--surface)), color-mix(in srgb, var(--accent) 9%, var(--surface-warm)));
       color: var(--primary);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 18px rgba(17, 24, 39, 0.055);
     }
 
     .settings-entry-icon .icon {
-      width: 18px;
-      height: 18px;
-      stroke-width: 1.9;
+      position: relative;
+      width: 19px;
+      height: 19px;
+      stroke-width: 2;
+      z-index: 1;
+    }
+
+    .settings-entry[data-settings-page="budget"] {
+      --settings-accent: #D1A340;
+    }
+
+    .settings-entry[data-settings-page="categories"] {
+      --settings-accent: #284D3B;
+    }
+
+    .settings-entry[data-settings-page="quick"] {
+      --settings-accent: #2F7D5B;
+    }
+
+    .settings-entry[data-settings-page="data"] {
+      --settings-accent: #4B5563;
+    }
+
+    .settings-entry[data-settings-page="app"] {
+      --settings-accent: #64748B;
     }
 
     [data-theme="dark"] .settings-entry-icon {
       color: #D8E7DC;
       border-color: rgba(216, 231, 220, 0.18);
-      background: rgba(216, 231, 220, 0.08);
+      background: linear-gradient(145deg, rgba(216, 231, 220, 0.12), rgba(209, 163, 64, 0.08));
     }
 
     .settings-entry strong,
-    .settings-entry span {
+    .settings-entry > span:not(.settings-entry-icon):not(.settings-entry-arrow) {
       display: block;
     }
 
-    .settings-entry span {
+    .settings-entry > span:not(.settings-entry-icon):not(.settings-entry-arrow) {
       color: var(--muted);
       font-size: 13px;
     }
@@ -1334,13 +1361,6 @@
       top: 10px;
       z-index: 12;
       box-shadow: 0 8px 18px rgba(17, 24, 39, 0.08);
-    }
-
-    body[data-active-view="history"] #historyEditToggle {
-      position: fixed;
-      top: calc(12px + env(safe-area-inset-top));
-      right: max(12px, calc((100vw - 820px) / 2 + 12px));
-      z-index: 35;
     }
 
     .money-summary-grid {
@@ -2247,27 +2267,27 @@
           <div class="settings-panel active" id="settingsMenuPanel" data-settings-panel="menu">
             <div class="settings-menu">
               <button class="settings-entry" type="button" data-settings-page="budget">
-                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"></path><path d="M5 19h14"></path><path d="M9 15v-4"></path><path d="M13 15V8"></path><path d="M17 15v-2"></path></svg></span>
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7.5h12"></path><path d="M7.5 4.5h9A2.5 2.5 0 0 1 19 7v10a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 17V7a2.5 2.5 0 0 1 2.5-2.5Z"></path><path d="M9 13.5h1.5"></path><path d="M13.5 13.5H15"></path></svg></span>
                 <span><strong>งบประมาณ</strong><span>งบรายเดือนและงบตามหมวด</span></span>
                 <span class="settings-entry-arrow">›</span>
               </button>
               <button class="settings-entry" type="button" data-settings-page="categories">
-                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg></span>
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7.5h6"></path><path d="M13 7.5h6"></path><path d="M5 12h10"></path><path d="M17 12h2"></path><path d="M5 16.5h3"></path><path d="M10 16.5h9"></path></svg></span>
                 <span><strong>หมวดหมู่</strong><span>รายรับและรายจ่าย</span></span>
                 <span class="settings-entry-arrow">›</span>
               </button>
               <button class="settings-entry" type="button" data-settings-page="quick">
-                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"></path></svg></span>
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m13 3-7 10h5l-1 8 8-11h-5l0-7Z"></path><path d="M6 19h5"></path></svg></span>
                 <span><strong>จดเร็ว</strong><span>รายการด่วนที่ใช้บ่อย</span></span>
                 <span class="settings-entry-arrow">›</span>
               </button>
               <button class="settings-entry" type="button" data-settings-page="data">
-                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg></span>
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8.5c0-1.7 2.7-3 6-3s6 1.3 6 3-2.7 3-6 3-6-1.3-6-3Z"></path><path d="M6 8.5v7c0 1.7 2.7 3 6 3s6-1.3 6-3v-7"></path><path d="M6 12c0 1.7 2.7 3 6 3s6-1.3 6-3"></path></svg></span>
                 <span><strong>ข้อมูล</strong><span>Export, Backup, Restore</span></span>
                 <span class="settings-entry-arrow">›</span>
               </button>
               <button class="settings-entry" type="button" data-settings-page="app">
-                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path><path d="M19 12h2"></path><path d="M3 12h2"></path><path d="M12 3v2"></path><path d="M12 19v2"></path></svg></span>
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14"></path><path d="M5 16h14"></path><path d="M9 5v6"></path><path d="M15 13v6"></path><circle cx="9" cy="8" r="2"></circle><circle cx="15" cy="16" r="2"></circle></svg></span>
                 <span><strong>แอป</strong><span>ธีมและสกุลเงิน</span></span>
                 <span class="settings-entry-arrow">›</span>
               </button>
