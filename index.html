@@ -1044,7 +1044,7 @@
       display: grid;
       width: min(calc(100% - 20px), 760px);
       min-height: var(--nav-height);
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 4px;
       padding: 6px;
       border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
@@ -1106,6 +1106,119 @@
       .nav-button {
         min-height: 64px;
         font-size: 10px;
+      }
+    }
+
+    body[data-active-view="groups"] .app {
+      width: min(100%, 1120px);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+    }
+
+    body[data-active-view="groups"] .bottom-nav {
+      display: none;
+    }
+
+    .groups-shell {
+      display: grid;
+      gap: 14px;
+    }
+
+    .groups-toolbar {
+      position: sticky;
+      top: 10px;
+      z-index: 18;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 94%, transparent);
+      box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+    }
+
+    .groups-toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .groups-overview {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .groups-overview-card {
+      padding: 12px;
+      border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .groups-overview-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    .groups-overview-card strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--primary);
+      font-size: 21px;
+      line-height: 1.1;
+      font-weight: 780;
+    }
+
+    [data-theme="dark"] .groups-overview-card strong {
+      color: #D8E7DC;
+    }
+
+    .groups-frame-shell {
+      min-height: 700px;
+      border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #F6F7F2;
+      box-shadow: 0 18px 44px rgba(17, 24, 39, 0.11);
+    }
+
+    .groups-frame {
+      display: block;
+      width: 100%;
+      height: min(84dvh, 900px);
+      min-height: 700px;
+      border: 0;
+      background: #F6F7F2;
+    }
+
+    @media (max-width: 620px) {
+      .groups-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .groups-toolbar-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      .groups-toolbar-actions > * {
+        flex: 1;
+      }
+
+      .groups-overview {
+        grid-template-columns: 1fr;
+      }
+
+      .groups-frame-shell,
+      .groups-frame {
+        min-height: 76dvh;
       }
     }
 
@@ -2373,6 +2486,28 @@
 
           <div id="dashboardChart"></div>
           <div class="dashboard-list" id="dashboardList"></div>
+          <div class="dashboard-list" id="groupsDashboardList"></div>
+        </section>
+      </section>
+
+      <section class="view" id="view-groups" data-view="groups">
+        <section class="section groups-shell">
+          <div class="groups-toolbar">
+            <div>
+              <h2 class="section-title">Groups by SplitEasy</h2>
+              <p class="section-note">โมดูลหารบิลเต็มระบบ: กลุ่ม สมาชิก บิลละเอียด ส่วนลด ภาษี ผ่อนชำระ บิลประจำ นำเข้า และส่งออก</p>
+            </div>
+            <div class="groups-toolbar-actions">
+              <button class="ghost-action" type="button" data-open-view="home">กลับ JKJ</button>
+              <a class="secondary-action" href="spliteasy.html" target="_blank" rel="noopener">เปิดเต็มจอ</a>
+            </div>
+          </div>
+
+          <div class="groups-overview" id="groupsOverview"></div>
+
+          <div class="groups-frame-shell">
+            <iframe class="groups-frame" id="splitEasyFrame" src="spliteasy.html" title="SplitEasy full group bill splitter"></iframe>
+          </div>
         </section>
       </section>
 
@@ -2683,6 +2818,10 @@
     <button class="nav-button" type="button" data-nav="dashboard">
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5"></path><path d="M5 19h14"></path><path d="M9 15v-4"></path><path d="M13 15V8"></path><path d="M17 15v-2"></path></svg>
       สรุป
+    </button>
+    <button class="nav-button" type="button" data-nav="groups">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      กลุ่ม
     </button>
     <button class="nav-button" type="button" data-nav="money">
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11h10"></path><path d="M7 15h7"></path><path d="M5 5h14v14H5Z"></path><path d="m9 9 2-2 2 2"></path></svg>
@@ -3031,6 +3170,9 @@
       budgetList: document.getElementById("budgetList"),
       dashboardList: document.getElementById("dashboardList"),
       dashboardChart: document.getElementById("dashboardChart"),
+      groupsDashboardList: document.getElementById("groupsDashboardList"),
+      groupsOverview: document.getElementById("groupsOverview"),
+      splitEasyFrame: document.getElementById("splitEasyFrame"),
       moneyNetAmount: document.getElementById("moneyNetAmount"),
       moneyCashAmount: document.getElementById("moneyCashAmount"),
       moneyOwedToMeAmount: document.getElementById("moneyOwedToMeAmount"),
@@ -3170,6 +3312,14 @@
           if (button.dataset.nav === "settings") showSettingsPage("menu");
         });
       });
+      document.addEventListener("click", (event) => {
+        const trigger = event.target.closest("[data-open-view]");
+        if (!trigger) return;
+        event.preventDefault();
+        setView(trigger.dataset.openView);
+        if (trigger.dataset.openView === "settings") showSettingsPage("menu");
+      });
+      window.addEventListener("message", handleSplitEasyMessage);
 
       els.addIncomeButton.addEventListener("click", () => openTransactionSheet("income"));
       els.addExpenseButton.addEventListener("click", () => openTransactionSheet("expense"));
@@ -3422,6 +3572,7 @@
       renderCategoryFilter();
       renderHistory();
       renderDashboard();
+      renderSplitEasySummary();
       renderMoneyClear();
       renderSplitGroups();
       renderBudget();
@@ -4301,6 +4452,63 @@
         `;
         els.dashboardList.appendChild(card);
       });
+    }
+
+    function renderSplitEasySummary() {
+      const groups = readSplitEasyGroups();
+      const expenseCount = groups.reduce((total, group) => total + (Array.isArray(group.expenses) ? group.expenses.length : 0), 0);
+      const installmentCount = groups.reduce((total, group) => total + (Array.isArray(group.installments) ? group.installments.length : 0), 0);
+      const cycleCount = groups.reduce((total, group) => total + (Array.isArray(group.cycles) ? group.cycles.length : 0), 0);
+      const totalAmount = groups.reduce((total, group) => total + (Array.isArray(group.expenses) ? sum(group.expenses.map((expense) => expense.amount)) : 0), 0);
+      const latestGroups = groups.slice(0, 3).map((group) => `
+        <div class="category-breakdown-row">
+          <span>${escapeHtml(group.emoji || "👥")} ${escapeHtml(group.name || "Untitled group")}</span>
+          <strong>${Array.isArray(group.expenses) ? group.expenses.length : 0} บิล</strong>
+        </div>
+      `).join("");
+
+      if (els.groupsOverview) {
+        els.groupsOverview.innerHTML = `
+          <div class="groups-overview-card"><span>กลุ่มทั้งหมด</span><strong>${groups.length}</strong></div>
+          <div class="groups-overview-card"><span>บิลในกลุ่ม</span><strong>${expenseCount}</strong></div>
+          <div class="groups-overview-card"><span>ยอดบิลรวม</span><strong>${formatCurrency(totalAmount)}</strong></div>
+        `;
+      }
+
+      if (!els.groupsDashboardList) return;
+      els.groupsDashboardList.innerHTML = `
+        <div class="dashboard-card">
+          <h3>SplitEasy Groups</h3>
+          <div class="dashboard-metrics">
+            <div class="dashboard-metric"><span>กลุ่ม</span><strong>${groups.length}</strong></div>
+            <div class="dashboard-metric"><span>บิล</span><strong>${expenseCount}</strong></div>
+            <div class="dashboard-metric"><span>ผ่อน/ประจำ</span><strong>${installmentCount + cycleCount}</strong></div>
+            <div class="dashboard-metric"><span>ยอดรวม</span><strong>${formatCurrency(totalAmount)}</strong></div>
+          </div>
+          <div class="category-breakdown">${latestGroups || `<p class="section-note">ยังไม่มีกลุ่ม SplitEasy</p>`}</div>
+          <div class="action-row" style="margin-top:12px;">
+            <button class="secondary-action" type="button" data-open-view="groups">เปิด Groups</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function readSplitEasyGroups() {
+      try {
+        const groups = JSON.parse(localStorage.getItem("se_v3") || "[]");
+        return Array.isArray(groups) ? groups : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function handleSplitEasyMessage(event) {
+      const data = event.data || {};
+      if (!data || data.type !== "jkj:spliteasy-recorded") return;
+      state.transactions = readStorage(STORAGE_KEYS.transactions, []);
+      normalizeTransactions();
+      renderAll();
+      showToast(data.message || "บันทึกจาก SplitEasy เข้า JKJ แล้ว");
     }
 
     function renderDashboardChart(summaries) {
