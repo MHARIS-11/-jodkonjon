@@ -1474,6 +1474,129 @@
       gap: 8px;
     }
 
+    .money-workspace-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin: 14px 0;
+      padding: 4px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-soft);
+    }
+
+    .money-workspace {
+      display: none;
+    }
+
+    .money-workspace.active {
+      display: grid;
+      gap: 14px;
+    }
+
+    .split-group-form,
+    .split-groups,
+    .split-expense-list,
+    .split-transfer-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .split-group-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 94%, var(--surface-warm));
+      box-shadow: 0 1px 0 rgba(17, 24, 39, 0.03);
+    }
+
+    .split-group-head,
+    .split-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .split-group-head h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 780;
+    }
+
+    .split-group-head small,
+    .split-expense-list small,
+    .split-transfer-list small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .split-expense-form {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--surface-soft) 74%, var(--surface));
+    }
+
+    .split-members {
+      display: grid;
+      gap: 7px;
+    }
+
+    .split-member-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 96px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .split-member-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .split-member-check input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .split-member-row .input {
+      min-height: 38px;
+      padding: 8px 10px;
+      text-align: right;
+    }
+
+    .split-row {
+      align-items: center;
+      padding: 10px 0;
+      border-top: 1px solid color-mix(in srgb, var(--border) 68%, transparent);
+    }
+
+    .split-row:first-child {
+      border-top: 0;
+    }
+
+    .split-row strong {
+      font-size: 14px;
+    }
+
+    .split-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
     .money-item {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -2281,6 +2404,12 @@
             </div>
           </div>
 
+          <div class="money-workspace-tabs" aria-label="โหมดเคลียร์เงิน">
+            <button class="segment-button active" type="button" data-money-workspace="clear">ค้างเงิน</button>
+            <button class="segment-button" type="button" data-money-workspace="split">บิลกลุ่ม</button>
+          </div>
+
+          <div class="money-workspace active" id="moneyClearWorkspace">
           <form class="settings-card section" id="moneyForm">
             <input type="hidden" id="moneyEditingId">
             <div class="form-grid">
@@ -2330,6 +2459,30 @@
             </div>
             <div class="money-list" id="moneyHistoryList"></div>
           </section>
+          </div>
+
+          <div class="money-workspace" id="splitWorkspace">
+            <form class="settings-card split-group-form" id="splitGroupForm">
+              <div class="section-head" style="margin-bottom:0;">
+                <div>
+                  <h2 class="section-title">บิลกลุ่ม</h2>
+                  <p class="section-note">หารบิลแล้วส่งยอดสุทธิเข้าเคลียร์เงิน</p>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="splitGroupNameInput">ชื่อกลุ่ม</label>
+                  <input class="input" id="splitGroupNameInput" type="text" placeholder="เช่น ทริปบางแสน, ปิ้งย่างวันศุกร์" required>
+                </div>
+                <div class="field">
+                  <label for="splitGroupMembersInput">สมาชิกเพิ่มเติม</label>
+                  <input class="input" id="splitGroupMembersInput" type="text" placeholder="คั่นด้วย comma เช่น เจม, ฝน, บอส">
+                </div>
+              </div>
+              <button class="primary-action" id="saveSplitGroupButton" type="submit" style="width:100%;">สร้างบิลกลุ่ม</button>
+            </form>
+            <div class="split-groups" id="splitGroupList"></div>
+          </div>
         </section>
       </section>
 
@@ -2763,6 +2916,7 @@
       expenseDraft: "jkj.expenseDraft.v1",
       appSettings: "jkj.appSettings.v1",
       moneyClear: "jkj.moneyClear.v1",
+      splitGroups: "jkj.splitGroups.v1",
       theme: "jkj.theme.v1"
     };
 
@@ -2804,9 +2958,11 @@
       appSettings: readStorage(STORAGE_KEYS.appSettings, {
         showQuickAdd: true,
         moneyOrder: "owedToMe",
+        moneyWorkspace: "clear",
         chartPeriod: "month"
       }),
       moneyClear: readStorage(STORAGE_KEYS.moneyClear, { items: [] }),
+      splitGroups: readStorage(STORAGE_KEYS.splitGroups, []),
       historyEditMode: false,
       budget: readStorage(STORAGE_KEYS.budget, {
         id: "budget-default",
@@ -2891,6 +3047,12 @@
       saveMoneyItemButton: document.getElementById("saveMoneyItemButton"),
       moneyPanels: document.getElementById("moneyPanels"),
       moneyHistoryList: document.getElementById("moneyHistoryList"),
+      moneyClearWorkspace: document.getElementById("moneyClearWorkspace"),
+      splitWorkspace: document.getElementById("splitWorkspace"),
+      splitGroupForm: document.getElementById("splitGroupForm"),
+      splitGroupNameInput: document.getElementById("splitGroupNameInput"),
+      splitGroupMembersInput: document.getElementById("splitGroupMembersInput"),
+      splitGroupList: document.getElementById("splitGroupList"),
       categoryNameInput: document.getElementById("categoryNameInput"),
       categoryTypeInput: document.getElementById("categoryTypeInput"),
       saveCategoryButton: document.getElementById("saveCategoryButton"),
@@ -2978,17 +3140,22 @@
       state.appSettings = {
         showQuickAdd: true,
         moneyOrder: "owedToMe",
+        moneyWorkspace: "clear",
         chartPeriod: "month",
         ...state.appSettings
       };
       if (!["owedToMe", "iOwe"].includes(state.appSettings.moneyOrder)) {
         state.appSettings.moneyOrder = "owedToMe";
       }
+      if (!["clear", "split"].includes(state.appSettings.moneyWorkspace)) {
+        state.appSettings.moneyWorkspace = "clear";
+      }
       if (!["day", "week", "month"].includes(state.appSettings.chartPeriod)) {
         state.appSettings.chartPeriod = "month";
       }
       normalizeTransactions();
       normalizeMoneyClear();
+      normalizeSplitGroups();
       applyTheme(readStorage(STORAGE_KEYS.theme, "light"));
       bindEvents();
       resetMoneyForm();
@@ -3019,6 +3186,14 @@
       els.addLineItemButton.addEventListener("click", addCurrentLineItem);
       els.addBackfillIncomeButton.addEventListener("click", () => addBackfillRow("income"));
       els.addBackfillExpenseButton.addEventListener("click", () => addBackfillRow("expense"));
+      els.splitGroupForm.addEventListener("submit", saveSplitGroup);
+      document.querySelectorAll("[data-money-workspace]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.appSettings.moneyWorkspace = button.dataset.moneyWorkspace === "split" ? "split" : "clear";
+          saveAppSettings();
+          renderMoneyWorkspaces();
+        });
+      });
       els.closeCalcButton.addEventListener("click", closeCalc);
       els.calcModeButton.addEventListener("pointerdown", (event) => {
         event.preventDefault();
@@ -3248,6 +3423,7 @@
       renderHistory();
       renderDashboard();
       renderMoneyClear();
+      renderSplitGroups();
       renderBudget();
       renderSettings();
       renderCategoryOptionsForSheet(els.transactionTypeInput.value);
@@ -4253,15 +4429,73 @@
         clearedAt: item.clearedAt || "",
         clearedDate: item.clearedDate || "",
         clearedTime: item.clearedTime || "",
+        source: item.source || "",
+        splitGroupId: item.splitGroupId || "",
+        splitFromId: item.splitFromId || "",
+        splitToId: item.splitToId || "",
         initialTransactionId: item.initialTransactionId || "",
         clearedTransactionId: item.clearedTransactionId || item.transactionId || "",
-        transactionId: ""
+        transactionId: "",
+        createdAt: item.createdAt || ""
       }));
       saveMoneyClear();
     }
 
+    function normalizeSplitGroups() {
+      state.splitGroups = (Array.isArray(state.splitGroups) ? state.splitGroups : []).map((group) => {
+        const me = (group.members || []).find((member) => member.isMe) || { id: "me", name: "เรา", isMe: true };
+        const members = uniqueById([me, ...(group.members || [])]).map((member, index) => ({
+          id: member.id || uid(),
+          name: member.isMe ? "เรา" : (member.name || `คนที่ ${index + 1}`),
+          isMe: !!member.isMe
+        }));
+        if (!members.some((member) => member.isMe)) members.unshift({ id: "me", name: "เรา", isMe: true });
+        return {
+          id: group.id || uid(),
+          name: group.name || "บิลกลุ่ม",
+          members,
+          expenses: Array.isArray(group.expenses) ? group.expenses.map((expense) => ({
+            id: expense.id || uid(),
+            title: expense.title || "รายจ่ายกลุ่ม",
+            amount: clampMoney(expense.amount),
+            payerId: expense.payerId || members[0].id,
+            splitType: expense.splitType === "custom" ? "custom" : "equal",
+            participants: Array.isArray(expense.participants) && expense.participants.length ? expense.participants : members.map((member) => member.id),
+            shares: expense.shares || {},
+            date: expense.date || todayISO(),
+            time: expense.time || currentTime(),
+            transactionId: expense.transactionId || "",
+            createdAt: expense.createdAt || new Date().toISOString()
+          })) : [],
+          settlements: Array.isArray(group.settlements) ? group.settlements : [],
+          createdAt: group.createdAt || new Date().toISOString()
+        };
+      });
+      saveSplitGroups();
+    }
+
+    function uniqueById(items) {
+      const seen = new Set();
+      return items.filter((item) => {
+        const key = item.id || item.name;
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function renderMoneyWorkspaces() {
+      const active = state.appSettings.moneyWorkspace === "split" ? "split" : "clear";
+      document.querySelectorAll("[data-money-workspace]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.moneyWorkspace === active);
+      });
+      els.moneyClearWorkspace?.classList.toggle("active", active === "clear");
+      els.splitWorkspace?.classList.toggle("active", active === "split");
+    }
+
     function renderMoneyClear() {
       if (!els.moneyPanels) return;
+      renderMoneyWorkspaces();
       const cash = getCashSummary();
       const activeItems = state.moneyClear.items.filter((item) => item.status !== "cleared");
       const owedToMe = activeItems.filter((item) => item.type === "owedToMe");
@@ -4294,6 +4528,418 @@
         ? history.slice(0, 12).map(moneyHistoryItemHtml).join("")
         : `<p class="section-note">ยังไม่มีประวัติเคลียร์เงิน</p>`;
       els.moneyHistoryList.querySelectorAll("[data-money-undo]").forEach((button) => button.addEventListener("click", () => undoMoneyClear(button.dataset.moneyUndo)));
+    }
+
+    function saveSplitGroup(event) {
+      event.preventDefault();
+      const name = els.splitGroupNameInput.value.trim();
+      if (!name) {
+        showToast("ใส่ชื่อบิลกลุ่มก่อน");
+        return;
+      }
+      const memberNames = els.splitGroupMembersInput.value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      const members = [
+        { id: uid(), name: "เรา", isMe: true },
+        ...memberNames.map((memberName) => ({ id: uid(), name: memberName, isMe: false }))
+      ];
+      state.splitGroups.unshift({
+        id: uid(),
+        name,
+        members,
+        expenses: [],
+        settlements: [],
+        createdAt: new Date().toISOString()
+      });
+      saveSplitGroups();
+      els.splitGroupForm.reset();
+      renderSplitGroups();
+      showToast("สร้างบิลกลุ่มแล้ว");
+    }
+
+    function renderSplitGroups() {
+      if (!els.splitGroupList) return;
+      els.splitGroupList.innerHTML = state.splitGroups.length
+        ? state.splitGroups.map(splitGroupCardHtml).join("")
+        : `<div class="money-panel"><p class="section-note">ยังไม่มีบิลกลุ่ม ลองสร้างกลุ่มจากทริปหรือมื้ออาหารที่ต้องหารกัน</p></div>`;
+
+      els.splitGroupList.querySelectorAll("[data-split-save-expense]").forEach((button) => {
+        button.addEventListener("click", () => saveSplitExpense(button.dataset.splitSaveExpense));
+      });
+      els.splitGroupList.querySelectorAll("[data-split-delete-expense]").forEach((button) => {
+        button.addEventListener("click", () => deleteSplitExpense(button.dataset.splitGroupId, button.dataset.splitDeleteExpense));
+      });
+      els.splitGroupList.querySelectorAll("[data-split-sync]").forEach((button) => {
+        button.addEventListener("click", () => syncSplitGroupToMoneyClear(button.dataset.splitSync));
+      });
+      els.splitGroupList.querySelectorAll("[data-split-delete-group]").forEach((button) => {
+        button.addEventListener("click", () => deleteSplitGroup(button.dataset.splitDeleteGroup));
+      });
+      els.splitGroupList.querySelectorAll("[data-money-workspace]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.appSettings.moneyWorkspace = button.dataset.moneyWorkspace === "split" ? "split" : "clear";
+          saveAppSettings();
+          renderMoneyWorkspaces();
+        });
+      });
+      els.splitGroupList.querySelectorAll("[data-split-method]").forEach((select) => {
+        select.addEventListener("change", () => updateSplitCustomInputs(select.dataset.splitMethod, select.value));
+      });
+      requestAnimationFrame(() => initMathFields(els.splitGroupList));
+    }
+
+    function splitGroupCardHtml(group) {
+      const transfers = splitGroupTransfers(group);
+      const expensesHtml = group.expenses.length
+        ? group.expenses.slice().reverse().map((expense) => splitExpenseRowHtml(group, expense)).join("")
+        : `<p class="section-note">ยังไม่มีรายจ่ายในกลุ่มนี้</p>`;
+      const transferHtml = transfers.length
+        ? transfers.map((transfer) => splitTransferRowHtml(group, transfer)).join("")
+        : `<p class="section-note">ยอดกลุ่มนี้เคลียร์กันพอดีแล้ว</p>`;
+      return `
+        <article class="split-group-card">
+          <div class="split-group-head">
+            <div>
+              <h3>${escapeHtml(group.name)}</h3>
+              <small>${group.members.length} คน · ${group.expenses.length} รายการ · รวม ${formatCurrency(sum(group.expenses.map((expense) => expense.amount)))}</small>
+            </div>
+            <button class="small-icon-button delete" type="button" data-split-delete-group="${escapeAttr(group.id)}" title="ลบกลุ่ม" aria-label="ลบกลุ่ม">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 14h10l1-14"></path><path d="M9 7V4h6v3"></path></svg>
+            </button>
+          </div>
+          ${splitExpenseFormHtml(group)}
+          <div>
+            <div class="section-head" style="margin-bottom:4px;">
+              <h2 class="section-title">รายการในบิล</h2>
+              <p class="section-note">${group.expenses.length} รายการ</p>
+            </div>
+            <div class="split-expense-list">${expensesHtml}</div>
+          </div>
+          <div>
+            <div class="section-head" style="margin-bottom:4px;">
+              <h2 class="section-title">สรุปโอนน้อยที่สุด</h2>
+              <p class="section-note">${transfers.length} รายการ</p>
+            </div>
+            <div class="split-transfer-list">${transferHtml}</div>
+          </div>
+          <div class="split-actions">
+            <button class="secondary-action" type="button" data-split-sync="${escapeAttr(group.id)}">ส่งเข้าเคลียร์เงิน</button>
+            <button class="ghost-action" type="button" data-money-workspace="clear">กลับไปค้างเงิน</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function splitExpenseFormHtml(group) {
+      const memberOptions = group.members.map((member) => `<option value="${escapeAttr(member.id)}">${escapeHtml(member.name)}</option>`).join("");
+      const memberRows = group.members.map((member) => `
+        <div class="split-member-row">
+          <label class="split-member-check">
+            <input type="checkbox" data-split-member="${escapeAttr(member.id)}" checked>
+            <span>${escapeHtml(member.name)}</span>
+          </label>
+          <input class="input" type="number" inputmode="decimal" min="0" step="0.01" data-split-share="${escapeAttr(member.id)}" placeholder="ส่วนแบ่ง" disabled>
+        </div>
+      `).join("");
+      return `
+        <div class="split-expense-form" data-split-form="${escapeAttr(group.id)}">
+          <div class="form-grid">
+            <div class="field">
+              <label>รายการ</label>
+              <input class="input" data-split-title type="text" placeholder="เช่น หมูกระทะ, ค่าโรงแรม">
+            </div>
+            <div class="field">
+              <label>ยอดรวม</label>
+              <input class="input" data-split-amount type="number" inputmode="decimal" min="0" step="0.01" placeholder="0">
+            </div>
+            <div class="field">
+              <label>ใครจ่าย</label>
+              <select class="select" data-split-payer>${memberOptions}</select>
+            </div>
+            <div class="field">
+              <label>วิธีหาร</label>
+              <select class="select" data-split-method="${escapeAttr(group.id)}">
+                <option value="equal">หารเท่า</option>
+                <option value="custom">กำหนดเอง</option>
+              </select>
+            </div>
+          </div>
+          <div class="split-members">${memberRows}</div>
+          <button class="primary-action" type="button" data-split-save-expense="${escapeAttr(group.id)}">เพิ่มรายจ่ายกลุ่ม</button>
+        </div>
+      `;
+    }
+
+    function splitExpenseRowHtml(group, expense) {
+      const payer = splitMemberName(group, expense.payerId);
+      return `
+        <div class="split-row">
+          <div>
+            <strong>${escapeHtml(expense.title)}</strong>
+            <small>${payer} จ่าย · ${expense.splitType === "custom" ? "กำหนดเอง" : "หารเท่า"} · ${formatDateShort(expense.date)}</small>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <strong>${formatCurrency(expense.amount)}</strong>
+            <button class="small-icon-button delete" type="button" data-split-group-id="${escapeAttr(group.id)}" data-split-delete-expense="${escapeAttr(expense.id)}" title="ลบรายการ" aria-label="ลบรายการ">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 14h10l1-14"></path><path d="M9 7V4h6v3"></path></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function splitTransferRowHtml(group, transfer) {
+      return `
+        <div class="split-row">
+          <div>
+            <strong>${escapeHtml(splitMemberName(group, transfer.from))} จ่ายให้ ${escapeHtml(splitMemberName(group, transfer.to))}</strong>
+            <small>ยอดสุทธิจากบิลกลุ่มนี้</small>
+          </div>
+          <strong>${formatCurrency(transfer.amount)}</strong>
+        </div>
+      `;
+    }
+
+    function updateSplitCustomInputs(groupId, method) {
+      const form = els.splitGroupList?.querySelector(`[data-split-form="${cssEscape(groupId)}"]`);
+      if (!form) return;
+      form.querySelectorAll("[data-split-share]").forEach((input) => {
+        input.disabled = method !== "custom";
+      });
+    }
+
+    function saveSplitExpense(groupId) {
+      const group = state.splitGroups.find((item) => item.id === groupId);
+      const form = els.splitGroupList?.querySelector(`[data-split-form="${cssEscape(groupId)}"]`);
+      if (!group || !form) return;
+      const title = form.querySelector("[data-split-title]")?.value.trim();
+      const amount = clampMoney(form.querySelector("[data-split-amount]")?.value);
+      const payerId = form.querySelector("[data-split-payer]")?.value;
+      const splitType = form.querySelector("[data-split-method]")?.value === "custom" ? "custom" : "equal";
+      const participants = Array.from(form.querySelectorAll("[data-split-member]:checked")).map((input) => input.dataset.splitMember);
+      if (!title || !amount || !payerId || !participants.length) {
+        showToast("ใส่รายการ ยอดเงิน และผู้ร่วมให้ครบก่อน");
+        return;
+      }
+      const shares = {};
+      if (splitType === "custom") {
+        let customTotal = 0;
+        participants.forEach((memberId) => {
+          const value = clampMoney(form.querySelector(`[data-split-share="${cssEscape(memberId)}"]`)?.value);
+          shares[memberId] = value;
+          customTotal += value;
+        });
+        if (Math.abs(customTotal - amount) > 0.05) {
+          showToast("ยอดกำหนดเองต้องรวมเท่ากับยอดบิล");
+          return;
+        }
+      }
+      const now = new Date().toISOString();
+      const expense = {
+        id: uid(),
+        title,
+        amount,
+        payerId,
+        splitType,
+        participants,
+        shares,
+        date: todayISO(),
+        time: currentTime(),
+        transactionId: "",
+        createdAt: now
+      };
+      if (splitMemberIsMe(group, payerId)) {
+        const transaction = createSplitGroupExpenseTransaction(group, expense);
+        state.transactions.unshift(transaction);
+        expense.transactionId = transaction.id;
+        saveTransactions();
+      }
+      group.expenses.push(expense);
+      saveSplitGroups();
+      renderAll();
+      showToast("เพิ่มรายจ่ายกลุ่มแล้ว");
+    }
+
+    function createSplitGroupExpenseTransaction(group, expense) {
+      const category = defaultCategory("expense");
+      const now = new Date().toISOString();
+      return {
+        id: uid(),
+        type: "expense",
+        mode: "single",
+        amount: clampMoney(expense.amount),
+        title: `${group.name} · ${expense.title}`,
+        category,
+        lines: [{ id: uid(), title: expense.title, category, amount: clampMoney(expense.amount) }],
+        note: "บิลกลุ่ม",
+        date: expense.date || todayISO(),
+        time: expense.time || currentTime(),
+        source: "split-group-payment",
+        splitGroupId: group.id,
+        splitExpenseId: expense.id,
+        createdAt: now,
+        updatedAt: now
+      };
+    }
+
+    function deleteSplitExpense(groupId, expenseId) {
+      const group = state.splitGroups.find((item) => item.id === groupId);
+      if (!group) return;
+      const expense = group.expenses.find((item) => item.id === expenseId);
+      removeTransactionSilently(expense?.transactionId);
+      group.expenses = group.expenses.filter((item) => item.id !== expenseId);
+      saveTransactions();
+      saveSplitGroups();
+      renderAll();
+      showToast("ลบรายจ่ายกลุ่มแล้ว");
+    }
+
+    function deleteSplitGroup(groupId) {
+      const group = state.splitGroups.find((item) => item.id === groupId);
+      if (group) {
+        group.expenses.forEach((expense) => removeTransactionSilently(expense.transactionId));
+        state.moneyClear.items = state.moneyClear.items.filter((item) => item.splitGroupId !== groupId || item.status === "cleared");
+      }
+      state.splitGroups = state.splitGroups.filter((item) => item.id !== groupId);
+      saveTransactions();
+      saveMoneyClear();
+      saveSplitGroups();
+      renderAll();
+      showToast("ลบบิลกลุ่มแล้ว");
+    }
+
+    function splitGroupTransfers(group) {
+      const balances = {};
+      group.members.forEach((member) => { balances[member.id] = 0; });
+      group.expenses.forEach((expense) => {
+        balances[expense.payerId] = (balances[expense.payerId] || 0) + clampMoney(expense.amount);
+        const shares = splitExpenseShares(group, expense);
+        Object.entries(shares).forEach(([memberId, amount]) => {
+          balances[memberId] = (balances[memberId] || 0) - clampMoney(amount);
+        });
+      });
+      (group.settlements || []).forEach((settlement) => {
+        balances[settlement.fromId] = (balances[settlement.fromId] || 0) + clampMoney(settlement.amount);
+        balances[settlement.toId] = (balances[settlement.toId] || 0) - clampMoney(settlement.amount);
+      });
+      return simplifySplitBalances(balances);
+    }
+
+    function splitExpenseShares(group, expense) {
+      if (expense.splitType === "custom") {
+        return { ...(expense.shares || {}) };
+      }
+      const ids = (expense.participants || group.members.map((member) => member.id)).filter(Boolean);
+      const share = ids.length ? clampMoney(expense.amount) / ids.length : 0;
+      return ids.reduce((map, id) => {
+        map[id] = share;
+        return map;
+      }, {});
+    }
+
+    function simplifySplitBalances(balances) {
+      const creditors = Object.entries(balances)
+        .filter(([, amount]) => amount > 0.01)
+        .map(([id, amount]) => ({ id, amount: clampMoney(amount) }));
+      const debtors = Object.entries(balances)
+        .filter(([, amount]) => amount < -0.01)
+        .map(([id, amount]) => ({ id, amount: clampMoney(Math.abs(amount)) }));
+      const transfers = [];
+      let debtorIndex = 0;
+      let creditorIndex = 0;
+      while (debtors[debtorIndex] && creditors[creditorIndex]) {
+        const amount = clampMoney(Math.min(debtors[debtorIndex].amount, creditors[creditorIndex].amount));
+        if (amount > 0.01) {
+          transfers.push({ from: debtors[debtorIndex].id, to: creditors[creditorIndex].id, amount });
+        }
+        debtors[debtorIndex].amount = clampMoney(debtors[debtorIndex].amount - amount);
+        creditors[creditorIndex].amount = clampMoney(creditors[creditorIndex].amount - amount);
+        if (debtors[debtorIndex].amount <= 0.01) debtorIndex += 1;
+        if (creditors[creditorIndex].amount <= 0.01) creditorIndex += 1;
+      }
+      return transfers;
+    }
+
+    function syncSplitGroupToMoneyClear(groupId) {
+      const group = state.splitGroups.find((item) => item.id === groupId);
+      if (!group) return;
+      const me = splitMe(group);
+      const transfers = splitGroupTransfers(group).filter((transfer) => transfer.from === me.id || transfer.to === me.id);
+      state.moneyClear.items = state.moneyClear.items.filter((item) => item.status === "cleared" || item.source !== "split-group" || item.splitGroupId !== group.id);
+      const now = new Date().toISOString();
+      const created = transfers.map((transfer) => {
+        const otherId = transfer.from === me.id ? transfer.to : transfer.from;
+        const other = group.members.find((member) => member.id === otherId);
+        return {
+          id: uid(),
+          type: transfer.to === me.id ? "owedToMe" : "iOwe",
+          person: other?.name || "ไม่ระบุชื่อ",
+          amount: clampMoney(transfer.amount),
+          date: todayISO(),
+          time: currentTime(),
+          note: `บิลกลุ่ม · ${group.name}`,
+          status: "active",
+          source: "split-group",
+          splitGroupId: group.id,
+          splitFromId: transfer.from,
+          splitToId: transfer.to,
+          initialTransactionId: "",
+          clearedTransactionId: "",
+          transactionId: "",
+          createdAt: now
+        };
+      });
+      state.moneyClear.items.unshift(...created);
+      saveMoneyClear();
+      state.appSettings.moneyWorkspace = "clear";
+      saveAppSettings();
+      renderAll();
+      showToast(created.length ? "ส่งยอดสุทธิเข้าเคลียร์เงินแล้ว" : "บิลนี้ไม่มีรายการที่เกี่ยวกับเรา");
+    }
+
+    function recordSplitSettlementFromMoneyItem(item) {
+      if (item.source !== "split-group" || !item.splitGroupId || !item.splitFromId || !item.splitToId) return;
+      const group = state.splitGroups.find((entry) => entry.id === item.splitGroupId);
+      if (!group) return;
+      group.settlements = [
+        ...(group.settlements || []).filter((settlement) => settlement.moneyClearId !== item.id),
+        {
+          id: uid(),
+          moneyClearId: item.id,
+          fromId: item.splitFromId,
+          toId: item.splitToId,
+          amount: clampMoney(item.amount),
+          clearedAt: item.clearedAt || new Date().toISOString()
+        }
+      ];
+      saveSplitGroups();
+    }
+
+    function removeSplitSettlementFromMoneyItem(item) {
+      if (item.source !== "split-group" || !item.splitGroupId) return;
+      const group = state.splitGroups.find((entry) => entry.id === item.splitGroupId);
+      if (!group) return;
+      group.settlements = (group.settlements || []).filter((settlement) => settlement.moneyClearId !== item.id);
+      saveSplitGroups();
+    }
+
+    function splitMe(group) {
+      return group.members.find((member) => member.isMe) || group.members[0];
+    }
+
+    function splitMemberIsMe(group, memberId) {
+      return !!group.members.find((member) => member.id === memberId && member.isMe);
+    }
+
+    function splitMemberName(group, memberId) {
+      return group.members.find((member) => member.id === memberId)?.name || "ไม่ระบุชื่อ";
+    }
+
+    function cssEscape(value) {
+      if (window.CSS?.escape) return CSS.escape(value);
+      return String(value).replace(/["\\]/g, "\\$&");
     }
 
     function renderMoneyPersonOptions() {
@@ -4470,6 +5116,7 @@
         removeTransactionSilently(item.initialTransactionId);
         removeTransactionSilently(item.clearedTransactionId);
         removeTransactionSilently(item.transactionId);
+        removeSplitSettlementFromMoneyItem(item);
         saveTransactions();
       }
       state.moneyClear.items = state.moneyClear.items.filter((item) => item.id !== id);
@@ -4485,12 +5132,14 @@
       const date = todayISO();
       const time = currentTime();
       const transaction = createMoneyTransaction(item, "payback", { date, time, now });
+      const clearedItem = { ...item, status: "cleared", clearedAt: now, clearedDate: date, clearedTime: time, clearedTransactionId: transaction.id, transactionId: "" };
       state.transactions.unshift(transaction);
       state.moneyClear.items = state.moneyClear.items.map((entry) => (
         entry.id === id
-          ? { ...entry, status: "cleared", clearedAt: now, clearedDate: date, clearedTime: time, clearedTransactionId: transaction.id, transactionId: "" }
+          ? clearedItem
           : entry
       ));
+      recordSplitSettlementFromMoneyItem(clearedItem);
       saveTransactions();
       saveMoneyClear();
       renderAll();
@@ -4501,6 +5150,7 @@
       const item = state.moneyClear.items.find((entry) => entry.id === id && entry.status === "cleared");
       if (!item) return;
       removeTransactionSilently(item.clearedTransactionId || item.transactionId);
+      removeSplitSettlementFromMoneyItem(item);
       state.moneyClear.items = state.moneyClear.items.map((entry) => (
         entry.id === id
           ? { ...entry, status: "active", clearedAt: "", clearedDate: "", clearedTime: "", clearedTransactionId: "", transactionId: "" }
@@ -4578,12 +5228,27 @@
           return [];
         }
         if (item.clearedTransactionId === id || item.transactionId === id) {
+          removeSplitSettlementFromMoneyItem(item);
           changed = true;
           return [{ ...item, status: "active", clearedAt: "", clearedDate: "", clearedTime: "", clearedTransactionId: "", transactionId: "" }];
         }
         return [item];
       });
       if (changed) saveMoneyClear();
+      return changed;
+    }
+
+    function syncSplitOnTransactionDelete(id) {
+      let changed = false;
+      state.splitGroups = state.splitGroups.map((group) => {
+        const nextExpenses = (group.expenses || []).filter((expense) => expense.transactionId !== id);
+        if (nextExpenses.length !== (group.expenses || []).length) {
+          changed = true;
+          return { ...group, expenses: nextExpenses };
+        }
+        return group;
+      });
+      if (changed) saveSplitGroups();
       return changed;
     }
 
@@ -5145,6 +5810,7 @@
       if (!confirm(`ลบรายการ "${transaction.title}"?`)) return;
       state.transactions = state.transactions.filter((item) => item.id !== id);
       syncMoneyOnTransactionDelete(id);
+      syncSplitOnTransactionDelete(id);
       saveTransactions();
       renderAll();
       showToast("ลบรายการแล้ว");
@@ -5478,7 +6144,8 @@
         quickAdds: state.quickAdds,
         budget: state.budget,
         appSettings: state.appSettings,
-        moneyClear: state.moneyClear
+        moneyClear: state.moneyClear,
+        splitGroups: state.splitGroups
       };
       downloadFile(JSON.stringify(payload, null, 2), `jkj-backup-${todayISO()}.json`, "application/json");
       showToast("Backup แล้ว");
@@ -5503,18 +6170,22 @@
           state.appSettings = {
             showQuickAdd: true,
             moneyOrder: "owedToMe",
+            moneyWorkspace: "clear",
             chartPeriod: "month",
             ...(data.appSettings || {})
           };
           state.moneyClear = data.moneyClear || { items: [] };
+          state.splitGroups = Array.isArray(data.splitGroups) ? data.splitGroups : [];
           normalizeTransactions();
           normalizeMoneyClear();
+          normalizeSplitGroups();
           saveTransactions();
           saveCategories();
           saveQuickAdds();
           saveBudget();
           saveAppSettings();
           saveMoneyClear();
+          saveSplitGroups();
           renderAll();
           showToast("Restore ข้อมูลแล้ว");
         } catch (error) {
@@ -5729,6 +6400,10 @@
 
     function saveMoneyClear() {
       localStorage.setItem(STORAGE_KEYS.moneyClear, JSON.stringify(state.moneyClear));
+    }
+
+    function saveSplitGroups() {
+      localStorage.setItem(STORAGE_KEYS.splitGroups, JSON.stringify(state.splitGroups));
     }
 
     function readStorage(key, fallback) {
