@@ -642,7 +642,7 @@ function catLabel(k){return t({all:'allCats',food:'catFood',transport:'catTransp
 function catEmoji(k){return{all:'🔍',food:'🍽️',transport:'🚗',rent:'🏠',fun:'🎬',health:'💊',other:'📦'}[k]||'📦';}
 
 /* ═══════════════ STORAGE ═════════════════════════════════ */
-function save(){try{localStorage.setItem('se_v3',JSON.stringify(S.groups));}catch(e){}}
+function save(){try{localStorage.setItem('se_v3',JSON.stringify(S.groups));syncJKJPendingDebtsFromSplitEasy();}catch(e){}}
 function load(){
   try{
     const r=localStorage.getItem('se_v3');
@@ -680,6 +680,7 @@ function getG(id){return S.groups.find(g=>g.id===id);}
 function updG(g){S.groups=S.groups.map(x=>x.id===g.id?revalidateGroup(g):x);save();}
 const todayStr=()=>new Date().toISOString().slice(0,10);
 const JKJ_TX_KEY='jkj.transactions.v1';
+const JKJ_DEBT_KEY='jkj.pendingDebts.v1';
 function jkjCurrentTime(){
   const d=new Date();
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -690,6 +691,56 @@ function jkjReadTx(){
 function jkjWriteTx(tx){
   localStorage.setItem(JKJ_TX_KEY,JSON.stringify(tx));
   try{window.parent?.postMessage({type:'jkj:spliteasy-recorded',message:'บันทึกจาก SplitEasy เข้า JKJ แล้ว'},'*');}catch(e){}
+}
+function jkjReadPendingDebts(){
+  try{const raw=localStorage.getItem(JKJ_DEBT_KEY);const data=raw?JSON.parse(raw):{items:[]};return data&&Array.isArray(data.items)?data:{items:[]};}catch(e){return{items:[]};}
+}
+function jkjWritePendingDebts(data){
+  localStorage.setItem(JKJ_DEBT_KEY,JSON.stringify(data));
+  try{window.parent?.postMessage({type:'jkj:pending-debts-updated'},'*');}catch(e){}
+}
+function syncJKJPendingDebtsFromSplitEasy(){
+  const now=new Date().toISOString();
+  const current=[];
+  (S.groups||[]).forEach(g=>{
+    const group=revalidateGroup(g);
+    const pairs=getPairwise(group.members||[], group.expenses||[]);
+    pairs.forEach(pair=>{
+      const debtor=(group.members||[]).find(m=>m.id===pair.from);
+      const creditor=(group.members||[]).find(m=>m.id===pair.to);
+      if(!debtor||!creditor||!(+pair.amount>0))return;
+      current.push({
+        debtId:`se:${group.id}:${pair.from}->${pair.to}`,
+        groupId:group.id,
+        groupName:group.name||'SplitEasy',
+        debtor:debtor.isMe?'You':(debtor.name||'Unknown'),
+        creditor:creditor.isMe?'You':(creditor.name||'Unknown'),
+        debtorId:pair.from,
+        creditorId:pair.to,
+        debtorIsMe:!!debtor.isMe,
+        creditorIsMe:!!creditor.isMe,
+        amount:+(+pair.amount||0).toFixed(2),
+        status:'pending',
+        source:'spliteasy'
+      });
+    });
+  });
+  const store=jkjReadPendingDebts();
+  const existing=new Map((store.items||[]).map(item=>[item.debtId,item]));
+  const currentIds=new Set(current.map(item=>item.debtId));
+  const merged=current.map(item=>{
+    const old=existing.get(item.debtId)||{};
+    return {...old,...item,status:'pending',createdAt:old.createdAt||now,updatedAt:now,clearedAt:'',clearedTransactionId:'',splitEasySettlementId:old.splitEasySettlementId||''};
+  });
+  (store.items||[]).forEach(item=>{
+    if(item.source==='spliteasy'&&item.groupId&&!currentIds.has(item.debtId)){
+      if(item.status==='cleared') merged.push(item);
+      else merged.push({...item,status:'cleared',updatedAt:now,clearedAt:item.clearedAt||now});
+    } else if(item.source!=='spliteasy'||!item.groupId){
+      merged.push(item);
+    }
+  });
+  jkjWritePendingDebts({items:merged});
 }
 function recordJKJFromSplitEasy(payload){
   const amount=+(payload?.amount||0);

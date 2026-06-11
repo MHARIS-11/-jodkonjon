@@ -1268,6 +1268,16 @@
         grid-template-columns: 1fr;
       }
 
+      .pending-debt-summary,
+      .pending-debt-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .pending-debt-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
       .groups-frame-shell,
       .groups-frame {
         min-height: 76dvh;
@@ -1637,6 +1647,108 @@
     .money-list {
       display: grid;
       gap: 8px;
+    }
+
+    .pending-debt-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+      border-radius: 12px;
+      background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface-warm) 86%, var(--surface)) 100%);
+      box-shadow: 0 12px 28px rgba(17, 24, 39, 0.07);
+    }
+
+    .pending-debt-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .pending-debt-summary-card {
+      padding: 12px;
+      border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--surface-soft) 72%, var(--surface));
+    }
+
+    .pending-debt-summary-card span,
+    .pending-debt-row small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .pending-debt-summary-card strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 22px;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .pending-debt-filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .pending-debt-panels {
+      display: grid;
+      gap: 12px;
+    }
+
+    .pending-debt-section {
+      display: grid;
+      gap: 8px;
+    }
+
+    .pending-debt-section h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 760;
+    }
+
+    .pending-debt-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px;
+      border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+      border-radius: 10px;
+      background: var(--surface);
+      transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease;
+    }
+
+    .pending-debt-row.settling {
+      opacity: 0;
+      transform: translateX(14px);
+      border-color: color-mix(in srgb, var(--income) 48%, var(--border));
+    }
+
+    .pending-debt-row strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .pending-debt-row .primary-action,
+    .pending-debt-row .secondary-action {
+      min-width: 104px;
+      justify-content: center;
+      padding-inline: 12px;
+      white-space: nowrap;
+    }
+
+    .pending-debt-empty {
+      padding: 12px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      background: color-mix(in srgb, var(--surface-soft) 60%, transparent);
     }
 
     .money-workspace-tabs {
@@ -2600,6 +2712,35 @@
           </div>
 
           <div class="money-workspace active" id="moneyClearWorkspace">
+          <section class="pending-debt-card" aria-labelledby="pendingDebtTitle">
+            <div class="section-head" style="margin-bottom:0;">
+              <div>
+                <h2 class="section-title" id="pendingDebtTitle">หนี้จาก SplitEasy</h2>
+                <p class="section-note">รายการค้างชำระที่ซิงก์จากบิลกลุ่ม</p>
+              </div>
+              <button class="ghost-action" id="syncPendingDebtsButton" type="button">ซิงก์</button>
+            </div>
+            <div class="pending-debt-summary">
+              <div class="pending-debt-summary-card">
+                <span>ยอดที่รอรับ</span>
+                <strong class="amount-income" id="pendingReceivableAmount">฿0</strong>
+              </div>
+              <div class="pending-debt-summary-card">
+                <span>ยอดที่ต้องจ่าย</span>
+                <strong class="amount-expense" id="pendingPayableAmount">฿0</strong>
+              </div>
+            </div>
+            <div class="pending-debt-filters">
+              <select class="select" id="pendingDebtGroupFilter" aria-label="กรองตามกลุ่ม"></select>
+              <select class="select" id="pendingDebtStatusFilter" aria-label="กรองตามสถานะ">
+                <option value="pending">รอเคลียร์</option>
+                <option value="cleared">เคลียร์แล้ว</option>
+                <option value="all">ทั้งหมด</option>
+              </select>
+            </div>
+            <div class="pending-debt-panels" id="pendingDebtPanels"></div>
+          </section>
+
           <form class="settings-card section" id="moneyForm">
             <input type="hidden" id="moneyEditingId">
             <div class="form-grid">
@@ -3110,6 +3251,7 @@
       expenseDraft: "jkj.expenseDraft.v1",
       appSettings: "jkj.appSettings.v1",
       moneyClear: "jkj.moneyClear.v1",
+      pendingDebts: "jkj.pendingDebts.v1",
       splitGroups: "jkj.splitGroups.v1",
       theme: "jkj.theme.v1"
     };
@@ -3153,9 +3295,12 @@
         showQuickAdd: true,
         moneyOrder: "owedToMe",
         moneyWorkspace: "clear",
+        pendingDebtGroup: "all",
+        pendingDebtStatus: "pending",
         chartPeriod: "month"
       }),
       moneyClear: readStorage(STORAGE_KEYS.moneyClear, { items: [] }),
+      pendingDebts: readStorage(STORAGE_KEYS.pendingDebts, { items: [] }),
       splitGroups: readStorage(STORAGE_KEYS.splitGroups, []),
       historyEditMode: false,
       budget: readStorage(STORAGE_KEYS.budget, {
@@ -3250,6 +3395,12 @@
       moneyPanels: document.getElementById("moneyPanels"),
       moneyHistoryList: document.getElementById("moneyHistoryList"),
       moneyClearWorkspace: document.getElementById("moneyClearWorkspace"),
+      pendingReceivableAmount: document.getElementById("pendingReceivableAmount"),
+      pendingPayableAmount: document.getElementById("pendingPayableAmount"),
+      pendingDebtGroupFilter: document.getElementById("pendingDebtGroupFilter"),
+      pendingDebtStatusFilter: document.getElementById("pendingDebtStatusFilter"),
+      pendingDebtPanels: document.getElementById("pendingDebtPanels"),
+      syncPendingDebtsButton: document.getElementById("syncPendingDebtsButton"),
       splitWorkspace: document.getElementById("splitWorkspace"),
       splitGroupForm: document.getElementById("splitGroupForm"),
       splitGroupNameInput: document.getElementById("splitGroupNameInput"),
@@ -3343,6 +3494,8 @@
         showQuickAdd: true,
         moneyOrder: "owedToMe",
         moneyWorkspace: "clear",
+        pendingDebtGroup: "all",
+        pendingDebtStatus: "pending",
         chartPeriod: "month",
         ...state.appSettings
       };
@@ -3352,11 +3505,18 @@
       if (!["clear", "split"].includes(state.appSettings.moneyWorkspace)) {
         state.appSettings.moneyWorkspace = "clear";
       }
+      if (!["pending", "cleared", "all"].includes(state.appSettings.pendingDebtStatus)) {
+        state.appSettings.pendingDebtStatus = "pending";
+      }
+      if (!state.appSettings.pendingDebtGroup) {
+        state.appSettings.pendingDebtGroup = "all";
+      }
       if (!["day", "week", "month"].includes(state.appSettings.chartPeriod)) {
         state.appSettings.chartPeriod = "month";
       }
       normalizeTransactions();
       normalizeMoneyClear();
+      normalizePendingDebts();
       normalizeSplitGroups();
       applyTheme(readStorage(STORAGE_KEYS.theme, "light"));
       bindEvents();
@@ -3613,6 +3773,21 @@
         renderHome();
       });
       els.moneyForm.addEventListener("submit", saveMoneyItem);
+      els.syncPendingDebtsButton?.addEventListener("click", () => {
+        syncPendingDebtsFromSplitEasy(true);
+        renderAll();
+        showToast("ซิงก์หนี้จาก SplitEasy แล้ว");
+      });
+      els.pendingDebtGroupFilter?.addEventListener("change", () => {
+        state.appSettings.pendingDebtGroup = els.pendingDebtGroupFilter.value || "all";
+        saveAppSettings();
+        renderPendingDebts();
+      });
+      els.pendingDebtStatusFilter?.addEventListener("change", () => {
+        state.appSettings.pendingDebtStatus = els.pendingDebtStatusFilter.value || "pending";
+        saveAppSettings();
+        renderPendingDebts();
+      });
       document.querySelectorAll("[data-money-order]").forEach((button) => {
         button.addEventListener("click", () => {
           state.appSettings.moneyOrder = button.dataset.moneyOrder;
@@ -4573,11 +4748,18 @@
 
     function handleSplitEasyMessage(event) {
       const data = event.data || {};
-      if (!data || data.type !== "jkj:spliteasy-recorded") return;
-      state.transactions = readStorage(STORAGE_KEYS.transactions, []);
-      normalizeTransactions();
-      renderAll();
-      showToast(data.message || "บันทึกจาก SplitEasy เข้า JKJ แล้ว");
+      if (!data || !String(data.type || "").startsWith("jkj:")) return;
+      if (data.type === "jkj:spliteasy-recorded") {
+        state.transactions = readStorage(STORAGE_KEYS.transactions, []);
+        normalizeTransactions();
+        renderAll();
+        showToast(data.message || "บันทึกจาก SplitEasy เข้า JKJ แล้ว");
+        return;
+      }
+      if (data.type === "jkj:pending-debts-updated") {
+        syncPendingDebtsFromSplitEasy();
+        if (data.message) showToast(data.message);
+      }
     }
 
     function openGroupsFullscreen() {
@@ -4775,6 +4957,32 @@
       saveMoneyClear();
     }
 
+    function normalizePendingDebts() {
+      if (!state.pendingDebts || !Array.isArray(state.pendingDebts.items)) {
+        state.pendingDebts = { items: [] };
+      }
+      state.pendingDebts.items = state.pendingDebts.items.map((debt) => ({
+        debtId: debt.debtId || debt.id || uid(),
+        groupId: debt.groupId || "",
+        groupName: debt.groupName || "SplitEasy",
+        debtor: debt.debtor || "",
+        creditor: debt.creditor || "",
+        debtorId: debt.debtorId || "",
+        creditorId: debt.creditorId || "",
+        debtorIsMe: Boolean(debt.debtorIsMe),
+        creditorIsMe: Boolean(debt.creditorIsMe),
+        amount: clampMoney(debt.amount),
+        status: debt.status === "cleared" ? "cleared" : "pending",
+        createdAt: debt.createdAt || new Date().toISOString(),
+        updatedAt: debt.updatedAt || "",
+        clearedAt: debt.clearedAt || "",
+        clearedTransactionId: debt.clearedTransactionId || "",
+        splitEasySettlementId: debt.splitEasySettlementId || "",
+        source: debt.source || "spliteasy"
+      })).filter((debt) => debt.amount > 0);
+      savePendingDebts();
+    }
+
     function normalizeSplitGroups() {
       state.splitGroups = (Array.isArray(state.splitGroups) ? state.splitGroups : []).map((group) => {
         const me = (group.members || []).find((member) => member.isMe) || { id: "me", name: "เรา", isMe: true };
@@ -4829,18 +5037,23 @@
 
     function renderMoneyClear() {
       if (!els.moneyPanels) return;
+      refreshPendingDebtsFromStorage();
       renderMoneyWorkspaces();
       const cash = getCashSummary();
       const activeItems = state.moneyClear.items.filter((item) => item.status !== "cleared");
+      const pendingItems = state.pendingDebts.items.filter((item) => item.status !== "cleared");
       const owedToMe = activeItems.filter((item) => item.type === "owedToMe");
       const iOwe = activeItems.filter((item) => item.type === "iOwe");
-      const owedTotal = sum(owedToMe.map((item) => item.amount));
-      const iOweTotal = sum(iOwe.map((item) => item.amount));
+      const pendingOwedToMe = pendingItems.filter((item) => item.creditorIsMe);
+      const pendingIOwe = pendingItems.filter((item) => item.debtorIsMe);
+      const owedTotal = sum(owedToMe.map((item) => item.amount)) + sum(pendingOwedToMe.map((item) => item.amount));
+      const iOweTotal = sum(iOwe.map((item) => item.amount)) + sum(pendingIOwe.map((item) => item.amount));
 
       els.moneyCashAmount.textContent = formatCurrency(cash.balance);
       els.moneyOwedToMeAmount.textContent = formatCurrency(owedTotal);
       els.moneyIOweAmount.textContent = formatCurrency(iOweTotal);
       els.moneyNetAmount.textContent = formatCurrency(cash.balance + owedTotal - iOweTotal);
+      renderPendingDebts();
 
       document.querySelectorAll("[data-money-order]").forEach((button) => {
         button.classList.toggle("active", button.dataset.moneyOrder === state.appSettings.moneyOrder);
@@ -4862,6 +5075,178 @@
         ? history.slice(0, 12).map(moneyHistoryItemHtml).join("")
         : `<p class="section-note">ยังไม่มีประวัติเคลียร์เงิน</p>`;
       els.moneyHistoryList.querySelectorAll("[data-money-undo]").forEach((button) => button.addEventListener("click", () => undoMoneyClear(button.dataset.moneyUndo)));
+    }
+
+    function refreshPendingDebtsFromStorage() {
+      const latest = readStorage(STORAGE_KEYS.pendingDebts, state.pendingDebts || { items: [] });
+      state.pendingDebts = latest && Array.isArray(latest.items) ? latest : { items: [] };
+      normalizePendingDebts();
+    }
+
+    function syncPendingDebtsFromSplitEasy() {
+      refreshPendingDebtsFromStorage();
+      renderPendingDebts();
+    }
+
+    function renderPendingDebts() {
+      if (!els.pendingDebtPanels) return;
+      const allItems = state.pendingDebts.items.filter((debt) => debt.debtorIsMe || debt.creditorIsMe);
+      const pendingItems = allItems.filter((debt) => debt.status !== "cleared");
+      const receivable = pendingItems.filter((debt) => debt.creditorIsMe);
+      const payable = pendingItems.filter((debt) => debt.debtorIsMe);
+      if (els.pendingReceivableAmount) els.pendingReceivableAmount.textContent = formatCurrency(sum(receivable.map((debt) => debt.amount)));
+      if (els.pendingPayableAmount) els.pendingPayableAmount.textContent = formatCurrency(sum(payable.map((debt) => debt.amount)));
+
+      const groups = unique(allItems.map((debt) => debt.groupName || "SplitEasy").filter(Boolean)).sort((a, b) => a.localeCompare(b, "th"));
+      const groupValue = groups.includes(state.appSettings.pendingDebtGroup) ? state.appSettings.pendingDebtGroup : "all";
+      state.appSettings.pendingDebtGroup = groupValue;
+      if (els.pendingDebtGroupFilter) {
+        els.pendingDebtGroupFilter.innerHTML = `<option value="all">ทุกกลุ่ม</option>` + groups
+          .map((groupName) => `<option value="${escapeAttr(groupName)}">${escapeHtml(groupName)}</option>`)
+          .join("");
+        els.pendingDebtGroupFilter.value = groupValue;
+      }
+      if (els.pendingDebtStatusFilter) {
+        els.pendingDebtStatusFilter.value = state.appSettings.pendingDebtStatus || "pending";
+      }
+
+      const statusFilter = state.appSettings.pendingDebtStatus || "pending";
+      const visible = allItems.filter((debt) => {
+        const matchesGroup = groupValue === "all" || debt.groupName === groupValue;
+        const matchesStatus = statusFilter === "all" || debt.status === statusFilter;
+        return matchesGroup && matchesStatus;
+      });
+      const visibleReceivable = visible.filter((debt) => debt.creditorIsMe);
+      const visiblePayable = visible.filter((debt) => debt.debtorIsMe);
+      els.pendingDebtPanels.innerHTML = `
+        ${pendingDebtSectionHtml("คนค้างเงินเรา", visibleReceivable, "receivable")}
+        ${pendingDebtSectionHtml("เราค้างเงินคนอื่น", visiblePayable, "payable")}
+      `;
+      els.pendingDebtPanels.querySelectorAll("[data-pending-settle]").forEach((button) => {
+        button.addEventListener("click", () => settlePendingDebt(button.dataset.pendingSettle));
+      });
+    }
+
+    function pendingDebtSectionHtml(title, debts, role) {
+      const emptyText = role === "receivable" ? "ยังไม่มีคนค้างเงินเราจาก SplitEasy" : "ยังไม่มีรายการที่เราค้างคนอื่นจาก SplitEasy";
+      return `
+        <div class="pending-debt-section">
+          <h3>${escapeHtml(title)}</h3>
+          ${debts.length ? debts.map((debt) => pendingDebtRowHtml(debt, role)).join("") : `<div class="pending-debt-empty">${emptyText}</div>`}
+        </div>
+      `;
+    }
+
+    function pendingDebtRowHtml(debt, role) {
+      const memberName = role === "receivable" ? debt.debtor : debt.creditor;
+      const actionText = role === "receivable" ? "รับแล้ว" : "จ่ายแล้ว";
+      const dateText = formatDateShort((debt.createdAt || todayISO()).slice(0, 10));
+      const statusText = debt.status === "cleared" ? `เคลียร์แล้ว ${formatDateShort((debt.clearedAt || debt.createdAt || todayISO()).slice(0, 10))}` : "รอเคลียร์";
+      return `
+        <div class="pending-debt-row" data-pending-debt-row="${escapeAttr(debt.debtId)}">
+          <div>
+            <strong>${escapeHtml(memberName || "ไม่ระบุชื่อ")} · ${formatCurrency(debt.amount)}</strong>
+            <small>${escapeHtml(debt.groupName || "SplitEasy")} · ${dateText} · ${statusText}</small>
+          </div>
+          ${debt.status === "cleared"
+            ? `<span class="pill">เคลียร์แล้ว</span>`
+            : `<button class="${role === "receivable" ? "primary-action" : "secondary-action"}" type="button" data-pending-settle="${escapeAttr(debt.debtId)}">${actionText}</button>`}
+        </div>
+      `;
+    }
+
+    function settlePendingDebt(debtId) {
+      const debt = state.pendingDebts.items.find((item) => item.debtId === debtId && item.status !== "cleared");
+      if (!debt) return;
+      const role = debt.creditorIsMe ? "receivable" : "payable";
+      const member = role === "receivable" ? debt.debtor : debt.creditor;
+      const title = role === "receivable"
+        ? `Settled ${member} from ${debt.groupName}`
+        : `Settled ${member} from ${debt.groupName}`;
+      if (!confirm(`เคลียร์ ${formatCurrency(debt.amount)} จาก ${member}?\nระบบจะบันทึกเป็น${role === "receivable" ? "รายรับ" : "รายจ่าย"}ใน JKJ อัตโนมัติ`)) return;
+      const row = els.pendingDebtPanels?.querySelector(`[data-pending-debt-row="${cssEscape(debtId)}"]`);
+      row?.classList.add("settling");
+      window.setTimeout(() => completePendingDebtSettlement(debtId, title, role), row ? 170 : 0);
+    }
+
+    function completePendingDebtSettlement(debtId, title, role) {
+      const debt = state.pendingDebts.items.find((item) => item.debtId === debtId && item.status !== "cleared");
+      if (!debt) return;
+      const now = new Date().toISOString();
+      const date = todayISO();
+      const time = currentTime();
+      const transaction = createPendingDebtTransaction(debt, title, role, { now, date, time });
+      const settlementId = syncPendingDebtSettlementToSplitEasy(debt, now);
+      state.transactions.unshift(transaction);
+      state.pendingDebts.items = state.pendingDebts.items.map((item) => item.debtId === debtId
+        ? { ...item, status: "cleared", clearedAt: now, clearedTransactionId: transaction.id, splitEasySettlementId: settlementId || item.splitEasySettlementId || "", updatedAt: now }
+        : item
+      );
+      saveTransactions();
+      savePendingDebts();
+      reloadSplitEasyFrame();
+      renderAll();
+      showToast(role === "receivable" ? "เคลียร์เป็นรายรับแล้ว" : "เคลียร์เป็นรายจ่ายแล้ว");
+    }
+
+    function createPendingDebtTransaction(debt, title, role, options) {
+      const type = role === "receivable" ? "income" : "expense";
+      const category = defaultCategory(type);
+      return {
+        id: uid(),
+        type,
+        mode: "single",
+        amount: clampMoney(debt.amount),
+        title,
+        category,
+        lines: [{ id: uid(), title, category, amount: clampMoney(debt.amount) }],
+        note: `SplitEasy · ${debt.groupName || "Group"}`,
+        date: options.date || todayISO(),
+        time: options.time || currentTime(),
+        source: "spliteasy-pending-debt",
+        pendingDebtId: debt.debtId,
+        splitEasyGroupId: debt.groupId || "",
+        createdAt: options.now || new Date().toISOString(),
+        updatedAt: options.now || new Date().toISOString()
+      };
+    }
+
+    function syncPendingDebtSettlementToSplitEasy(debt, now) {
+      if (!debt.groupId) return "";
+      const groups = readSplitEasyGroups();
+      const groupIndex = groups.findIndex((group) => group.id === debt.groupId);
+      if (groupIndex < 0) return "";
+      const group = groups[groupIndex];
+      const debtorId = debt.debtorId || splitEasyMemberIdByName(group, debt.debtor);
+      const creditorId = debt.creditorId || splitEasyMemberIdByName(group, debt.creditor);
+      if (!debtorId || !creditorId) return "";
+      const existing = (group.expenses || []).find((expense) => expense.jkjDebtId === debt.debtId || expense.id === debt.splitEasySettlementId);
+      if (existing) return existing.id;
+      const settlementId = `jkj-settle-${uid()}`;
+      const settlement = {
+        id: settlementId,
+        title: `JKJ settled ${debt.debtor} to ${debt.creditor}`,
+        amount: clampMoney(debt.amount),
+        emoji: "💸",
+        paidById: debtorId,
+        payers: [{ id: debtorId, amt: clampMoney(debt.amount) }],
+        splitType: "custom",
+        participants: [creditorId],
+        customAmounts: { [creditorId]: clampMoney(debt.amount) },
+        percentages: {},
+        date: now,
+        isSettlement: true,
+        jkjDebtId: debt.debtId
+      };
+      group.expenses = [...(group.expenses || []), settlement];
+      groups[groupIndex] = group;
+      localStorage.setItem("se_v3", JSON.stringify(groups));
+      return settlementId;
+    }
+
+    function splitEasyMemberIdByName(group, name) {
+      const member = (group.members || []).find((item) => item.name === name || (item.isMe && ["You", "เรา", "คุณ"].includes(name)));
+      return member?.id || "";
     }
 
     function saveSplitGroup(event) {
@@ -5586,6 +5971,31 @@
       return changed;
     }
 
+    function syncPendingDebtOnTransactionDelete(id) {
+      let changed = false;
+      state.pendingDebts.items = state.pendingDebts.items.map((debt) => {
+        if (debt.clearedTransactionId !== id) return debt;
+        changed = true;
+        removePendingDebtSettlementFromSplitEasy(debt);
+        return { ...debt, status: "pending", clearedAt: "", clearedTransactionId: "", splitEasySettlementId: "", updatedAt: new Date().toISOString() };
+      });
+      if (changed) savePendingDebts();
+      return changed;
+    }
+
+    function removePendingDebtSettlementFromSplitEasy(debt) {
+      const groups = readSplitEasyGroups();
+      const groupIndex = groups.findIndex((group) => group.id === debt.groupId);
+      if (groupIndex < 0) return false;
+      const group = groups[groupIndex];
+      const before = (group.expenses || []).length;
+      group.expenses = (group.expenses || []).filter((expense) => expense.id !== debt.splitEasySettlementId && expense.jkjDebtId !== debt.debtId);
+      if (group.expenses.length === before) return false;
+      groups[groupIndex] = group;
+      localStorage.setItem("se_v3", JSON.stringify(groups));
+      return true;
+    }
+
     function syncMoneyOnTransactionEdit(transaction) {
       if (!transaction) return false;
       let changed = false;
@@ -6145,6 +6555,7 @@
       state.transactions = state.transactions.filter((item) => item.id !== id);
       syncMoneyOnTransactionDelete(id);
       syncSplitOnTransactionDelete(id);
+      syncPendingDebtOnTransactionDelete(id);
       saveTransactions();
       renderAll();
       showToast("ลบรายการแล้ว");
@@ -6479,6 +6890,7 @@
         budget: state.budget,
         appSettings: state.appSettings,
         moneyClear: state.moneyClear,
+        pendingDebts: state.pendingDebts,
         splitGroups: state.splitGroups
       };
       downloadFile(JSON.stringify(payload, null, 2), `jkj-backup-${todayISO()}.json`, "application/json");
@@ -6509,9 +6921,11 @@
             ...(data.appSettings || {})
           };
           state.moneyClear = data.moneyClear || { items: [] };
+          state.pendingDebts = data.pendingDebts || { items: [] };
           state.splitGroups = Array.isArray(data.splitGroups) ? data.splitGroups : [];
           normalizeTransactions();
           normalizeMoneyClear();
+          normalizePendingDebts();
           normalizeSplitGroups();
           saveTransactions();
           saveCategories();
@@ -6519,6 +6933,7 @@
           saveBudget();
           saveAppSettings();
           saveMoneyClear();
+          savePendingDebts();
           saveSplitGroups();
           renderAll();
           showToast("Restore ข้อมูลแล้ว");
@@ -6734,6 +7149,10 @@
 
     function saveMoneyClear() {
       localStorage.setItem(STORAGE_KEYS.moneyClear, JSON.stringify(state.moneyClear));
+    }
+
+    function savePendingDebts() {
+      localStorage.setItem(STORAGE_KEYS.pendingDebts, JSON.stringify(state.pendingDebts));
     }
 
     function saveSplitGroups() {
