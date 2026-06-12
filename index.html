@@ -127,15 +127,15 @@
 
     .icon-button {
       display: inline-flex;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--surface) 94%, transparent);
       color: var(--text);
-      box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04);
+      box-shadow: 0 8px 20px rgba(17, 24, 39, 0.045);
       transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
     }
 
@@ -1148,8 +1148,8 @@
 
     .groups-overview {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: 1fr;
+      gap: 16px;
     }
 
     .groups-overview-card {
@@ -1177,6 +1177,225 @@
 
     [data-theme="dark"] .groups-overview-card strong {
       color: #D8E7DC;
+    }
+
+    .hjk-overview-card,
+    .hjk-launch-card,
+    .hjk-dashboard-module-card {
+      border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--surface) 96%, var(--surface-warm));
+      box-shadow: 0 10px 28px rgba(17, 24, 39, 0.045);
+      overflow: hidden;
+    }
+
+    .hjk-launch-card {
+      display: grid;
+      gap: 14px;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .hjk-launch-card h3 {
+      margin: 0 0 4px;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 760;
+    }
+
+    .hjk-launch-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hjk-launch-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .hjk-launch-actions .ghost-action,
+    .hjk-launch-actions .secondary-action {
+      min-height: 44px;
+      border-radius: 16px;
+      box-shadow: none;
+    }
+
+    .hjk-overview-card {
+      padding: 0;
+    }
+
+    .hjk-overview-card summary {
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 82px;
+      padding: 18px 20px;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    .hjk-overview-card summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .hjk-overview-icon {
+      display: inline-flex;
+      width: 34px;
+      height: 34px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(40, 77, 59, 0.08);
+      color: var(--primary);
+      font-size: 18px;
+    }
+
+    .hjk-overview-title {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hjk-overview-value {
+      display: block;
+      margin-top: 2px;
+      color: var(--primary);
+      font-size: 22px;
+      line-height: 1.08;
+      font-weight: 800;
+    }
+
+    .hjk-overview-chevron {
+      color: var(--text);
+      transition: transform 200ms ease;
+    }
+
+    .hjk-overview-card[open] .hjk-overview-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .hjk-overview-body {
+      display: grid;
+      gap: 8px;
+      padding: 0 20px 18px;
+    }
+
+    .hjk-overview-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--surface) 88%, var(--background));
+      font-size: 13px;
+    }
+
+    .hjk-overview-line strong,
+    .hjk-overview-line b {
+      color: var(--primary);
+      font-weight: 760;
+    }
+
+    .hjk-dashboard-module-card {
+      display: grid;
+      gap: 14px;
+      min-height: 152px;
+      padding: 20px;
+      color: #FFFFFF;
+      background:
+        radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.16), transparent 31%),
+        linear-gradient(135deg, #1F5137 0%, #2B6042 64%, #1E3F2D 100%);
+      box-shadow: 0 16px 36px rgba(31, 81, 55, 0.18);
+    }
+
+    .hjk-module-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hjk-language-pill {
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .hjk-language-pill span {
+      min-width: 34px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .hjk-language-pill span:last-child {
+      background: #FFFFFF;
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(17, 24, 39, 0.14);
+    }
+
+    .hjk-module-title {
+      margin: 0;
+      color: #FFFFFF;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .hjk-module-balance {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hjk-module-balance span {
+      display: block;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hjk-module-balance strong {
+      display: block;
+      margin-top: 4px;
+      color: #77D6AA;
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 820;
+    }
+
+    .hjk-update-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .groups-frame-shell {
@@ -4675,37 +4894,109 @@
       const installmentCount = groups.reduce((total, group) => total + (Array.isArray(group.installments) ? group.installments.length : 0), 0);
       const cycleCount = groups.reduce((total, group) => total + (Array.isArray(group.cycles) ? group.cycles.length : 0), 0);
       const totalAmount = groups.reduce((total, group) => total + (Array.isArray(group.expenses) ? sum(group.expenses.map((expense) => expense.amount)) : 0), 0);
-      const latestGroups = groups.slice(0, 3).map((group) => `
-        <div class="category-breakdown-row">
-          <span>${escapeHtml(group.emoji || "👥")} ${escapeHtml(group.name || "Untitled group")}</span>
-          <strong>${Array.isArray(group.expenses) ? group.expenses.length : 0} บิล</strong>
+      const splitDate = (value) => {
+        const date = value ? new Date(value) : null;
+        if (!date || Number.isNaN(date.getTime())) return "ยังไม่มีวันที่";
+        return new Intl.DateTimeFormat("th-TH", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(date);
+      };
+      const allBills = groups.flatMap((group) => (Array.isArray(group.expenses) ? group.expenses : []).map((expense) => ({
+        ...expense,
+        groupName: group.name || "HJK",
+        groupEmoji: group.emoji || "👥"
+      })));
+      const latestBills = allBills.slice(-3).reverse();
+      const discountTotal = allBills.reduce((total, expense) => total + (expense.discount && expense.discount.enabled ? Number(expense.discount.amount || 0) : 0), 0);
+      const taxTotal = allBills.reduce((total, expense) => total + Number(expense.tax || expense.vat || 0), 0);
+      const latestGroups = groups.slice(0, 3).map((group) => {
+        const createdAt = group.createdAt || group.created || group.date || (Array.isArray(group.expenses) && group.expenses[0] ? group.expenses[0].date : "");
+        return `
+          <div class="hjk-overview-line">
+            <span><strong>${escapeHtml(group.emoji || "👥")} ${escapeHtml(group.name || "Untitled group")}</strong><br><small>${splitDate(createdAt)}</small></span>
+            <b>${Array.isArray(group.expenses) ? group.expenses.length : 0} บิล</b>
+          </div>
+        `;
+      }).join("");
+      const billRows = latestBills.map((bill) => `
+        <div class="hjk-overview-line">
+          <span><strong>${escapeHtml(bill.title || bill.name || "บิล")}</strong><br><small>${escapeHtml(bill.groupEmoji)} ${escapeHtml(bill.groupName)} · ${splitDate(bill.date || bill.createdAt)}</small></span>
+          <b>${formatCurrency(bill.amount)}</b>
         </div>
       `).join("");
+      const totalRows = `
+        <div class="hjk-overview-line"><span>ยอดก่อนส่วนลด</span><b>${formatCurrency(totalAmount)}</b></div>
+        <div class="hjk-overview-line"><span>ส่วนลด</span><b>-${formatCurrency(discountTotal)}</b></div>
+        <div class="hjk-overview-line"><span>ภาษี / ค่าบริการ</span><b>${formatCurrency(taxTotal)}</b></div>
+        <div class="hjk-overview-line"><span><strong>ยอดรวมทั้งสิ้น</strong></span><b>${formatCurrency(totalAmount - discountTotal + taxTotal)}</b></div>
+      `;
+      const accordionHtml = `
+        <details class="groups-overview-card hjk-overview-card" open>
+          <summary><span class="hjk-overview-icon">♙</span><span><span class="hjk-overview-title">กลุ่มทั้งหมด</span><strong class="hjk-overview-value">${groups.length}</strong></span><span class="hjk-overview-chevron">›</span></summary>
+          <div class="hjk-overview-body">${latestGroups || `<div class="hjk-overview-line"><span>ยังไม่มีกลุ่ม HJK</span><b>0</b></div>`}</div>
+        </details>
+        <details class="groups-overview-card hjk-overview-card">
+          <summary><span class="hjk-overview-icon">▤</span><span><span class="hjk-overview-title">บิลในกลุ่ม</span><strong class="hjk-overview-value">${expenseCount}</strong></span><span class="hjk-overview-chevron">›</span></summary>
+          <div class="hjk-overview-body">${billRows || `<div class="hjk-overview-line"><span>ยังไม่มีบิลในกลุ่ม</span><b>0</b></div>`}</div>
+        </details>
+        <details class="groups-overview-card hjk-overview-card">
+          <summary><span class="hjk-overview-icon">▣</span><span><span class="hjk-overview-title">ยอดบิลรวม</span><strong class="hjk-overview-value">${formatCurrency(totalAmount)}</strong></span><span class="hjk-overview-chevron">›</span></summary>
+          <div class="hjk-overview-body">${totalRows}</div>
+        </details>
+      `;
+      const bindOverviewAccordion = (root) => {
+        if (!root) return;
+        root.querySelectorAll("details.hjk-overview-card").forEach((item) => {
+          item.addEventListener("toggle", () => {
+            if (!item.open) return;
+            root.querySelectorAll("details.hjk-overview-card[open]").forEach((other) => {
+              if (other !== item) other.open = false;
+            });
+          });
+        });
+      };
 
       if (els.groupsOverview) {
-        els.groupsOverview.innerHTML = `
-          <div class="groups-overview-card"><span>กลุ่มทั้งหมด</span><strong>${groups.length}</strong></div>
-          <div class="groups-overview-card"><span>บิลในกลุ่ม</span><strong>${expenseCount}</strong></div>
-          <div class="groups-overview-card"><span>ยอดบิลรวม</span><strong>${formatCurrency(totalAmount)}</strong></div>
-        `;
+        els.groupsOverview.innerHTML = accordionHtml;
+        bindOverviewAccordion(els.groupsOverview);
       }
 
       if (!els.groupsDashboardList) return;
       els.groupsDashboardList.innerHTML = `
-        <div class="dashboard-card">
-          <h3>กลุ่มหารก่อนจน (HJK)</h3>
-          <div class="dashboard-metrics">
-            <div class="dashboard-metric"><span>กลุ่ม</span><strong>${groups.length}</strong></div>
-            <div class="dashboard-metric"><span>บิล</span><strong>${expenseCount}</strong></div>
-            <div class="dashboard-metric"><span>ผ่อน/ประจำ</span><strong>${installmentCount + cycleCount}</strong></div>
-            <div class="dashboard-metric"><span>ยอดรวม</span><strong>${formatCurrency(totalAmount)}</strong></div>
+        <div class="hjk-launch-card">
+          <div>
+            <h3>Groups by HJK</h3>
+            <p>โมดูลหารบิลเต็มระบบ: กลุ่ม สมาชิก บิลละเอียด ส่วนลด ภาษี ผ่อนชำระ บิลประจำ นำเข้า และส่งออก</p>
           </div>
-          <div class="category-breakdown">${latestGroups || `<p class="section-note">ยังไม่มีกลุ่มหารก่อนจน (HJK)</p>`}</div>
-          <div class="action-row" style="margin-top:12px;">
-            <button class="secondary-action" type="button" data-open-view="groups">เปิด Groups</button>
+          <div class="hjk-launch-actions">
+            <button class="ghost-action" type="button" data-open-view="home">กลับ JKJ</button>
+            <button class="ghost-action" type="button" id="dashboardReloadGroupsButton">รีโหลด</button>
+            <button class="secondary-action" type="button" data-open-view="groups">เปิดเต็มจอ</button>
+          </div>
+        </div>
+        ${accordionHtml}
+        <div class="hjk-dashboard-module-card">
+          <div class="hjk-module-top">
+            <span>สวัสดี</span>
+            <span class="hjk-language-pill"><span>EN</span><span>TH</span></span>
+          </div>
+          <h3 class="hjk-module-title">Hankonjon</h3>
+          <div class="hjk-module-balance">
+            <span>ยอดสุทธิ<strong>${formatCurrency(totalAmount - discountTotal + taxTotal)}</strong></span>
+            <span>รวมผ่อน/ประจำ ${installmentCount + cycleCount}</span>
+          </div>
+          <div class="hjk-update-row">
+            <span>อัปเดตล่าสุด ${splitDate(Date.now())}</span>
+            <span>›</span>
           </div>
         </div>
       `;
+      bindOverviewAccordion(els.groupsDashboardList);
+      document.getElementById("dashboardReloadGroupsButton")?.addEventListener("click", reloadSplitEasyFrame);
     }
 
     function readSplitEasyGroups() {

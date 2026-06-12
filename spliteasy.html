@@ -314,34 +314,119 @@ body.th .lang-btn{font-family:'Sarabun',sans-serif}
 .summary-action-wrap{display:flex;gap:8px;flex-wrap:wrap}
 .summary-action-wrap .btn{min-width:150px;flex:1}
 
-/* ── HJK REBRAND UI ───────────────────────── */
-.hjk-green-panel{background:linear-gradient(135deg,var(--hjk-primary),#244832);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:24px 20px;color:#fff;box-shadow:0 14px 34px rgba(45,90,61,.22);min-height:132px;display:flex;align-items:center}
-.hjk-filter-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.hjk-filter-pill{background:#fff;border:1px solid var(--border);border-radius:14px;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:700;color:var(--ink)}
-.iowe-row-wrap{margin-bottom:12px}
-.iowe-row-compact{display:flex;align-items:center;gap:14px;min-height:86px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:16px;cursor:pointer;box-shadow:0 1px 6px rgba(26,26,46,.045);transition:background .15s,border-radius .15s,border-color .15s}
-.iowe-row-compact .av-sm{width:58px;height:58px;border-radius:50%;font-size:18px}
-.iowe-row-compact:active{background:var(--bg)}
-.iowe-row-compact.expanded{border-radius:16px 16px 0 0;border-bottom-color:transparent}
-.iowe-row-compact .row-chevron{background:transparent;color:var(--muted);font-size:15px;transform:none}
-.iowe-row-compact.expanded .row-chevron{transform:rotate(180deg);background:transparent;color:var(--hjk-primary)}
-.iowe-row-detail{background:#fff;padding:14px 16px;border:1px solid var(--border);border-radius:16px;margin:0 14px 14px;display:none}
-.iowe-row-detail.open{display:block;animation:detailIn .18s cubic-bezier(.22,1,.36,1)}
-.iowe-detail-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+/* ── HJK Quiet Luxury screens ───────────────────────── */
+.hjk-green-panel{
+  min-height:96px;
+  padding:18px 20px;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 72% 28%,rgba(255,255,255,.14),transparent 34%),
+    linear-gradient(135deg,#1F5137,#2B6042 58%,#21432F);
+  box-shadow:0 12px 28px rgba(31,81,55,.16);
+  display:flex;
+  align-items:center;
+}
+.hjk-green-panel>div{width:100%}
+.hjk-filter-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.hjk-filter-pill{
+  height:48px;
+  background:#fff;
+  border:1px solid #E8E8E3;
+  border-radius:16px;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:14px;
+  font-weight:700;
+  color:#111827;
+  box-shadow:none;
+}
+.iowe-row-wrap{margin-bottom:16px}
+.iowe-row-compact{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  min-height:92px;
+  padding:14px 18px;
+  background:#fff;
+  border:1px solid #E8E8E3;
+  border-radius:20px;
+  cursor:pointer;
+  box-shadow:0 10px 28px rgba(17,24,39,.045);
+  transition:background .2s ease,border-radius .2s ease,border-color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+.iowe-row-compact .av-sm{width:56px;height:56px;border-radius:50%;font-size:18px}
+.iowe-row-compact:active{transform:scale(.995);background:#FAFAF8}
+.iowe-row-compact.expanded{border-radius:20px 20px 0 0;border-bottom-color:transparent;box-shadow:0 14px 34px rgba(17,24,39,.06)}
+.iowe-row-compact .row-chevron{background:transparent;color:#6B7280;font-size:15px;transform:none}
+.iowe-row-compact.expanded .row-chevron{transform:rotate(180deg);background:transparent;color:#1F5137}
+.iowe-row-detail{
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  padding:0 16px;
+  margin:0 12px;
+  background:#fff;
+  border:0 solid #E8E8E3;
+  border-radius:0 0 18px 18px;
+  transform:translateY(-2px);
+  transition:max-height .2s ease,opacity .2s ease,padding .2s ease,border-width .2s ease,margin .2s ease,transform .2s ease;
+}
+.iowe-row-detail.open{
+  max-height:360px;
+  opacity:1;
+  padding:14px 16px 16px;
+  margin:0 12px 14px;
+  border-width:1px;
+  transform:translateY(0);
+}
+.iowe-detail-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #E8E8E3;font-size:13px}
 .iowe-detail-row:last-of-type{border-bottom:none}
-.hjk-primary-action{width:100%;margin-top:12px;padding:13px;background:var(--hjk-primary);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
-.summary-collapse-section{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 6px rgba(26,26,46,.045)}
-.summary-collapse-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;transition:background .15s}
-.summary-collapse-header:active{background:var(--bg)}
-.summary-collapse-icon{font-size:20px;flex-shrink:0;color:var(--hjk-primary)}
-.summary-collapse-title{flex:1;font-size:15px;font-weight:700}
-.summary-collapse-value{font-size:20px;font-weight:800;font-family:'Fraunces',serif;color:var(--hjk-primary)}
-.summary-collapse-chevron{color:var(--muted);font-size:16px;transition:transform .2s}
+.hjk-primary-action{
+  width:100%;
+  height:44px;
+  margin-top:14px;
+  padding:0 16px;
+  background:linear-gradient(135deg,#1F5137,#285F40);
+  color:#fff;
+  border:none;
+  border-radius:18px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  box-shadow:0 10px 20px rgba(31,81,55,.18);
+}
+.hjk-empty-minimal{min-height:94px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:#6B7280;font-size:13px;text-align:center}
+.hjk-empty-minimal span{font-size:24px;color:#9CA3AF}
+.summary-collapse-section{
+  background:#fff;
+  border:1px solid #E8E8E3;
+  border-radius:20px;
+  margin-bottom:16px;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(17,24,39,.04);
+}
+.summary-collapse-header{display:flex;align-items:center;gap:12px;min-height:74px;padding:16px 18px;cursor:pointer;transition:background .2s ease}
+.summary-collapse-header:active{background:#F8F8F5}
+.summary-collapse-icon{width:34px;height:34px;border-radius:12px;background:#F3F7F4;color:#1F5137;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.summary-collapse-title{flex:1;font-size:16px;font-weight:700;color:#111827}
+.summary-collapse-value{font-size:22px;font-weight:800;font-family:'DM Sans','Sarabun',sans-serif;color:#1F5137}
+.summary-collapse-chevron{color:#6B7280;font-size:16px;transition:transform .2s ease}
 .summary-collapse-section.open .summary-collapse-chevron{transform:rotate(180deg)}
-.summary-collapse-body{padding:0 16px 14px;display:none}
-.summary-collapse-section.open .summary-collapse-body{display:block;animation:detailIn .18s cubic-bezier(.22,1,.36,1)}
-.summary-mini-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.summary-collapse-body{max-height:0;opacity:0;overflow:hidden;padding:0 18px;transition:max-height .2s ease,opacity .2s ease,padding .2s ease}
+.summary-collapse-section.open .summary-collapse-body{max-height:900px;opacity:1;padding:0 18px 18px}
+.summary-mini-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #E8E8E3;font-size:13px}
 .summary-mini-row:last-child{border-bottom:none}
+@media (prefers-reduced-motion: reduce){
+  .iowe-row-compact,.iowe-row-detail,.summary-collapse-header,.summary-collapse-body,.summary-collapse-chevron{transition:none!important}
+}
 @media (max-width:380px){
   .row-detail{padding-left:14px}
   .sport-stat-grid,.sport-preview{grid-template-columns:1fr}
@@ -1515,19 +1600,27 @@ function debtTicket(prefix,gid,personId,date){
   return `#${prefix}${yy}${mm}${dd}-${String(gid||'').slice(-3)}${String(personId||'').slice(-3)}`;
 }
 function toggleIOweRow(rowKey){
-  _expandedIOwe[rowKey]=!_expandedIOwe[rowKey];
+  const next=!_expandedIOwe[rowKey];
+  Object.keys(_expandedIOwe).forEach(k=>_expandedIOwe[k]=false);
+  document.querySelectorAll('.iowe-row-compact.expanded').forEach(el=>el.classList.remove('expanded'));
+  document.querySelectorAll('.iowe-row-detail.open').forEach(el=>el.classList.remove('open'));
+  document.querySelectorAll('.iowe-row-wrap.open-wrap').forEach(el=>el.classList.remove('open-wrap'));
+  _expandedIOwe[rowKey]=next;
   const compact=document.querySelector(`[data-iowe-key="${rowKey}"]`);
   const detail=document.getElementById('iowe-detail-'+rowKey);
   const wrap=document.getElementById('iowe-wrap-'+rowKey);
-  if(compact)compact.classList.toggle('expanded',_expandedIOwe[rowKey]);
-  if(detail)detail.classList.toggle('open',_expandedIOwe[rowKey]);
-  if(wrap)wrap.classList.toggle('open-wrap',_expandedIOwe[rowKey]);
+  if(compact)compact.classList.toggle('expanded',next);
+  if(detail)detail.classList.toggle('open',next);
+  if(wrap)wrap.classList.toggle('open-wrap',next);
 }
 let _expandedSummary={groups:false,bills:false,total:true};
 function toggleSummarySection(key){
-  _expandedSummary[key]=!_expandedSummary[key];
+  const next=!_expandedSummary[key];
+  Object.keys(_expandedSummary).forEach(k=>_expandedSummary[k]=false);
+  document.querySelectorAll('.summary-collapse-section.open').forEach(el=>el.classList.remove('open'));
+  _expandedSummary[key]=next;
   const el=document.getElementById('sum-sec-'+key);
-  if(el)el.classList.toggle('open',_expandedSummary[key]);
+  if(el)el.classList.toggle('open',next);
 }
 function summaryCollapseSection(key,icon,title,value,body,openDefault=false){
   const open=_expandedSummary[key]===undefined?openDefault:_expandedSummary[key];
@@ -3890,7 +3983,6 @@ function scrIOwe(){
   const groupLabel=S.lang==='th'?'กลุ่ม':'Group';
   const noteLabel=S.lang==='th'?'หมายเหตุ':'Note';
   const ticketLabel=S.lang==='th'?'เลขที่รายการ':'Ticket';
-  const openGroupLabel=S.lang==='th'?'เปิดกลุ่ม':'Open group';
   const remindLabel=S.lang==='th'?'ทวงเงิน':'Remind';
   const payLabel=S.lang==='th'?'ชำระเงิน':'Pay';
 
@@ -3922,17 +4014,16 @@ function scrIOwe(){
         <div class="iowe-detail-row"><span class="txt-muted">${noteLabel}</span><span class="fw7">-</span></div>
         <div class="iowe-detail-row"><span class="txt-muted">${ticketLabel}</span><span class="fw7">${debtTicket(isPay?'PAY':'ST',x.gid,pid,x.latestDate)}</span></div>
         ${action}
-        <button class="row-action" onclick="event.stopPropagation();go('group','${x.gid}')" style="width:100%;margin-top:8px">${openGroupLabel}</button>
       </div>
     </div>`;
   };
 
   const oweRows=iOweList.length===0
-    ?`<p class="txt-muted" style="font-size:13px;padding:10px 0;text-align:center">${t('noDebts')}</p>`
+    ?`<div class="hjk-empty-minimal"><span>▢</span><p>${t('noDebts')}</p></div>`
     :iOweList.map(x=>debtRow(x,'pay')).join('');
 
   const owedRows=iAmOwedList.length===0
-    ?`<p class="txt-muted" style="font-size:13px;padding:10px 0;text-align:center">${t('noDebts')}</p>`
+    ?`<div class="hjk-empty-minimal"><span>▢</span><p>${t('noDebts')}</p></div>`
     :iAmOwedList.map(x=>debtRow(x,'receive')).join('');
 
   const walletHtml=(function(){
@@ -3954,11 +4045,11 @@ function scrIOwe(){
       <div class="hjk-green-panel">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
           <div>
-            <p style="color:rgba(255,255,255,.76);font-size:14px;font-weight:700;margin-bottom:6px">${S.lang==='th'?'ค้างเงิน':'Pending money'}</p>
-            <p class="ff-s fw7" style="color:#fff;font-size:38px;line-height:1">${fmt(totalOwed)}</p>
-            <p style="color:rgba(255,255,255,.68);font-size:12px;margin-top:8px">${S.lang==='th'?'จากยอดที่ต้องจ่าย':'From payables'} ${fmt(totalIOwe)}</p>
+            <p style="color:rgba(255,255,255,.82);font-size:14px;font-weight:700;margin-bottom:5px">${S.lang==='th'?'ค้างเงิน':'Pending money'}</p>
+            <p class="ff-s fw7" style="color:#fff;font-size:34px;line-height:1">${fmt(totalOwed)}</p>
+            <p style="color:rgba(255,255,255,.7);font-size:12px;margin-top:7px">${S.lang==='th'?'จากยอดที่ต้องจ่าย':'From payables'} ${fmt(totalIOwe)}</p>
           </div>
-          <button onclick="toast('${S.lang==='th'?'เลือกรายการที่ต้องการชำระ':'Choose an item to settle'}')" style="background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:12px 14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">▣ ${payLabel}</button>
+          <button onclick="toast('${S.lang==='th'?'เลือกรายการที่ต้องการชำระ':'Choose an item to settle'}')" style="height:44px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:0 14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.12);backdrop-filter:blur(12px)">▣ ${payLabel}</button>
         </div>
       </div>
     </div>
