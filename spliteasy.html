@@ -314,10 +314,24 @@ body.th .lang-btn{font-family:'Sarabun',sans-serif}
 .summary-action-wrap{display:flex;gap:8px;flex-wrap:wrap}
 .summary-action-wrap .btn{min-width:150px;flex:1}
 
-/* ── HJK Quiet Luxury screens ───────────────────────── */
+/* ── HJK Clear Money reference screen ───────────────────────── */
+.hjk-clear-screen{
+  background:#F8F8F5;
+  color:#111827;
+  min-height:100vh;
+}
+body:has(.hjk-clear-screen) #global-lang-toggle,
+body:has(.hjk-clear-screen) #copy-btn,
+body:has(.hjk-clear-screen) #copy-toast{display:none!important}
+.hjk-clear-content{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+  padding:44px 20px 0;
+}
 .hjk-green-panel{
-  min-height:96px;
-  padding:18px 20px;
+  min-height:100px;
+  padding:18px 22px;
   color:#fff;
   border:1px solid rgba(255,255,255,.12);
   border-radius:24px;
@@ -329,6 +343,26 @@ body.th .lang-btn{font-family:'Sarabun',sans-serif}
   align-items:center;
 }
 .hjk-green-panel>div{width:100%}
+.hjk-hero-label{color:rgba(255,255,255,.84);font-size:15px;font-weight:700;margin-bottom:5px}
+.hjk-hero-amount{color:#fff;font-size:34px;line-height:1;font-weight:800;font-family:'DM Sans','Sarabun',sans-serif}
+.hjk-hero-sub{color:rgba(255,255,255,.74);font-size:12px;margin-top:8px}
+.hjk-hero-pay{
+  height:44px;
+  background:rgba(255,255,255,.15);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:16px;
+  padding:0 14px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter:blur(12px);
+}
 .hjk-filter-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .hjk-filter-pill{
   height:48px;
@@ -344,7 +378,12 @@ body.th .lang-btn{font-family:'Sarabun',sans-serif}
   color:#111827;
   box-shadow:none;
 }
-.iowe-row-wrap{margin-bottom:16px}
+.hjk-debt-section{display:flex;flex-direction:column;gap:14px}
+.hjk-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hjk-section-title{margin:0;color:#111827;font-size:16px;font-weight:700}
+.hjk-section-count{color:#6B7280;font-size:13px}
+.hjk-debt-list{display:grid;gap:14px}
+.iowe-row-wrap{margin-bottom:0}
 .iowe-row-compact{
   display:flex;
   align-items:center;
@@ -385,6 +424,12 @@ body.th .lang-btn{font-family:'Sarabun',sans-serif}
 }
 .iowe-detail-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #E8E8E3;font-size:13px}
 .iowe-detail-row:last-of-type{border-bottom:none}
+.iowe-person-title{margin:0;color:#111827;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iowe-person-meta{margin:3px 0 0;color:#6B7280;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iowe-person-status{margin:3px 0 0;color:#6B7280;font-size:12px}
+.iowe-row-amount{font-size:18px;font-weight:800;flex-shrink:0}
+.iowe-row-amount.receive{color:#1F5137}
+.iowe-row-amount.pay{color:var(--danger)}
 .hjk-primary-action{
   width:100%;
   height:44px;
@@ -403,8 +448,22 @@ body.th .lang-btn{font-family:'Sarabun',sans-serif}
   gap:6px;
   box-shadow:0 10px 20px rgba(31,81,55,.18);
 }
-.hjk-empty-minimal{min-height:94px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:#6B7280;font-size:13px;text-align:center}
+.hjk-empty-minimal{
+  min-height:92px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:#6B7280;
+  font-size:13px;
+  text-align:center;
+  border:1px dashed #E0E0DA;
+  border-radius:20px;
+  background:rgba(255,255,255,.62);
+}
 .hjk-empty-minimal span{font-size:24px;color:#9CA3AF}
+.hjk-empty-minimal small{display:block;margin-top:2px;color:#8A8F99;font-size:12px}
 .summary-collapse-section{
   background:#fff;
   border:1px solid #E8E8E3;
@@ -3992,7 +4051,6 @@ function scrIOwe(){
     const personName=isPay?x.toName:x.fromName;
     const person=isPay?x.toM:x.fromM;
     const pid=isPay?x.toId:x.fromId;
-    const amountColor=isPay?'var(--danger)':'var(--hjk-primary)';
     const action=isPay
       ?`<button class="hjk-primary-action" onclick="event.stopPropagation();openSettleSheet('${x.gid}','${x.toId}',${x.amount.toFixed(2)})">▱ ${payLabel}</button>`
       :`<button class="hjk-primary-action" onclick="event.stopPropagation();toast('${remindLabel}')">⌁ ${remindLabel}</button>`;
@@ -4000,11 +4058,11 @@ function scrIOwe(){
       <div class="iowe-row-compact${_expandedIOwe[rowKey]?' expanded':''}" data-iowe-key="${rowKey}" onclick="toggleIOweRow('${rowKey}')">
         ${renderAv(getG(x.gid),person,'av-sm')}
         <div class="flex1" style="min-width:0">
-          <p class="fw7" style="font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(personName)}</p>
-          <p class="txt-muted" style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${x.gemoji} ${esc(x.gname)} · ${formatDebtDate(x.latestDate)}</p>
-          <p class="txt-muted" style="font-size:11px">${pendingLabel}</p>
+          <p class="iowe-person-title">${esc(personName)}</p>
+          <p class="iowe-person-meta">${x.gemoji} ${esc(x.gname)} · ${formatDebtDate(x.latestDate)}</p>
+          <p class="iowe-person-status">${pendingLabel}</p>
         </div>
-        <span class="fw7" style="color:${amountColor};font-size:16px;flex-shrink:0">${fmt(x.amount)}</span>
+        <span class="iowe-row-amount ${isPay?'pay':'receive'}">${fmt(x.amount)}</span>
         <span class="row-chevron">⌄</span>
       </div>
       <div class="iowe-row-detail${_expandedIOwe[rowKey]?' open':''}" id="iowe-detail-${rowKey}">
@@ -4019,11 +4077,11 @@ function scrIOwe(){
   };
 
   const oweRows=iOweList.length===0
-    ?`<div class="hjk-empty-minimal"><span>▢</span><p>${t('noDebts')}</p></div>`
+    ?`<div class="hjk-empty-minimal"><span>▢</span><p>${S.lang==='th'?'ยังไม่มีรายการที่เราค้างคนอื่น':'No payables yet'}</p><small>${S.lang==='th'?'จาก HJK':'from HJK'}</small></div>`
     :iOweList.map(x=>debtRow(x,'pay')).join('');
 
   const owedRows=iAmOwedList.length===0
-    ?`<div class="hjk-empty-minimal"><span>▢</span><p>${t('noDebts')}</p></div>`
+    ?`<div class="hjk-empty-minimal"><span>▢</span><p>${S.lang==='th'?'ยังไม่มีรายการที่เขาค้างเรา':'No receivables yet'}</p><small>${S.lang==='th'?'จาก HJK':'from HJK'}</small></div>`
     :iAmOwedList.map(x=>debtRow(x,'receive')).join('');
 
   const walletHtml=(function(){
@@ -4040,41 +4098,39 @@ function scrIOwe(){
       </div>`).join('')}</div>`;
   })();
 
-  return `<div class="screen">
-    <div class="p20 pt56" style="padding-bottom:0">
+  return `<div class="screen hjk-clear-screen">
+    <div class="hjk-clear-content">
       <div class="hjk-green-panel">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
           <div>
-            <p style="color:rgba(255,255,255,.82);font-size:14px;font-weight:700;margin-bottom:5px">${S.lang==='th'?'ค้างเงิน':'Pending money'}</p>
-            <p class="ff-s fw7" style="color:#fff;font-size:34px;line-height:1">${fmt(totalOwed)}</p>
-            <p style="color:rgba(255,255,255,.7);font-size:12px;margin-top:7px">${S.lang==='th'?'จากยอดที่ต้องจ่าย':'From payables'} ${fmt(totalIOwe)}</p>
+            <p class="hjk-hero-label">${S.lang==='th'?'ค้างเงิน':'Pending money'}</p>
+            <p class="hjk-hero-amount">${fmt(totalOwed)}</p>
+            <p class="hjk-hero-sub">${S.lang==='th'?'จากยอดที่ต้องจ่าย':'From payables'} ${fmt(totalIOwe)}</p>
           </div>
-          <button onclick="toast('${S.lang==='th'?'เลือกรายการที่ต้องการชำระ':'Choose an item to settle'}')" style="height:44px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:0 14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.12);backdrop-filter:blur(12px)">▣ ${payLabel}</button>
+          <button class="hjk-hero-pay" onclick="toast('${S.lang==='th'?'เลือกรายการที่ต้องการชำระ':'Choose an item to settle'}')">▣ ${payLabel}</button>
         </div>
       </div>
-    </div>
-    <div class="p20 gap-col">
       <div class="hjk-filter-row">
         <button class="hjk-filter-pill">${S.lang==='th'?'ทุกกลุ่ม':'All groups'} <span>⌄</span></button>
         <button class="hjk-filter-pill">${pendingLabel} <span>⌄</span></button>
       </div>
       ${walletHtml}
 
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <p class="fw7" style="font-size:15px">${S.lang==='th'?'คนค้างเงินเรา':'Who owes you'}</p>
-          <span class="txt-muted" style="font-size:13px">${iAmOwedList.length} ${t('people')}</span>
+      <section class="hjk-debt-section">
+        <div class="hjk-section-head">
+          <p class="hjk-section-title">${S.lang==='th'?'คนค้างเงินเรา':'Who owes you'}</p>
+          <span class="hjk-section-count">${iAmOwedList.length} ${t('people')}</span>
         </div>
-        ${owedRows}
-      </div>
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <p class="fw7" style="font-size:15px">${S.lang==='th'?'เราค้างเงินคนอื่น':'Who you owe'}</p>
-          <span class="txt-muted" style="font-size:13px">${iOweList.length} ${t('people')}</span>
+        <div class="hjk-debt-list">${owedRows}</div>
+      </section>
+      <section class="hjk-debt-section">
+        <div class="hjk-section-head">
+          <p class="hjk-section-title">${S.lang==='th'?'เราค้างเงินคนอื่น':'Who you owe'}</p>
+          <span class="hjk-section-count">${iOweList.length} ${t('people')}</span>
         </div>
-        ${oweRows}
-      </div>
-      <div style="height:10px"></div>
+        <div class="hjk-debt-list">${oweRows}</div>
+      </section>
+      <div style="height:16px"></div>
     </div>
   </div>`;
 }
