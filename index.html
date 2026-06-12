@@ -2706,17 +2706,12 @@
             </div>
           </div>
 
-          <div class="money-workspace-tabs" aria-label="โหมดเคลียร์เงิน">
-            <button class="segment-button active" type="button" data-money-workspace="clear">ค้างเงิน</button>
-            <button class="segment-button" type="button" data-money-workspace="split">บิลกลุ่ม</button>
-          </div>
-
           <div class="money-workspace active" id="moneyClearWorkspace">
           <section class="pending-debt-card" aria-labelledby="pendingDebtTitle">
             <div class="section-head" style="margin-bottom:0;">
               <div>
                 <h2 class="section-title" id="pendingDebtTitle">หนี้จาก หารก่อนจน (HJK)</h2>
-                <p class="section-note">รายการค้างชำระที่ซิงก์จากบิลกลุ่ม</p>
+                <p class="section-note">รายการค้างชำระที่ซิงก์จาก HJK</p>
               </div>
               <button class="ghost-action" id="syncPendingDebtsButton" type="button">ซิงก์</button>
             </div>
@@ -2792,28 +2787,6 @@
           </section>
           </div>
 
-          <div class="money-workspace" id="splitWorkspace">
-            <form class="settings-card split-group-form" id="splitGroupForm">
-              <div class="section-head" style="margin-bottom:0;">
-                <div>
-                  <h2 class="section-title">บิลกลุ่ม</h2>
-                  <p class="section-note">หารบิลแล้วส่งยอดสุทธิเข้าเคลียร์เงิน</p>
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="field">
-                  <label for="splitGroupNameInput">ชื่อกลุ่ม</label>
-                  <input class="input" id="splitGroupNameInput" type="text" placeholder="เช่น ทริปบางแสน, ปิ้งย่างวันศุกร์" required>
-                </div>
-                <div class="field">
-                  <label for="splitGroupMembersInput">สมาชิกเพิ่มเติม</label>
-                  <input class="input" id="splitGroupMembersInput" type="text" placeholder="คั่นด้วย comma เช่น เจม, ฝน, บอส">
-                </div>
-              </div>
-              <button class="primary-action" id="saveSplitGroupButton" type="submit" style="width:100%;">สร้างบิลกลุ่ม</button>
-            </form>
-            <div class="split-groups" id="splitGroupList"></div>
-          </div>
         </section>
       </section>
 
@@ -3502,9 +3475,7 @@
       if (!["owedToMe", "iOwe"].includes(state.appSettings.moneyOrder)) {
         state.appSettings.moneyOrder = "owedToMe";
       }
-      if (!["clear", "split"].includes(state.appSettings.moneyWorkspace)) {
-        state.appSettings.moneyWorkspace = "clear";
-      }
+      state.appSettings.moneyWorkspace = "clear";
       if (!["pending", "cleared", "all"].includes(state.appSettings.pendingDebtStatus)) {
         state.appSettings.pendingDebtStatus = "pending";
       }
@@ -3565,7 +3536,7 @@
       els.addLineItemButton.addEventListener("click", addCurrentLineItem);
       els.addBackfillIncomeButton.addEventListener("click", () => addBackfillRow("income"));
       els.addBackfillExpenseButton.addEventListener("click", () => addBackfillRow("expense"));
-      els.splitGroupForm.addEventListener("submit", saveSplitGroup);
+      els.splitGroupForm?.addEventListener("submit", saveSplitGroup);
       document.querySelectorAll("[data-money-workspace]").forEach((button) => {
         button.addEventListener("click", () => {
           state.appSettings.moneyWorkspace = button.dataset.moneyWorkspace === "split" ? "split" : "clear";
@@ -4994,7 +4965,7 @@
         if (!members.some((member) => member.isMe)) members.unshift({ id: "me", name: "เรา", isMe: true });
         return {
           id: group.id || uid(),
-          name: group.name || "บิลกลุ่ม",
+          name: group.name || "HJK",
           members,
           expenses: Array.isArray(group.expenses) ? group.expenses.map((expense) => ({
             id: expense.id || uid(),
@@ -5027,7 +4998,8 @@
     }
 
     function renderMoneyWorkspaces() {
-      const active = state.appSettings.moneyWorkspace === "split" ? "split" : "clear";
+      const active = "clear";
+      state.appSettings.moneyWorkspace = "clear";
       document.querySelectorAll("[data-money-workspace]").forEach((button) => {
         button.classList.toggle("active", button.dataset.moneyWorkspace === active);
       });
@@ -5253,7 +5225,7 @@
       event.preventDefault();
       const name = els.splitGroupNameInput.value.trim();
       if (!name) {
-        showToast("ใส่ชื่อบิลกลุ่มก่อน");
+        showToast("ใส่ชื่อกลุ่มก่อน");
         return;
       }
       const memberNames = els.splitGroupMembersInput.value
@@ -5273,16 +5245,16 @@
         createdAt: new Date().toISOString()
       });
       saveSplitGroups();
-      els.splitGroupForm.reset();
+      els.splitGroupForm?.reset?.();
       renderSplitGroups();
-      showToast("สร้างบิลกลุ่มแล้ว");
+      showToast("สร้างกลุ่มแล้ว");
     }
 
     function renderSplitGroups() {
       if (!els.splitGroupList) return;
       els.splitGroupList.innerHTML = state.splitGroups.length
         ? state.splitGroups.map(splitGroupCardHtml).join("")
-        : `<div class="money-panel"><p class="section-note">ยังไม่มีบิลกลุ่ม ลองสร้างกลุ่มจากทริปหรือมื้ออาหารที่ต้องหารกัน</p></div>`;
+        : `<div class="money-panel"><p class="section-note">ยังไม่มีรายการ HJK เดิม</p></div>`;
 
       els.splitGroupList.querySelectorAll("[data-split-save-expense]").forEach((button) => {
         button.addEventListener("click", () => saveSplitExpense(button.dataset.splitSaveExpense));
@@ -5414,7 +5386,7 @@
         <div class="split-row">
           <div>
             <strong>${escapeHtml(splitMemberName(group, transfer.from))} จ่ายให้ ${escapeHtml(splitMemberName(group, transfer.to))}</strong>
-            <small>ยอดสุทธิจากบิลกลุ่มนี้</small>
+            <small>ยอดสุทธิจากรายการนี้</small>
           </div>
           <strong>${formatCurrency(transfer.amount)}</strong>
         </div>
@@ -5492,7 +5464,7 @@
         title: `${group.name} · ${expense.title}`,
         category,
         lines: [{ id: uid(), title: expense.title, category, amount: clampMoney(expense.amount) }],
-        note: "บิลกลุ่ม",
+        note: "HJK",
         date: expense.date || todayISO(),
         time: expense.time || currentTime(),
         source: "split-group-payment",
@@ -5526,7 +5498,7 @@
       saveMoneyClear();
       saveSplitGroups();
       renderAll();
-      showToast("ลบบิลกลุ่มแล้ว");
+      showToast("ลบกลุ่มแล้ว");
     }
 
     function splitGroupTransfers(group) {
@@ -5598,7 +5570,7 @@
           amount: clampMoney(transfer.amount),
           date: todayISO(),
           time: currentTime(),
-          note: `บิลกลุ่ม · ${group.name}`,
+          note: `HJK · ${group.name}`,
           status: "active",
           source: "split-group",
           splitGroupId: group.id,
