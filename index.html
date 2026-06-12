@@ -2658,7 +2658,7 @@
         <section class="section groups-shell">
           <div class="groups-toolbar">
             <div>
-              <h2 class="section-title">Groups by SplitEasy</h2>
+              <h2 class="section-title">หารก่อนจน (HJK)</h2>
               <p class="section-note">โมดูลหารบิลเต็มระบบ: กลุ่ม สมาชิก บิลละเอียด ส่วนลด ภาษี ผ่อนชำระ บิลประจำ นำเข้า และส่งออก</p>
             </div>
             <div class="groups-toolbar-actions">
@@ -2673,7 +2673,7 @@
           <div class="groups-frame-shell" id="groupsFrameShell">
             <button class="groups-fullscreen-exit" id="closeGroupsFullButton" type="button">ย่อกลับ</button>
             <div class="groups-frame-status" id="splitEasyStatus"></div>
-            <iframe class="groups-frame" id="splitEasyFrame" src="spliteasy.html" title="SplitEasy full group bill splitter"></iframe>
+            <iframe class="groups-frame" id="splitEasyFrame" src="spliteasy.html" title="หารก่อนจน (HJK) full group bill splitter"></iframe>
           </div>
         </section>
       </section>
@@ -2715,7 +2715,7 @@
           <section class="pending-debt-card" aria-labelledby="pendingDebtTitle">
             <div class="section-head" style="margin-bottom:0;">
               <div>
-                <h2 class="section-title" id="pendingDebtTitle">หนี้จาก SplitEasy</h2>
+                <h2 class="section-title" id="pendingDebtTitle">หนี้จาก หารก่อนจน (HJK)</h2>
                 <p class="section-note">รายการค้างชำระที่ซิงก์จากบิลกลุ่ม</p>
               </div>
               <button class="ghost-action" id="syncPendingDebtsButton" type="button">ซิงก์</button>
@@ -3776,7 +3776,7 @@
       els.syncPendingDebtsButton?.addEventListener("click", () => {
         syncPendingDebtsFromSplitEasy(true);
         renderAll();
-        showToast("ซิงก์หนี้จาก SplitEasy แล้ว");
+        showToast("ซิงก์หนี้จาก หารก่อนจน (HJK) แล้ว");
       });
       els.pendingDebtGroupFilter?.addEventListener("change", () => {
         state.appSettings.pendingDebtGroup = els.pendingDebtGroupFilter.value || "all";
@@ -4722,14 +4722,14 @@
       if (!els.groupsDashboardList) return;
       els.groupsDashboardList.innerHTML = `
         <div class="dashboard-card">
-          <h3>SplitEasy Groups</h3>
+          <h3>กลุ่มหารก่อนจน (HJK)</h3>
           <div class="dashboard-metrics">
             <div class="dashboard-metric"><span>กลุ่ม</span><strong>${groups.length}</strong></div>
             <div class="dashboard-metric"><span>บิล</span><strong>${expenseCount}</strong></div>
             <div class="dashboard-metric"><span>ผ่อน/ประจำ</span><strong>${installmentCount + cycleCount}</strong></div>
             <div class="dashboard-metric"><span>ยอดรวม</span><strong>${formatCurrency(totalAmount)}</strong></div>
           </div>
-          <div class="category-breakdown">${latestGroups || `<p class="section-note">ยังไม่มีกลุ่ม SplitEasy</p>`}</div>
+          <div class="category-breakdown">${latestGroups || `<p class="section-note">ยังไม่มีกลุ่มหารก่อนจน (HJK)</p>`}</div>
           <div class="action-row" style="margin-top:12px;">
             <button class="secondary-action" type="button" data-open-view="groups">เปิด Groups</button>
           </div>
@@ -4753,7 +4753,7 @@
         state.transactions = readStorage(STORAGE_KEYS.transactions, []);
         normalizeTransactions();
         renderAll();
-        showToast(data.message || "บันทึกจาก SplitEasy เข้า JKJ แล้ว");
+        showToast(data.message || "บันทึกจาก หารก่อนจน (HJK) เข้า JKJ แล้ว");
         return;
       }
       if (data.type === "jkj:pending-debts-updated") {
@@ -4783,7 +4783,7 @@
 
     function reloadSplitEasyFrame() {
       if (!els.splitEasyFrame) return;
-      setSplitEasyStatus("กำลังโหลด SplitEasy...", false);
+      setSplitEasyStatus("กำลังโหลด หารก่อนจน (HJK)...", false);
       els.splitEasyFrame.src = "about:blank";
       window.setTimeout(() => {
         els.splitEasyFrame.src = "spliteasy.html";
@@ -4815,7 +4815,7 @@
       if (!els.splitEasyStatus) return;
       els.splitEasyStatus.classList.toggle("active", Boolean(message));
       els.splitEasyStatus.innerHTML = message
-        ? `<strong>${isError ? "โหลด SplitEasy ไม่สำเร็จ" : "สถานะ"}</strong><p class="section-note" style="margin-top:4px;">${escapeHtml(message)}</p>`
+        ? `<strong>${isError ? "โหลด หารก่อนจน (HJK) ไม่สำเร็จ" : "สถานะ"}</strong><p class="section-note" style="margin-top:4px;">${escapeHtml(message)}</p>`
         : "";
     }
 
@@ -4964,7 +4964,7 @@
       state.pendingDebts.items = state.pendingDebts.items.map((debt) => ({
         debtId: debt.debtId || debt.id || uid(),
         groupId: debt.groupId || "",
-        groupName: debt.groupName || "SplitEasy",
+        groupName: debt.groupName || "หารก่อนจน (HJK)",
         debtor: debt.debtor || "",
         creditor: debt.creditor || "",
         debtorId: debt.debtorId || "",
@@ -5097,7 +5097,7 @@
       if (els.pendingReceivableAmount) els.pendingReceivableAmount.textContent = formatCurrency(sum(receivable.map((debt) => debt.amount)));
       if (els.pendingPayableAmount) els.pendingPayableAmount.textContent = formatCurrency(sum(payable.map((debt) => debt.amount)));
 
-      const groups = unique(allItems.map((debt) => debt.groupName || "SplitEasy").filter(Boolean)).sort((a, b) => a.localeCompare(b, "th"));
+      const groups = unique(allItems.map((debt) => debt.groupName || "หารก่อนจน (HJK)").filter(Boolean)).sort((a, b) => a.localeCompare(b, "th"));
       const groupValue = groups.includes(state.appSettings.pendingDebtGroup) ? state.appSettings.pendingDebtGroup : "all";
       state.appSettings.pendingDebtGroup = groupValue;
       if (els.pendingDebtGroupFilter) {
@@ -5128,7 +5128,7 @@
     }
 
     function pendingDebtSectionHtml(title, debts, role) {
-      const emptyText = role === "receivable" ? "ยังไม่มีคนค้างเงินเราจาก SplitEasy" : "ยังไม่มีรายการที่เราค้างคนอื่นจาก SplitEasy";
+      const emptyText = role === "receivable" ? "ยังไม่มีคนค้างเงินเราจาก หารก่อนจน (HJK)" : "ยังไม่มีรายการที่เราค้างคนอื่นจาก หารก่อนจน (HJK)";
       return `
         <div class="pending-debt-section">
           <h3>${escapeHtml(title)}</h3>
@@ -5146,7 +5146,7 @@
         <div class="pending-debt-row" data-pending-debt-row="${escapeAttr(debt.debtId)}">
           <div>
             <strong>${escapeHtml(memberName || "ไม่ระบุชื่อ")} · ${formatCurrency(debt.amount)}</strong>
-            <small>${escapeHtml(debt.groupName || "SplitEasy")} · ${dateText} · ${statusText}</small>
+            <small>${escapeHtml(debt.groupName || "หารก่อนจน (HJK)")} · ${dateText} · ${statusText}</small>
           </div>
           ${debt.status === "cleared"
             ? `<span class="pill">เคลียร์แล้ว</span>`
@@ -5200,7 +5200,7 @@
         title,
         category,
         lines: [{ id: uid(), title, category, amount: clampMoney(debt.amount) }],
-        note: `SplitEasy · ${debt.groupName || "Group"}`,
+        note: `หารก่อนจน (HJK) · ${debt.groupName || "Group"}`,
         date: options.date || todayISO(),
         time: options.time || currentTime(),
         source: "spliteasy-pending-debt",
