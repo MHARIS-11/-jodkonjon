@@ -1797,11 +1797,13 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
       margin: 10px 0 12px;
+      order: 1;
     }
 
     .money-panels {
       display: grid;
       gap: 12px;
+      order: 2;
     }
 
     .money-panel {
@@ -1868,8 +1870,256 @@
       gap: 8px;
     }
 
-    .pending-debt-card {
+    .money-person-card {
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.055);
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .money-person-card[open] {
+      border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+      box-shadow: 0 18px 42px rgba(17, 24, 39, 0.08);
+    }
+
+    .money-person-card summary {
       display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto auto auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 82px;
+      padding: 14px;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    .money-person-card summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .money-avatar {
+      display: inline-flex;
+      width: 48px;
+      height: 48px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #1F5137, #2F6A48);
+      color: #FFFFFF;
+      font-size: 16px;
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+    }
+
+    .money-person-main {
+      min-width: 0;
+    }
+
+    .money-person-name {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 820;
+      line-height: 1.15;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .money-person-sub {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 13px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .money-net-amount {
+      color: var(--income);
+      font-size: 18px;
+      font-weight: 820;
+      white-space: nowrap;
+    }
+
+    .money-net-amount.payable {
+      color: var(--expense);
+    }
+
+    .money-settle-all {
+      min-width: 78px;
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid color-mix(in srgb, var(--accent) 72%, transparent);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 96%, var(--accent) 4%);
+      color: #B77900;
+      font-size: 14px;
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
+    .money-chevron {
+      color: var(--text);
+      font-size: 18px;
+      transition: transform 180ms ease;
+    }
+
+    .money-person-card[open] .money-chevron {
+      transform: rotate(180deg);
+    }
+
+    .money-person-details {
+      display: grid;
+      gap: 14px;
+      padding: 0 14px 14px;
+    }
+
+    .money-person-total-box {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--surface-warm) 64%, var(--surface));
+    }
+
+    .money-person-total-box span {
+      display: block;
+      padding: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .money-person-total-box span + span {
+      border-left: 1px solid var(--border);
+    }
+
+    .money-person-total-box strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 18px;
+    }
+
+    .money-recent-title {
+      margin: 0;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .money-entry-list {
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .money-entry-row {
+      display: grid;
+      grid-template-columns: auto 36px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 54px;
+      padding: 9px 10px;
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 68%, transparent);
+    }
+
+    .money-entry-row:last-child {
+      border-bottom: 0;
+    }
+
+    .money-entry-date {
+      width: 66px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .money-entry-icon {
+      display: inline-flex;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--income);
+      font-weight: 800;
+    }
+
+    .money-entry-icon.payable {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--expense);
+    }
+
+    .money-entry-title {
+      display: block;
+      overflow: hidden;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 760;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .money-entry-note {
+      display: block;
+      margin-top: 2px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .money-entry-side {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .money-entry-tools {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .money-entry-amount {
+      color: var(--income);
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .money-entry-amount.payable {
+      color: var(--expense);
+    }
+
+    .money-clear-check {
+      display: inline-flex;
+      width: 30px;
+      height: 30px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+      border-radius: 9px;
+      background: var(--surface);
+      color: var(--primary);
+    }
+
+    .money-clear-check:hover {
+      border-color: color-mix(in srgb, var(--primary) 34%, var(--border));
+      background: rgba(40, 77, 59, 0.06);
+    }
+
+    .pending-debt-card {
+      display: none !important;
       gap: 12px;
       padding: 14px;
       border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
@@ -1988,6 +2238,14 @@
     .money-workspace.active {
       display: grid;
       gap: 14px;
+    }
+
+    #moneyForm {
+      order: 3;
+    }
+
+    #moneyClearWorkspace > .section {
+      order: 4;
     }
 
     .split-group-form,
@@ -2989,11 +3247,6 @@
             </div>
             <button class="primary-action" id="saveMoneyItemButton" type="submit" style="width:100%;">บันทึกเคลียร์เงิน</button>
           </form>
-
-          <div class="money-order" aria-label="เลือกช่องที่ขึ้นก่อน">
-            <button class="segment-button active" type="button" data-money-order="owedToMe">เขาค้างเราก่อน</button>
-            <button class="segment-button" type="button" data-money-order="iOwe">เราค้างเขาก่อน</button>
-          </div>
 
           <div class="money-panels" id="moneyPanels"></div>
 
@@ -5323,19 +5576,33 @@
       });
 
       renderMoneyPersonOptions();
-      const groups = moneyPersonGroups(activeItems);
+      const groups = combinedMoneyPersonGroups(activeItems, pendingItems);
       els.moneyPanels.innerHTML = groups.length
-        ? groups.map(moneyPersonBlockHtml).join("")
+        ? groups.map(combinedMoneyPersonCardHtml).join("")
         : `<div class="money-panel"><p class="section-note">ยังไม่มีรายการค้างเงิน</p></div>`;
+      els.moneyPanels.querySelectorAll("[data-money-clear-entry]").forEach((button) => button.addEventListener("click", () => clearCombinedMoneyEntry(button.dataset.moneyClearEntry)));
+      els.moneyPanels.querySelectorAll("[data-money-clear-person]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          clearCombinedMoneyPerson(button.dataset.moneyClearPerson);
+        });
+      });
       els.moneyPanels.querySelectorAll("[data-money-clear]").forEach((button) => button.addEventListener("click", () => clearMoneyItem(button.dataset.moneyClear)));
       els.moneyPanels.querySelectorAll("[data-money-edit]").forEach((button) => button.addEventListener("click", () => editMoneyItem(button.dataset.moneyEdit)));
       els.moneyPanels.querySelectorAll("[data-money-delete]").forEach((button) => button.addEventListener("click", () => deleteMoneyItem(button.dataset.moneyDelete)));
+      els.moneyPanels.querySelectorAll("details.money-person-card").forEach((card) => {
+        card.addEventListener("toggle", () => {
+          if (!card.open) return;
+          els.moneyPanels.querySelectorAll("details.money-person-card[open]").forEach((other) => {
+            if (other !== card) other.open = false;
+          });
+        });
+      });
 
-      const history = state.moneyClear.items
-        .filter((item) => item.status === "cleared")
-        .sort((a, b) => (b.clearedAt || "").localeCompare(a.clearedAt || ""));
+      const history = combinedMoneyHistoryItems();
       els.moneyHistoryList.innerHTML = history.length
-        ? history.slice(0, 12).map(moneyHistoryItemHtml).join("")
+        ? history.slice(0, 12).map(combinedMoneyHistoryItemHtml).join("")
         : `<p class="section-note">ยังไม่มีประวัติเคลียร์เงิน</p>`;
       els.moneyHistoryList.querySelectorAll("[data-money-undo]").forEach((button) => button.addEventListener("click", () => undoMoneyClear(button.dataset.moneyUndo)));
     }
@@ -5432,9 +5699,9 @@
       window.setTimeout(() => completePendingDebtSettlement(debtId, title, role), row ? 170 : 0);
     }
 
-    function completePendingDebtSettlement(debtId, title, role) {
+    function completePendingDebtSettlement(debtId, title, role, options = {}) {
       const debt = state.pendingDebts.items.find((item) => item.debtId === debtId && item.status !== "cleared");
-      if (!debt) return;
+      if (!debt) return false;
       const now = new Date().toISOString();
       const date = todayISO();
       const time = currentTime();
@@ -5447,9 +5714,12 @@
       );
       saveTransactions();
       savePendingDebts();
-      reloadSplitEasyFrame();
-      renderAll();
-      showToast(role === "receivable" ? "เคลียร์เป็นรายรับแล้ว" : "เคลียร์เป็นรายจ่ายแล้ว");
+      if (!options.silent) {
+        reloadSplitEasyFrame();
+        renderAll();
+        showToast(role === "receivable" ? "เคลียร์เป็นรายรับแล้ว" : "เคลียร์เป็นรายจ่ายแล้ว");
+      }
+      return true;
     }
 
     function createPendingDebtTransaction(debt, title, role, options) {
@@ -5930,6 +6200,222 @@
       els.moneyPersonOptions.innerHTML = names.map((name) => `<option value="${escapeAttr(name)}"></option>`).join("");
     }
 
+    function combinedMoneyEntries(activeItems, pendingItems) {
+      const moneyEntries = activeItems.map((item) => ({
+        key: `money:${item.id}`,
+        source: "money",
+        id: item.id,
+        person: moneyExactPersonKey(item.person),
+        direction: item.type === "iOwe" ? "payable" : "receivable",
+        amount: clampMoney(item.amount),
+        date: item.date || todayISO(),
+        time: item.time || "",
+        title: item.type === "iOwe" ? `เราค้าง${item.person || "ไม่ระบุชื่อ"}` : `${item.person || "ไม่ระบุชื่อ"}ค้างเรา`,
+        note: item.note || "JKJ",
+        raw: item
+      }));
+      const pendingEntries = pendingItems
+        .filter((debt) => debt.debtorIsMe || debt.creditorIsMe)
+        .map((debt) => {
+          const receivable = debt.creditorIsMe;
+          const person = receivable ? debt.debtor : debt.creditor;
+          return {
+            key: `pending:${debt.debtId}`,
+            source: "pending",
+            id: debt.debtId,
+            person: moneyExactPersonKey(person),
+            direction: receivable ? "receivable" : "payable",
+            amount: clampMoney(debt.amount),
+            date: (debt.createdAt || todayISO()).slice(0, 10),
+            time: "",
+            title: receivable ? `${person || "ไม่ระบุชื่อ"}ค้างเรา` : `เราค้าง${person || "ไม่ระบุชื่อ"}`,
+            note: debt.groupName || "HJK",
+            raw: debt
+          };
+        });
+      return [...moneyEntries, ...pendingEntries].filter((entry) => entry.amount > 0);
+    }
+
+    function combinedMoneyPersonGroups(activeItems, pendingItems) {
+      const map = new Map();
+      combinedMoneyEntries(activeItems, pendingItems).forEach((entry) => {
+        const key = entry.person;
+        if (!map.has(key)) {
+          map.set(key, { key, person: entry.person, entries: [] });
+        }
+        map.get(key).entries.push(entry);
+      });
+      const preferred = state.appSettings.moneyOrder === "iOwe" ? "payableTotal" : "receivableTotal";
+      return Array.from(map.values()).map((group) => {
+        const receivableTotal = sum(group.entries.filter((entry) => entry.direction === "receivable").map((entry) => entry.amount));
+        const payableTotal = sum(group.entries.filter((entry) => entry.direction === "payable").map((entry) => entry.amount));
+        const net = receivableTotal - payableTotal;
+        return {
+          ...group,
+          receivableTotal,
+          payableTotal,
+          net,
+          latestAt: group.entries.map((entry) => `${entry.date || ""} ${entry.time || ""}`.trim()).sort().at(-1) || ""
+        };
+      }).sort((a, b) => {
+        const preferredDiff = (b[preferred] || 0) - (a[preferred] || 0);
+        if (preferredDiff) return preferredDiff;
+        const netDiff = Math.abs(b.net) - Math.abs(a.net);
+        if (netDiff) return netDiff;
+        return a.person.localeCompare(b.person, "th");
+      });
+    }
+
+    function moneyExactPersonKey(person) {
+      return String(person || "ไม่ระบุชื่อ").trim() || "ไม่ระบุชื่อ";
+    }
+
+    function moneyPersonInitials(person) {
+      const clean = moneyExactPersonKey(person);
+      const thai = clean.match(/[\u0E00-\u0E7F]/g);
+      if (thai && thai.length) return thai.slice(0, 2).join("");
+      return clean.split(/\s+/).map((part) => part[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || "คง";
+    }
+
+    function combinedMoneyPersonCardHtml(group) {
+      const isReceivable = group.net >= 0;
+      const amountClass = isReceivable ? "" : "payable";
+      const actionText = isReceivable ? "รับ" : "จ่าย";
+      const subText = group.net > 0
+        ? `${escapeHtml(group.person)}ต้องจ่ายเรา`
+        : (group.net < 0 ? `เราต้องจ่าย${escapeHtml(group.person)}` : "หักลบกันพอดี");
+      const recent = group.entries
+        .slice()
+        .sort((a, b) => (`${b.date || ""} ${b.time || ""}`).localeCompare(`${a.date || ""} ${a.time || ""}`));
+      return `
+        <details class="money-person-card">
+          <summary>
+            <span class="money-avatar">${escapeHtml(moneyPersonInitials(group.person))}</span>
+            <span class="money-person-main">
+              <span class="money-person-name">${escapeHtml(group.person)}</span>
+              <span class="money-person-sub">${subText}</span>
+            </span>
+            <strong class="money-net-amount ${amountClass}">${formatCurrency(Math.abs(group.net))}</strong>
+            <button class="money-settle-all" type="button" data-money-clear-person="${escapeAttr(group.key)}">${actionText}</button>
+            <span class="money-chevron">⌄</span>
+          </summary>
+          <div class="money-person-details">
+            <div>
+              <p class="money-recent-title">ยอดรวม</p>
+              <div class="money-person-total-box">
+                <span>เขาค้างเรา <strong class="amount-income">${formatCurrency(group.receivableTotal)}</strong></span>
+                <span>เราค้างเขา <strong class="amount-expense">${formatCurrency(group.payableTotal)}</strong></span>
+              </div>
+            </div>
+            <div>
+              <p class="money-recent-title">แสดง ${Math.min(recent.length, 5)} รายการล่าสุด</p>
+              <div class="money-entry-list">${recent.slice(0, 5).map(combinedMoneyEntryHtml).join("")}</div>
+              ${recent.length > 5 ? `<button class="ghost-action" type="button" style="width:100%;margin-top:10px;">ดูทั้งหมด ${recent.length} รายการ</button>` : ""}
+            </div>
+          </div>
+        </details>
+      `;
+    }
+
+    function combinedMoneyEntryHtml(entry) {
+      const payable = entry.direction === "payable";
+      const sourceLabel = entry.source === "pending" ? "HJK" : "JKJ";
+      const moneyActions = entry.source === "money"
+        ? `<button class="small-icon-button" type="button" data-money-edit="${escapeAttr(entry.id)}" title="แก้ไข" aria-label="แก้ไข"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.2 2.2 0 0 0-3-3L5 17l-1 3Z"></path><path d="m14 6 4 4"></path></svg></button>
+           <button class="small-icon-button delete" type="button" data-money-delete="${escapeAttr(entry.id)}" title="ลบ" aria-label="ลบ"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 14h10l1-14"></path><path d="M9 7V4h6v3"></path></svg></button>`
+        : "";
+      return `
+        <div class="money-entry-row">
+          <span class="money-entry-date">${formatDateShort(entry.date)}</span>
+          <span class="money-entry-icon ${payable ? "payable" : ""}">${payable ? "จ" : "ร"}</span>
+          <span>
+            <strong class="money-entry-title">${escapeHtml(entry.title)}</strong>
+            <small class="money-entry-note">${escapeHtml(sourceLabel)}${entry.note ? " · " + escapeHtml(entry.note) : ""}</small>
+          </span>
+          <span class="money-entry-side">
+            <strong class="money-entry-amount ${payable ? "payable" : ""}">${formatCurrency(entry.amount)}</strong>
+            <span class="money-entry-tools">
+              <button class="money-clear-check" type="button" data-money-clear-entry="${escapeAttr(entry.key)}" title="เคลียร์รายการนี้" aria-label="เคลียร์รายการนี้">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>
+              </button>
+              ${moneyActions}
+            </span>
+          </span>
+        </div>
+      `;
+    }
+
+    function clearCombinedMoneyEntry(entryKey) {
+      const [source, id] = String(entryKey || "").split(":");
+      if (source === "money") {
+        clearMoneyItem(id);
+        return;
+      }
+      if (source === "pending") {
+        clearPendingDebtNow(id);
+      }
+    }
+
+    function clearCombinedMoneyPerson(personKey) {
+      const activeItems = state.moneyClear.items.filter((item) => item.status !== "cleared");
+      const pendingItems = state.pendingDebts.items.filter((item) => item.status !== "cleared");
+      const group = combinedMoneyPersonGroups(activeItems, pendingItems).find((item) => item.key === personKey);
+      if (!group || !group.entries.length) return;
+      group.entries.forEach((entry) => {
+        if (entry.source === "money") clearMoneyItem(entry.id, { silent: true });
+        if (entry.source === "pending") clearPendingDebtNow(entry.id, { silent: true });
+      });
+      reloadSplitEasyFrame();
+      renderAll();
+      showToast(`เคลียร์รายการของ ${group.person} แล้ว`);
+    }
+
+    function clearPendingDebtNow(debtId, options = {}) {
+      const debt = state.pendingDebts.items.find((item) => item.debtId === debtId && item.status !== "cleared");
+      if (!debt) return false;
+      const role = debt.creditorIsMe ? "receivable" : "payable";
+      const member = role === "receivable" ? debt.debtor : debt.creditor;
+      const title = `Settled ${member} from ${debt.groupName}`;
+      return completePendingDebtSettlement(debtId, title, role, options);
+    }
+
+    function combinedMoneyHistoryItems() {
+      const moneyHistory = state.moneyClear.items
+        .filter((item) => item.status === "cleared")
+        .map((item) => ({ ...item, historySource: "money", sortAt: item.clearedAt || "" }));
+      const pendingHistory = state.pendingDebts.items
+        .filter((debt) => debt.status === "cleared")
+        .map((debt) => ({
+          id: debt.debtId,
+          type: debt.creditorIsMe ? "owedToMe" : "iOwe",
+          person: debt.creditorIsMe ? debt.debtor : debt.creditor,
+          amount: clampMoney(debt.amount),
+          note: `HJK · ${debt.groupName || "Group"}`,
+          clearedAt: debt.clearedAt || debt.updatedAt || debt.createdAt || "",
+          clearedDate: (debt.clearedAt || debt.updatedAt || debt.createdAt || todayISO()).slice(0, 10),
+          clearedTime: "",
+          historySource: "pending",
+          sortAt: debt.clearedAt || debt.updatedAt || ""
+        }));
+      return [...moneyHistory, ...pendingHistory].sort((a, b) => (b.sortAt || "").localeCompare(a.sortAt || ""));
+    }
+
+    function combinedMoneyHistoryItemHtml(item) {
+      if (item.historySource !== "pending") return moneyHistoryItemHtml(item);
+      const text = item.type === "owedToMe" ? "รับคืนจาก" : "จ่ายคืนให้";
+      return `
+        <div class="money-item">
+          <div>
+            <strong>${text} ${escapeHtml(item.person || "ไม่ระบุชื่อ")}</strong>
+            <small>${formatDateShort(item.clearedDate)}${item.note ? " · " + escapeHtml(item.note) : ""}</small>
+          </div>
+          <div>
+            <strong>${formatCurrency(item.amount)}</strong>
+          </div>
+        </div>
+      `;
+    }
+
     function moneyPersonGroups(items) {
       const map = new Map();
       items.forEach((item) => {
@@ -6107,9 +6593,9 @@
       showToast("ลบรายการเคลียร์เงินแล้ว");
     }
 
-    function clearMoneyItem(id) {
+    function clearMoneyItem(id, options = {}) {
       const item = state.moneyClear.items.find((entry) => entry.id === id && entry.status !== "cleared");
-      if (!item) return;
+      if (!item) return false;
       const now = new Date().toISOString();
       const date = todayISO();
       const time = currentTime();
@@ -6124,8 +6610,11 @@
       recordSplitSettlementFromMoneyItem(clearedItem);
       saveTransactions();
       saveMoneyClear();
-      renderAll();
-      showToast(item.type === "owedToMe" ? "เคลียร์เป็นรายรับแล้ว" : "เคลียร์เป็นรายจ่ายแล้ว");
+      if (!options.silent) {
+        renderAll();
+        showToast(item.type === "owedToMe" ? "เคลียร์เป็นรายรับแล้ว" : "เคลียร์เป็นรายจ่ายแล้ว");
+      }
+      return true;
     }
 
     function undoMoneyClear(id) {
