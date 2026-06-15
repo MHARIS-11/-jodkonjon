@@ -5406,6 +5406,12 @@
         syncPendingDebtsFromSplitEasy();
         if (data.message) showToast(data.message);
       }
+      if (data.type === "jkj:open-clear-money") {
+        closeGroupsFullscreen(false);
+        setView("money");
+        renderAll();
+        showToast(data.message || "เปิดหน้าเคลียร์เงิน");
+      }
     }
 
     function openGroupsFullscreen() {
@@ -5838,15 +5844,26 @@
       const now = new Date().toISOString();
       const date = todayISO();
       const time = currentTime();
+      const person = debt.creditorIsMe ? debt.debtor : debt.creditor;
+      const detailRows = pendingDebtSourceDetailEntries(debt, person, { includeCleared: true });
+      const detailKeys = detailRows.map((entry) => entry.key).filter(Boolean);
       const transaction = createPendingDebtTransaction(debt, title, role, { now, date, time });
-      const settlementId = syncPendingDebtSettlementToSplitEasy(debt, now);
       state.transactions.unshift(transaction);
       state.pendingDebts.items = state.pendingDebts.items.map((item) => item.debtId === debtId
-        ? { ...item, status: "cleared", clearedAt: now, clearedTransactionId: transaction.id, splitEasySettlementId: settlementId || item.splitEasySettlementId || "", updatedAt: now }
+        ? {
+            ...item,
+            status: "cleared",
+            clearedAt: now,
+            clearedTransactionId: transaction.id,
+            detailClearedKeys: [...new Set([...(item.detailClearedKeys || []), ...detailKeys])],
+            splitEasySettlementId: "",
+            updatedAt: now
+          }
         : item
       );
       saveTransactions();
       savePendingDebts();
+      syncPendingDebtClearStateToSplitEasy(debt, detailKeys, now);
       if (!options.silent) {
         reloadSplitEasyFrame();
         renderAll();
@@ -5877,37 +5894,65 @@
       };
     }
 
-    function syncPendingDebtSettlementToSplitEasy(debt, now) {
+    function syncPendingDebtClearStateToSplitEasy(debt, detailKeys = [], now = new Date().toISOString()) {
       if (!debt.groupId) return "";
       const groups = readSplitEasyGroups();
       const groupIndex = groups.findIndex((group) => group.id === debt.groupId);
       if (groupIndex < 0) return "";
       const group = groups[groupIndex];
-      const debtorId = debt.debtorId || splitEasyMemberIdByName(group, debt.debtor);
-      const creditorId = debt.creditorId || splitEasyMemberIdByName(group, debt.creditor);
-      if (!debtorId || !creditorId) return "";
-      const existing = (group.expenses || []).find((expense) => expense.jkjDebtId === debt.debtId || expense.id === debt.splitEasySettlementId);
-      if (existing) return existing.id;
-      const settlementId = `jkj-settle-${uid()}`;
-      const settlement = {
-        id: settlementId,
-        title: `JKJ settled ${debt.debtor} to ${debt.creditor}`,
-        amount: clampMoney(debt.amount),
-        emoji: "💸",
-        paidById: debtorId,
-        payers: [{ id: debtorId, amt: clampMoney(debt.amount) }],
-        splitType: "custom",
-        participants: [creditorId],
-        customAmounts: { [creditorId]: clampMoney(debt.amount) },
-        percentages: {},
-        date: now,
-        isSettlement: true,
-        jkjDebtId: debt.debtId
-      };
-      group.expenses = [...(group.expenses || []), settlement];
+      const keys = [...new Set((detailKeys || []).filter(Boolean))];
+      if (!keys.length) return "";
+      const impactedExpenseIds = new Set(keys.map((key) => pendingDebtDetailKeyParts(key).expenseId).filter(Boolean));
+      const pendingItems = state.pendingDebts.items || [];
+      group.expenses = (group.expenses || []).map((expense) => {
+        if (!impactedExpenseIds.has(expense.id || "")) return expense;
+        const clearedKeys = [...new Set([...(expense.jkjClearedDetailKeys || []), ...keys.filter((key) => pendingDebtDetailKeyParts(key).expenseId === (expense.id || ""))])];
+        const clearedDetails = pendingItems
+          .flatMap((item) => (item.detailClearedItems || []).filter((detail) => clearedKeys.includes(detail.key)))
+          .filter((detail, index, array) => array.findIndex((item) => item.key === detail.key) === index);
+        const nextExpense = {
+          ...expense,
+          jkjClearedDetailKeys: clearedKeys,
+          jkjClearedDetails: clearedDetails,
+          jkjStatusUpdatedAt: now
+        };
+        if (splitEasyExpenseFullyClearedInJKJ(group, nextExpense, pendingItems)) {
+          return { ...nextExpense, jkjFullyClearedAt: nextExpense.jkjFullyClearedAt || now };
+        }
+        const { jkjFullyClearedAt, ...activeExpense } = nextExpense;
+        return activeExpense;
+      });
       groups[groupIndex] = group;
       localStorage.setItem("se_v3", JSON.stringify(groups));
-      return settlementId;
+      return `jkj-clear-state:${debt.debtId}`;
+    }
+
+    function pendingDebtDetailKeyParts(detailKey) {
+      const parts = String(detailKey || "").replace(/^pending-detail:/, "").split("|").map((part) => decodeURIComponent(part));
+      return {
+        debtId: parts[0] || "",
+        expenseId: parts[1] || "",
+        detailIndex: parts[2] || "",
+        direction: parts[3] || "",
+        amount: clampMoney(parts[4] || 0)
+      };
+    }
+
+    function splitEasyExpenseFullyClearedInJKJ(group, expense, pendingItems = state.pendingDebts.items || []) {
+      const expenseId = expense.id || "";
+      if (!expenseId) return false;
+      const rows = pendingItems
+        .filter((debt) => debt.groupId === group.id)
+        .flatMap((debt) => {
+          const person = debt.creditorIsMe ? debt.debtor : debt.creditor;
+          return pendingDebtSourceDetailEntries(debt, person, { includeCleared: true });
+        })
+        .filter((entry) => entry.rawExpenseId === expenseId);
+      if (!rows.length) return false;
+      return rows.every((entry) => {
+        const debt = pendingItems.find((item) => item.debtId === entry.id);
+        return debt && pendingDebtDetailIsCleared(debt, entry.key);
+      });
     }
 
     function splitEasyMemberIdByName(group, name) {
@@ -6424,6 +6469,7 @@
       const rows = [];
       (group.expenses || []).forEach((expense, index) => {
         if (!expense || expense.isSettlement || expense.jkjDebtId) return;
+        if (expense.jkjFullyClearedAt && !options.includeCleared) return;
         splitEasyExpensePairDetails(expense, group.members || [], me.id, otherId).forEach((detail, detailIndex) => {
           const payable = detail.from === me.id && detail.to === otherId;
           const receivable = detail.from === otherId && detail.to === me.id;
@@ -6769,6 +6815,7 @@
       if (!group || !group.entries.length) return;
       group.entries.forEach((entry) => {
         if (entry.source === "money") clearMoneyItem(entry.id, { silent: true });
+        if (entry.source === "pending-detail") clearPendingDebtDetailNow(entry.key, { silent: true });
         if (entry.source === "pending") clearPendingDebtNow(entry.id, { silent: true });
       });
       reloadSplitEasyFrame();
@@ -6803,6 +6850,10 @@
         type: role === "receivable" ? "owedToMe" : "iOwe",
         person: detail.person,
         amount: detail.amount,
+        direction: detail.direction,
+        detailTitle: detail.detailTitle || "",
+        rawExpenseId: detail.rawExpenseId || "",
+        rawDetailIndex: detail.rawDetailIndex,
         note: `HJK · ${detail.note || debt.groupName || "Group"}`,
         clearedAt: now,
         clearedDate: date,
@@ -6815,27 +6866,31 @@
         detailClearedItems: [...(debt.detailClearedItems || []), nextDetailItem]
       };
       const remainingRows = pendingDebtSourceDetailEntries(nextDebt, person);
-      const shouldClearDebt = remainingRows.length === 0;
-      const settlementId = shouldClearDebt ? syncPendingDebtSettlementToSplitEasy(debt, now) : debt.splitEasySettlementId;
+      const remainingReceivable = sum(remainingRows.filter((entry) => entry.direction === "receivable").map((entry) => entry.amount));
+      const remainingPayable = sum(remainingRows.filter((entry) => entry.direction === "payable").map((entry) => entry.amount));
+      const remainingAmount = clampMoney(Math.abs(remainingReceivable - remainingPayable));
+      const shouldClearDebt = remainingRows.length === 0 || remainingAmount <= 0.005;
 
       state.transactions.unshift(transaction);
       state.pendingDebts.items = state.pendingDebts.items.map((item) => item.debtId === debtId
         ? {
             ...item,
+            amount: shouldClearDebt ? item.amount : remainingAmount,
             detailClearedKeys: nextKeys,
             detailClearedItems: nextDebt.detailClearedItems,
             status: shouldClearDebt ? "cleared" : "pending",
             clearedAt: shouldClearDebt ? now : item.clearedAt,
             clearedTransactionId: shouldClearDebt ? transaction.id : item.clearedTransactionId,
-            splitEasySettlementId: settlementId || item.splitEasySettlementId || "",
+            splitEasySettlementId: "",
             updatedAt: now
           }
         : item
       );
       saveTransactions();
       savePendingDebts();
+      syncPendingDebtClearStateToSplitEasy({ ...debt, detailClearedKeys: nextKeys, detailClearedItems: nextDebt.detailClearedItems }, nextKeys, now);
       if (!options.silent) {
-        if (shouldClearDebt) reloadSplitEasyFrame();
+        reloadSplitEasyFrame();
         renderAll();
         showToast(role === "receivable" ? "บันทึกรับคืนรายการนี้แล้ว" : "บันทึกจ่ายคืนรายการนี้แล้ว");
       }

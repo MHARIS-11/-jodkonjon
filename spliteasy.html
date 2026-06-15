@@ -321,8 +321,6 @@ body.th .lang-btn{font-family:'Sarabun',sans-serif}
   min-height:100vh;
 }
 body:has(.hjk-clear-screen) #global-lang-toggle,
-body:has(.hjk-clear-screen) #copy-btn,
-body:has(.hjk-clear-screen) #copy-toast{display:none!important}
 .hjk-clear-content{
   display:flex;
   flex-direction:column;
@@ -908,6 +906,18 @@ function updG(g){S.groups=S.groups.map(x=>x.id===g.id?revalidateGroup(g):x);save
 const todayStr=()=>new Date().toISOString().slice(0,10);
 const JKJ_TX_KEY='jkj.transactions.v1';
 const JKJ_DEBT_KEY='jkj.pendingDebts.v1';
+function hjkActiveExpenses(g){return (g?.expenses||[]).filter(e=>!e.isSettlement&&!e.jkjFullyClearedAt);}
+function hjkClearedExpenses(g){return (g?.expenses||[]).filter(e=>e.jkjFullyClearedAt);}
+function hjkClearedDetailsForExpense(exp, detailTitle=''){
+  return (exp?.jkjClearedDetails||[]).filter(d=>!detailTitle||!d.detailTitle||d.detailTitle===detailTitle);
+}
+function hjkClearedBadge(exp){
+  return exp?.jkjFullyClearedAt?`<span style="font-size:10px;background:var(--sage-lt);color:var(--sage);padding:2px 7px;border-radius:100px;font-weight:700;margin-right:6px;flex-shrink:0">✓ JKJ</span>`:'';
+}
+function openJKJClearMoney(){
+  try{window.parent?.postMessage({type:'jkj:open-clear-money',message:S.lang==='th'?'เปิดหน้าเคลียร์เงินใน JKJ':'Open JKJ Clear Money'},'*');}catch(e){}
+  toast(S.lang==='th'?'เปิดไปเคลียร์ใน JKJ':'Open Clear Money in JKJ');
+}
 function jkjCurrentTime(){
   const d=new Date();
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -931,7 +941,7 @@ function syncJKJPendingDebtsFromSplitEasy(){
   const current=[];
   (S.groups||[]).forEach(g=>{
     const group=revalidateGroup(g);
-    const pairs=getPairwise(group.members||[], group.expenses||[]);
+    const pairs=getPairwise(group.members||[], hjkActiveExpenses(group));
     pairs.forEach(pair=>{
       const debtor=(group.members||[]).find(m=>m.id===pair.from);
       const creditor=(group.members||[]).find(m=>m.id===pair.to);
@@ -957,7 +967,9 @@ function syncJKJPendingDebtsFromSplitEasy(){
   const currentIds=new Set(current.map(item=>item.debtId));
   const merged=current.map(item=>{
     const old=existing.get(item.debtId)||{};
-    return {...old,...item,status:'pending',createdAt:old.createdAt||now,updatedAt:now,clearedAt:'',clearedTransactionId:'',splitEasySettlementId:old.splitEasySettlementId||''};
+    const hasClearedDetails=Array.isArray(old.detailClearedKeys)&&old.detailClearedKeys.length>0;
+    const amount=hasClearedDetails&&old.status!=='cleared'?Math.min(item.amount,+old.amount||item.amount):item.amount;
+    return {...old,...item,amount,status:'pending',createdAt:old.createdAt||now,updatedAt:now,clearedAt:'',clearedTransactionId:'',splitEasySettlementId:''};
   });
   (store.items||[]).forEach(item=>{
     if(item.source==='spliteasy'&&item.groupId&&!currentIds.has(item.debtId)){
@@ -1724,7 +1736,7 @@ function renderNav(){
   // Compute total I-owe for badge
   let totalOwe=0;
   S.groups.map(revalidateGroup).forEach(g=>{
-    const b=calcBal(g.members,g.expenses);
+    const b=calcBal(g.members,hjkActiveExpenses(g));
     const mb=b[g.members[0]?.id]||0;
     if(mb<-0.5)totalOwe+=Math.abs(mb);
   });
@@ -1765,7 +1777,7 @@ function navTo(k){
 ═══════════════════════════════════════════════════════════ */
 function scrHome(){
   const netOwed=S.groups.reduce((acc,g)=>{
-    const b=calcBal(g.members,g.expenses);return acc+(b[g.members[0]?.id]||0);
+    const b=calcBal(g.members,hjkActiveExpenses(g));return acc+(b[g.members[0]?.id]||0);
   },0);
 
   const cards=S.groups.length===0
@@ -1775,9 +1787,10 @@ function scrHome(){
        <button class="btn btn-primary btn-sm" onclick="go('create-group')">${t('createFirstGroup')}</button>
       </div>`
     :S.groups.map(g=>{
-        const bals=calcBal(g.members,g.expenses);
+        const activeExpenses=hjkActiveExpenses(g);
+        const bals=calcBal(g.members,activeExpenses);
         const mb=bals[g.members[0]?.id]||0;
-        const tot=g.expenses.reduce((a,e)=>a+(+e.amount||0),0);
+        const tot=activeExpenses.reduce((a,e)=>a+(+e.amount||0),0);
         const col=mb>=0?'var(--sage)':'var(--danger)';
         const hasDebt=mb<-0.5;
         return `<div class="row" onclick="S.catFilter='all';go('group','${g.id}')">
@@ -1787,7 +1800,7 @@ function scrHome(){
               <p class="fw7" style="font-size:15px">${esc(g.name)}</p>
               ${hasDebt?`<span class="debt-badge">${t('hasDebt')}</span>`:''}
             </div>
-            <p class="txt-muted" style="font-size:12px;margin-top:2px">${g.members.length} ${t('people')} · ${fmt(tot)}</p>
+            <p class="txt-muted" style="font-size:12px;margin-top:2px">${g.members.length} ${t('people')} · ${fmt(tot)}${hjkClearedExpenses(g).length?` · เคลียร์แล้ว ${hjkClearedExpenses(g).length}`:''}</p>
           </div>
           <div class="text-right">
             <p class="ff-s fw7" style="font-size:17px;color:${col}">${mb>=0?'+':''}${fmt(mb)}</p>
@@ -3049,7 +3062,8 @@ function pickEE(e){const b=document.getElementById('ee-btn');if(b){b.textContent
 ═══════════════════════════════════════════════════════════ */
 function scrSummary(){
   const g=revalidateGroup(getG(S.selectedGroupId));if(!g)return go('home');
-  const goodExpenses=validExpenses(g),badExpenses=invalidExpenses(g);
+  const activeGroup={...g,expenses:hjkActiveExpenses(g)};
+  const goodExpenses=validExpenses(activeGroup),badExpenses=invalidExpenses(activeGroup);
   const bals=calcBal(g.members,goodExpenses);
   const txns=getPairwise(g.members,goodExpenses);
   
@@ -3100,7 +3114,7 @@ function scrSummary(){
       }).join('');
 
   // Per-expense breakdown
-  const expBD=[...g.expenses].reverse().map(exp=>{
+  const expBD=[...goodExpenses].reverse().map(exp=>{
     const invalid=(exp.invalidReasons||[]).length>0;
     const amt=+exp.amount||0;
     const payers=exp.payers||[{id:exp.paidById,amt}];
@@ -3181,17 +3195,17 @@ function scrSummary(){
         <p class="txt-muted" style="font-size:12px">${badExpenses.length} expense(s) contain missing or deleted member references. They are skipped in settlement until fixed.</p>
       </div>`:''}
       <div class="summary-action-wrap">
-        <button class="btn btn-secondary" style="flex:1" onclick="openExportModal()" ${g.expenses.length===0?'disabled':''}>📤 ${t('exportSummary')}</button>
+        <button class="btn btn-secondary" style="flex:1" onclick="openExportModal()" ${goodExpenses.length===0?'disabled':''}>📤 ${t('exportSummary')}</button>
       </div>
       ${summaryCollapseSection('groups','♙',S.lang==='th'?'กลุ่มทั้งหมด':'Group members',g.members.length,membersBody,false)}
-      ${summaryCollapseSection('bills','▤',S.lang==='th'?'บิลในกลุ่ม':'Group bills',g.expenses.length,billsBody,false)}
+      ${summaryCollapseSection('bills','▤',S.lang==='th'?'บิลในกลุ่ม':'Group bills',goodExpenses.length,billsBody,false)}
       ${summaryCollapseSection('total','▣',S.lang==='th'?'ยอดบิลรวม':'Bill total',fmt(totalNet),totalBody,true)}
-      ${txns.length>0?`<button class="btn btn-primary" onclick="settleAll('${g.id}')">${t('markAllSettled')}</button>`:''}
+      ${txns.length>0?`<button class="btn btn-primary" onclick="settleAll('${g.id}')">${S.lang==='th'?'ไปเคลียร์ใน JKJ':'Clear in JKJ'}</button>`:''}
       <div style="height:10px"></div>
     </div>
   </div>`;
 }
-function settleAll(gid){const g=getG(gid);updG({...g,expenses:[]});toast(t('allSettledToast'));go('group',gid);}
+function settleAll(gid){openJKJClearMoney();}
 
 /* ═══════════════════════════════════════════════════════════
    INSTALLMENTS
@@ -3474,7 +3488,7 @@ function scrActivity(){
           const payers=(exp.payers||[{id:exp.paidById,amt:exp.amount}]).map(p=>`${GN(g,p.id)} ${fmt(p.amt)}`).join(', ');
           return compactRow('activity',`${exp.gid}-${exp.id}`,
             `<div style="width:44px;height:44px;background:var(--accent-lt);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${exp.emoji}</div>
-             <div class="row-main-text"><p class="row-main-title">${esc(exp.title)}</p><p class="row-main-sub">${exp.gEmoji} ${esc(exp.gName)}</p></div>
+             <div class="row-main-text"><div style="display:flex;align-items:center;min-width:0">${hjkClearedBadge(exp)}<p class="row-main-title">${esc(exp.title)}</p></div><p class="row-main-sub">${exp.gEmoji} ${esc(exp.gName)}</p></div>
              <span class="ff-s fw7" style="font-size:16px">${fmt(exp.amount)}</span>`,
             `<p style="font-size:12px;line-height:1.55">${t('payer')}: <strong style="color:var(--ink)">${esc(payers)}</strong><br>${exp.note?esc(exp.note):t('noExpenses')}</p>
              <div class="row-actions"><button class="row-action primary" onclick="event.stopPropagation();go('group','${exp.gid}')">${sportCopyText('เปิดกลุ่ม','Open group')}</button><button class="row-action" onclick="event.stopPropagation();S.editExpenseId='${exp.id}';go('edit-expense','${exp.gid}')">${t('edit')}</button><button class="row-action danger" onclick="event.stopPropagation();delExp('${exp.gid}','${exp.id}')">${t('del')}</button></div>`
@@ -4017,8 +4031,9 @@ function scrIOwe(){
   const iOweList=[],iAmOwedList=[];
   S.groups.forEach(g=>{
     const myId=g.members[0]?.id;if(!myId)return;
-    const txns=getPairwise(g.members,g.expenses);
-    const latestDate=(g.expenses||[]).reduce((latest,e)=>{
+    const activeExpenses=hjkActiveExpenses(g);
+    const txns=getPairwise(g.members,activeExpenses);
+    const latestDate=activeExpenses.reduce((latest,e)=>{
       const d=new Date(e.date||0).getTime();
       return d>(latest||0)?d:latest;
     },0);
@@ -4052,8 +4067,8 @@ function scrIOwe(){
     const person=isPay?x.toM:x.fromM;
     const pid=isPay?x.toId:x.fromId;
     const action=isPay
-      ?`<button class="hjk-primary-action" onclick="event.stopPropagation();openSettleSheet('${x.gid}','${x.toId}',${x.amount.toFixed(2)})">▱ ${payLabel}</button>`
-      :`<button class="hjk-primary-action" onclick="event.stopPropagation();toast('${remindLabel}')">⌁ ${remindLabel}</button>`;
+      ?`<button class="hjk-primary-action" onclick="event.stopPropagation();openJKJClearMoney()">▱ ${S.lang==='th'?'เปิด JKJ':'Open JKJ'}</button>`
+      :`<button class="hjk-primary-action" onclick="event.stopPropagation();openJKJClearMoney()">⌁ ${S.lang==='th'?'เปิด JKJ':'Open JKJ'}</button>`;
     return `<div class="iowe-row-wrap" id="iowe-wrap-${rowKey}">
       <div class="iowe-row-compact${_expandedIOwe[rowKey]?' expanded':''}" data-iowe-key="${rowKey}" onclick="toggleIOweRow('${rowKey}')">
         ${renderAv(getG(x.gid),person,'av-sm')}
@@ -4107,7 +4122,7 @@ function scrIOwe(){
             <p class="hjk-hero-amount">${fmt(totalOwed)}</p>
             <p class="hjk-hero-sub">${S.lang==='th'?'จากยอดที่ต้องจ่าย':'From payables'} ${fmt(totalIOwe)}</p>
           </div>
-          <button class="hjk-hero-pay" onclick="toast('${S.lang==='th'?'เลือกรายการที่ต้องการชำระ':'Choose an item to settle'}')">▣ ${payLabel}</button>
+          <button class="hjk-hero-pay" onclick="openJKJClearMoney()">▣ ${S.lang==='th'?'เปิด JKJ':'Open JKJ'}</button>
         </div>
       </div>
       <div class="hjk-filter-row">
@@ -4212,7 +4227,9 @@ function recordExpenseToJKJ(gid,eid){
 
 function scrGroupFiltered(){
   const g=revalidateGroup(getG(S.selectedGroupId));if(!g)return go('home');
-  const bals=calcBal(g.members,g.expenses);
+  const activeExpenses=hjkActiveExpenses(g);
+  const clearedCount=hjkClearedExpenses(g).length;
+  const bals=calcBal(g.members,activeExpenses);
   const myId=g.members[0]?.id,myBal=bals[myId]||0;
   const col=myBal>=0?'var(--sage)':'var(--danger)';
   const hasDebt=myBal<-0.5;
@@ -4228,7 +4245,7 @@ function scrGroupFiltered(){
   const chips=CAT_KEYS.map(k=>`<button class="cat-chip${filter===k?' on':''}" onclick="S.catFilter='${k}';render()">${catEmoji(k)} ${catLabel(k)}</button>`).join('');
 
   // Filter expenses
-  const filtered=g.expenses.filter(e=>filter==='all'||(CAT_MAP[e.emoji]||'other')===filter);
+  const filtered=activeExpenses.filter(e=>filter==='all'||(CAT_MAP[e.emoji]||'other')===filter);
 
   const expList=filtered.length===0
     ?`<div class="empty"><div class="ei">🔍</div><p>${filter==='all'?'No expenses yet':'No expenses in this category'}</p></div>`
@@ -4243,7 +4260,7 @@ function scrGroupFiltered(){
         return compactRow('gexp',`${g.id}-${exp.id}`,
           `<div style="width:44px;height:44px;border-radius:14px;background:var(--accent-lt);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${exp.emoji}</div>
            <div class="row-main-text">
-             <div style="display:flex;align-items:center;min-width:0">${exp.isSettlement?'<span style="font-size:10px;background:var(--sage-lt);color:var(--sage);padding:2px 7px;border-radius:100px;font-weight:700;margin-right:6px;flex-shrink:0">✓ Settled</span>':''}<p class="row-main-title">${esc(exp.title)}</p>${noteBadge}</div>
+             <div style="display:flex;align-items:center;min-width:0">${hjkClearedBadge(exp)}<p class="row-main-title">${esc(exp.title)}</p>${noteBadge}</div>
              <p class="row-main-sub">${pNames} · ${exp.splitType}${invalid?' · Needs member fix':''}</p>
            </div>
            <span class="ff-s fw7" style="font-size:16px">${fmt(exp.amount)}</span>`,
@@ -4302,7 +4319,7 @@ function scrGroupFiltered(){
       <div class="cat-scroll mb12">${chips}</div>
       <div class="sec-hdr">
         <h3>${t('expenses')}</h3>
-        <span class="txt-muted" style="font-size:13px">${filtered.length} ${t('items')}</span>
+        <span class="txt-muted" style="font-size:13px">${filtered.length} ${t('items')}${clearedCount?` · เคลียร์แล้ว ${clearedCount}`:''}</span>
       </div>
       ${expList}
     </div>
@@ -4359,6 +4376,11 @@ function openExpDetail(gid,eid){
       const sh=c.length?priceToSplit/c.length:0;
       const iPayerId = item.payerId || exp.paidById;
       const iPayerName = GN(g, iPayerId);
+      const clearedBadges = hjkClearedDetailsForExpense(exp, item.name || "").map(detail => `
+        <span style="display:inline-flex;align-items:center;gap:4px;background:var(--sage-lt);color:var(--sage);border-radius:100px;padding:3px 9px;font-size:11px;font-weight:700">
+          ✓ ${esc(detail.person || '')} ${fmt(detail.amount)}
+        </span>
+      `).join('');
       
       let chargeInfo = [];
       if (item.hasService) chargeInfo.push(`SC ${exp.service_percent || 0}%`);
@@ -4383,8 +4405,16 @@ function openExpDetail(gid,eid){
             </span>`;
           }).join('')}
         </div>
+        ${clearedBadges?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:7px">${clearedBadges}</div>`:''}
       </div>`;
     }).join('')}`:'';
+  const clearedDetails = hjkClearedDetailsForExpense(exp);
+  const clearStatusSection = clearedDetails.length && !(exp.subItems&&exp.subItems.length>0) ? `
+    <p class="lbl" style="margin-top:16px">✓ JKJ</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      ${clearedDetails.map(detail=>`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--sage-lt);color:var(--sage);border-radius:100px;padding:5px 10px;font-size:12px;font-weight:700">${esc(detail.person||'')} ${fmt(detail.amount)}</span>`).join('')}
+    </div>
+  ` : '';
 
   const oRows=allIds.map(id=>{
     const m=g.members.find(x=>x.id===id);
@@ -4411,6 +4441,7 @@ function openExpDetail(gid,eid){
     ${exp.note?`<div style="background:var(--gold-lt);border-radius:12px;padding:10px 14px;margin-bottom:14px"><p style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:2px">📝 ${t('noteLabel')}</p><p style="font-size:13px;color:var(--ink)">${esc(exp.note)}</p></div>`:''}
     <p class="lbl">${t('payer')}</p>${pRows}
     ${siSection}
+    ${clearStatusSection}
     <p class="lbl" style="margin-top:16px">${t('participants')} — ${t('share')} & ${t('owedAmt')}</p>
     <div style="background:var(--card);border-radius:14px;border:1px solid var(--border);padding:0 4px">${oRows}</div>
     <div style="display:flex;gap:8px;margin-top:14px">
@@ -5043,120 +5074,6 @@ function render(){
 
 /* ═══════════════ BOOT ═══════════════════════════════════ */
 load();render();
-</script>
-<!-- ── COPY CODE BUTTON ──────────────────────────────── -->
-<button id="copy-btn" onclick="copyCode()" title="Copy all code"
-  style="position:fixed;z-index:9999;
-    width:52px;height:52px;border-radius:50%;border:none;
-    background:linear-gradient(135deg,#1A1A2E,#2D2D4E);
-    color:#fff;font-size:22px;cursor:grab;
-    box-shadow:0 4px 20px rgba(26,26,46,.35);
-    display:flex;align-items:center;justify-content:center;
-    transition:transform .15s,opacity .15s;
-    touch-action:none;user-select:none">
-  📋
-</button>
-<div id="copy-toast"
-  style="position:fixed;z-index:9999;
-    background:#1A1A2E;color:#fff;padding:8px 16px;
-    border-radius:100px;font-size:13px;font-weight:600;
-    opacity:0;pointer-events:none;transition:opacity .3s;
-    white-space:nowrap;box-shadow:0 4px 16px rgba(26,26,46,.3)">
-  ✅ Copied!
-</div>
-<script>
-(function(){
-  const btn=document.getElementById('copy-btn');
-  const ct=document.getElementById('copy-toast');
-  
-  // Restore position
-  let x = localStorage.getItem('copyButtonX');
-  let y = localStorage.getItem('copyButtonY');
-  if(x !== null && y !== null){
-    btn.style.left = x + 'px';
-    btn.style.top = y + 'px';
-  } else {
-    btn.style.bottom = '100px';
-    btn.style.right = '16px';
-  }
-
-  function updateToastPos() {
-    const rect = btn.getBoundingClientRect();
-    ct.style.left = rect.left + 'px';
-    ct.style.top = (rect.top - 45) + 'px';
-  }
-
-  let isDragging = false;
-  let startX, startY, initialX, initialY;
-  let hasMoved = false;
-
-  btn.onpointerdown = function(e) {
-    isDragging = true;
-    hasMoved = false;
-    btn.style.cursor = 'grabbing';
-    startX = e.clientX;
-    startY = e.clientY;
-    const rect = btn.getBoundingClientRect();
-    initialX = rect.left;
-    initialY = rect.top;
-    btn.setPointerCapture(e.pointerId);
-  };
-
-  btn.onpointermove = function(e) {
-    if (!isDragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved = true;
-    
-    let newX = initialX + dx;
-    let newY = initialY + dy;
-    
-    // Keep within viewport
-    newX = Math.max(0, Math.min(window.innerWidth - 52, newX));
-    newY = Math.max(0, Math.min(window.innerHeight - 52, newY));
-    
-    btn.style.left = newX + 'px';
-    btn.style.top = newY + 'px';
-    btn.style.bottom = 'auto';
-    btn.style.right = 'auto';
-  };
-
-  btn.onpointerup = function(e) {
-    if (!isDragging) return;
-    isDragging = false;
-    btn.style.cursor = 'grab';
-    localStorage.setItem('copyButtonX', parseInt(btn.style.left));
-    localStorage.setItem('copyButtonY', parseInt(btn.style.top));
-    if (hasMoved) {
-      // Prevent click if we dragged
-      e.stopPropagation();
-    }
-  };
-
-  window.copyCode = function(){
-    if(hasMoved) return; // Don't copy if it was a drag
-    fetch(window.location.href)
-      .then(r=>r.text())
-      .then(html=>{
-        navigator.clipboard.writeText(html).then(()=>{
-          btn.textContent='✅';
-          updateToastPos();
-          ct.style.opacity='1';
-          setTimeout(()=>{btn.textContent='📋';ct.style.opacity='0';},2000);
-        }).catch(()=>{
-          const ta=document.createElement('textarea');
-          ta.value=html;ta.style.position='fixed';ta.style.opacity='0';
-          document.body.appendChild(ta);ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          btn.textContent='✅';
-          updateToastPos();
-          ct.style.opacity='1';
-          setTimeout(()=>{btn.textContent='📋';ct.style.opacity='0';},2000);
-        });
-      });
-  };
-})();
 </script>
 </body>
 </html>
