@@ -7928,17 +7928,36 @@
       }
 
       try {
-        const result = await window.Tesseract.recognize(file, "tha+eng", {
-          logger: (message) => {
-            if (!message?.progress) return;
-            state.billScan.progress = Math.round(message.progress * 100);
-            state.billScan.status = message.status === "recognizing text" ? "กำลังอ่านข้อความในบิล" : "กำลังเตรียม OCR";
+        const targets = await createBillScanOcrTargets(file);
+        let best = null;
+        let lastError = null;
+        for (const target of targets) {
+          try {
+            state.billScan.status = `กำลังอ่านข้อความในบิล (${target.label})`;
             updateBillScanStatus();
+            const result = await window.Tesseract.recognize(target.source, "tha+eng", {
+              logger: (message) => {
+                if (!message?.progress) return;
+                state.billScan.progress = Math.round(message.progress * 100);
+                state.billScan.status = message.status === "recognizing text" ? `กำลังอ่านข้อความในบิล (${target.label})` : "กำลังเตรียม OCR";
+                updateBillScanStatus();
+              }
+            });
+            const text = result?.data?.text || "";
+            const parsed = parseBillText(text);
+            if (!best || parsed.items.length > best.parsed.items.length || (parsed.items.length === best.parsed.items.length && text.length > best.text.length)) {
+              best = { text, parsed, label: target.label };
+            }
+            if (parsed.items.length >= 2) break;
+          } catch (targetError) {
+            lastError = targetError;
+            console.warn(targetError);
           }
-        });
-        state.billScan.rawText = result?.data?.text || "";
-        applyParsedBillText(parseBillText(state.billScan.rawText));
-        state.billScan.status = state.billScan.items.length ? `อ่านได้ ${state.billScan.items.length} รายการ` : "อ่านยอดรวมได้ ลองตรวจข้อความอีกครั้ง";
+        }
+        if (!best) throw lastError || new Error("Bill OCR failed");
+        state.billScan.rawText = best.text;
+        applyParsedBillText(best.parsed);
+        state.billScan.status = state.billScan.items.length ? `อ่านได้ ${state.billScan.items.length} รายการ (${best.label})` : "อ่านยอดรวมได้ ลองตรวจข้อความอีกครั้ง";
       } catch (error) {
         console.error(error);
         state.billScan.status = "อ่านรูปไม่สำเร็จ วางข้อความบิลเองได้";
@@ -7955,6 +7974,72 @@
       applyParsedBillText(parseBillText(state.billScan.rawText));
       state.billScan.status = state.billScan.items.length ? `วิเคราะห์ได้ ${state.billScan.items.length} รายการ` : "ยังไม่เจอรายการสินค้า ลองแก้ข้อความ";
       renderBillScan();
+    }
+
+    async function createBillScanOcrTargets(file) {
+      const targets = [{ label: "ทั้งภาพ", source: file }];
+      try {
+        const image = await loadBillScanImage(file);
+        const full = billScanCanvasDataUrl(image, { x: 0, y: 0, width: image.naturalWidth, height: image.naturalHeight });
+        const receipt = billScanCanvasDataUrl(image, {
+          x: image.naturalWidth * 0.02,
+          y: image.naturalHeight * 0.15,
+          width: image.naturalWidth * 0.96,
+          height: image.naturalHeight * 0.68
+        });
+        const items = billScanCanvasDataUrl(image, {
+          x: image.naturalWidth * 0.03,
+          y: image.naturalHeight * 0.30,
+          width: image.naturalWidth * 0.94,
+          height: image.naturalHeight * 0.52
+        });
+        targets.push({ label: "ส่วนบิล", source: receipt }, { label: "รายการสินค้า", source: items }, { label: "ปรับภาพ", source: full });
+      } catch (error) {
+        console.warn(error);
+      }
+      return targets;
+    }
+
+    function loadBillScanImage(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve(image);
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Image load failed"));
+        };
+        image.src = url;
+      });
+    }
+
+    function billScanCanvasDataUrl(image, crop) {
+      const sourceWidth = Math.max(1, Math.min(image.naturalWidth - crop.x, crop.width));
+      const sourceHeight = Math.max(1, Math.min(image.naturalHeight - crop.y, crop.height));
+      const maxWidth = 1500;
+      const scale = Math.min(1, maxWidth / sourceWidth);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+      canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.filter = "contrast(1.15) grayscale(1)";
+      context.drawImage(
+        image,
+        Math.max(0, crop.x),
+        Math.max(0, crop.y),
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+      return canvas.toDataURL("image/png");
     }
 
     function applyParsedBillText(parsed) {
@@ -7981,8 +8066,13 @@
         .map((line) => line.replace(/\s+/g, " ").trim())
         .filter(Boolean);
       const lines = rawLines.map((line) => line.replace(/[|]/g, " ").trim()).filter(Boolean);
-      const totalWords = /(รวม|ยอดรวม|ยอดสุทธิ|สุทธิ|total|grand|amount|ชำระ|จ่ายจริง|net)/i;
-      const skipWords = /(ภาษี|vat|tax|เงินทอน|change|เงินสด|cash|บัตร|card|พร้อมเพย์|promptpay|ส่วนลด|discount|ยอดก่อน|subtotal|เลขที่|สาขา|receipt|ใบเสร็จ|ผู้รับ|โทร)/i;
+      const itemHeaderWords = /(รายการ\s*สินค้า|สินค้า|items?)/i;
+      const totalWords = /(รวม|ยอดรวม|ยอดสุทธิ|สุทธิ|total|grand|amount|ชำระ|จ่ายจริง|net|ยอดที่ต้องจ่าย)/i;
+      const skipWords = /(ภาษี|vat|tax|เงินทอน|change|เงินสด|cash|บัตร|card|พร้อมเพย์|promptpay|ส่วนลด|discount|ยอดก่อน|subtotal|เลขที่|เลขที่ใบเสร็จ|เลขที่ใบเสร็จ|เลขที่สั่งซื้อ|รหัสร้าน|สาขา|receipt|ใบเสร็จ|ผู้รับ|โทร|7delivery|delivery|ดูใบกำกับ|ขอใบกำกับ|ใบกำกับ|pdf)/i;
+      const itemStartIndex = lines.findIndex((line) => itemHeaderWords.test(line));
+      const itemStopIndex = itemStartIndex >= 0
+        ? lines.findIndex((line, index) => index > itemStartIndex && (totalWords.test(line) || /(ดูใบกำกับ|ขอใบกำกับ|ใบกำกับ|pdf|ขอบคุณ|thank)/i.test(line)))
+        : -1;
       let total = 0;
       let totalLineIndex = -1;
 
@@ -7997,25 +8087,34 @@
 
       const items = [];
       lines.forEach((line, index) => {
+        if (itemStartIndex >= 0 && index <= itemStartIndex) return;
+        if (itemStopIndex >= 0 && index >= itemStopIndex) return;
         if (index === totalLineIndex || totalWords.test(line) || skipWords.test(line)) return;
         const money = lastMoneyMatch(line);
         if (!money || money.value <= 0) return;
         const title = cleanBillItemTitle(line.slice(0, money.index).trim());
         if (!title || title.length < 2 || /^\d+$/.test(title)) return;
         if (money.value > 99999) return;
+        if (!isLikelyBillItemLine(line, title, money, itemStartIndex >= 0)) return;
         items.push({ title, amount: money.value });
       });
 
+      const storeLine = lines.find((line, index) => (
+        index !== itemStartIndex &&
+        /(7-?eleven|โลตัส|lotus|big\s*c|makro|tops|ร้าน|สาขา)/i.test(line) &&
+        !/รหัสร้าน|เลขที่|ใบเสร็จ|รายการสินค้า/i.test(line)
+      ));
       const firstUsefulLine = lines.find((line) => (
         line.length >= 2 &&
         !lastMoneyMatch(line) &&
         !skipWords.test(line) &&
-        !totalWords.test(line)
+        !totalWords.test(line) &&
+        !itemHeaderWords.test(line)
       ));
       if (!total) total = sum(items.map((item) => item.amount));
 
       return {
-        store: cleanStoreName(firstUsefulLine || ""),
+        store: cleanStoreName(storeLine || firstUsefulLine || ""),
         date: extractBillDate(lines.join(" ")),
         time: extractBillTime(lines.join(" ")),
         total: clampMoney(total),
@@ -8028,12 +8127,22 @@
     }
 
     function lastMoneyMatch(line) {
-      const matches = [...String(line || "").matchAll(/(?:฿|THB)?\s*(-?\d{1,3}(?:,\d{3})*|-?\d+)(?:[.,](\d{1,2}))?/gi)];
+      const matches = [...String(line || "").matchAll(/(?:฿|THB)?\s*(-?\d{1,3}(?:,\d{3})*|-?\d+)\s*(?:[.,]\s*(\d{1,2}))?/gi)];
       if (!matches.length) return null;
       const match = matches[matches.length - 1];
       const raw = `${match[1] || "0"}.${(match[2] || "00").padEnd(2, "0")}`;
       const value = clampMoney(raw.replace(/,/g, ""));
       return { value, index: match.index || 0, raw: match[0] };
+    }
+
+    function isLikelyBillItemLine(line, title, money, insideItemSection) {
+      const text = String(line || "");
+      if (/(รหัสร้าน|เลขที่|ใบเสร็จ|สาขา|delivery|pdf|ดูใบกำกับ|ขอใบกำกับ)/i.test(text)) return false;
+      if (/[A-Za-zก-ฮ]/.test(String(money.raw || "").replace(/[.,\d\s฿]/g, ""))) return false;
+      if (insideItemSection) return true;
+      const hasLeadingQty = /^\s*(\d+|[๐-๙]+)\s+/.test(text);
+      const hasDecimalPrice = /(?:฿|THB)?\s*\d+(?:,\d{3})*\s*[.,]\s*\d{1,2}\b/i.test(text);
+      return hasLeadingQty && hasDecimalPrice && title.length >= 2;
     }
 
     function cleanBillItemTitle(title) {
@@ -8052,7 +8161,8 @@
     }
 
     function extractBillTime(text) {
-      const match = String(text || "").match(/(?:เวลา|time)?\s*([01]?\d|2[0-3])[:. ]([0-5]\d)/i);
+      const source = String(text || "");
+      const match = source.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/) || source.match(/(?:เวลา|time)\s*([01]?\d|2[0-3])[:. ]([0-5]\d)\b/i);
       if (!match) return currentTime();
       return `${String(match[1]).padStart(2, "0")}:${match[2]}`;
     }
