@@ -1831,6 +1831,195 @@
       background: rgba(216, 231, 220, 0.1);
     }
 
+    .scan-action {
+      min-height: 36px;
+      padding: 7px 11px;
+      border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .scan-sheet {
+      max-height: min(90dvh, 760px);
+    }
+
+    .scan-dropzone {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border: 1px dashed color-mix(in srgb, var(--primary) 34%, var(--border));
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+    }
+
+    .scan-dropzone input {
+      width: 100%;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .scan-preview {
+      width: 100%;
+      max-height: 170px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: var(--surface-soft);
+    }
+
+    .scan-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 40px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .scan-progress {
+      width: 82px;
+      height: 6px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--border) 70%, transparent);
+    }
+
+    .scan-progress span {
+      display: block;
+      width: var(--scan-progress, 0%);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--primary);
+      transition: width 180ms ease;
+    }
+
+    .scan-review-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .scan-review-grid .field.full,
+    .scan-review-grid .scan-raw {
+      grid-column: 1 / -1;
+    }
+
+    .scan-raw textarea {
+      min-height: 96px;
+      font-size: 13px;
+    }
+
+    .scan-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+
+    .scan-summary strong {
+      color: var(--primary);
+      font-size: 22px;
+      font-weight: 780;
+    }
+
+    .scan-item-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .scan-list,
+    .scan-groups {
+      display: grid;
+      gap: 8px;
+    }
+
+    .scan-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) minmax(76px, 0.34fr);
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .scan-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary);
+    }
+
+    .scan-group {
+      padding: 10px;
+      border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+    }
+
+    .scan-group-head,
+    .scan-group-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .scan-group-head {
+      margin-bottom: 8px;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    .scan-group-row {
+      padding: 7px 0;
+      border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+      font-size: 13px;
+    }
+
+    .scan-group-row button {
+      color: var(--expense);
+      background: transparent;
+      font-weight: 760;
+    }
+
+    .scan-empty {
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 560px) {
+      .scan-review-grid,
+      .scan-item-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .scan-item {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .scan-item .input[data-scan-item-field="amount"] {
+        grid-column: 2;
+      }
+    }
+
     .transaction-detail {
       margin-top: 5px;
       color: var(--muted);
@@ -3602,6 +3791,7 @@
       <div class="sheet-head">
         <h2 class="sheet-title" id="sheetTitle">รายจ่าย</h2>
         <div class="sheet-head-actions">
+          <button class="scan-action" id="scanBillButton" type="button" hidden>สแกนบิล</button>
           <button class="ghost-action sheet-hold-button" id="holdSheetButton" type="button">ค้างไว้ก่อน</button>
           <button class="icon-button" id="closeSheetButton" type="button" title="ปิด" aria-label="ปิด">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
@@ -3666,6 +3856,92 @@
 
       <button class="primary-action" id="saveTransactionButton" type="submit" style="width:100%;">บันทึก</button>
     </form>
+  </div>
+
+  <div class="sheet-backdrop" id="billScanSheet" role="dialog" aria-modal="true" aria-labelledby="billScanTitle">
+    <div class="sheet scan-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="billScanTitle">สแกนบิลก่อนจน</h2>
+        <button class="icon-button" id="closeBillScanButton" type="button" title="ปิด" aria-label="ปิด">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+        </button>
+      </div>
+
+      <div class="mode-tabs" id="billScanModeTabs" aria-label="โหมดสแกนบิล">
+        <button class="mode-tab active" type="button" data-bill-scan-mode="rough">ยอดรวม</button>
+        <button class="mode-tab" type="button" data-bill-scan-mode="detail">แยกรายการ</button>
+      </div>
+
+      <div class="scan-dropzone">
+        <strong>เลือกรูปบิลหรือถ่ายรูปใหม่</strong>
+        <input id="billScanFileInput" type="file" accept="image/*" capture="environment">
+        <img class="scan-preview" id="billScanPreview" alt="ตัวอย่างบิล" hidden>
+        <div class="scan-status">
+          <span id="billScanStatus">ยังไม่ได้เลือกรูป</span>
+          <div class="scan-progress" aria-hidden="true"><span id="billScanProgress"></span></div>
+        </div>
+      </div>
+
+      <div class="scan-review-grid" style="margin-top:12px;">
+        <div class="field full">
+          <label for="billScanStoreInput">ร้านค้า / ชื่อบิล</label>
+          <input class="input" id="billScanStoreInput" type="text" placeholder="เช่น 7-Eleven">
+        </div>
+        <div class="field">
+          <label for="billScanDateInput">วันที่</label>
+          <input class="input" id="billScanDateInput" type="date">
+        </div>
+        <div class="field">
+          <label for="billScanTimeInput">เวลา</label>
+          <input class="input" id="billScanTimeInput" type="time">
+        </div>
+        <div class="field">
+          <label for="billScanTotalInput">ยอดรวม</label>
+          <input class="input" id="billScanTotalInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0">
+        </div>
+        <div class="field" id="billScanCategoryField">
+          <label for="billScanCategoryInput">หมวดหมู่</label>
+          <select class="select" id="billScanCategoryInput"></select>
+        </div>
+        <div class="field scan-raw">
+          <label for="billScanRawText">ข้อความที่อ่านได้</label>
+          <textarea class="textarea" id="billScanRawText" placeholder="OCR จะเติมข้อความตรงนี้ หรือวางข้อความบิลเองแล้วกดวิเคราะห์"></textarea>
+        </div>
+      </div>
+
+      <div class="action-row" style="margin-top:12px;">
+        <button class="secondary-action" id="analyzeBillTextButton" type="button">วิเคราะห์ข้อความ</button>
+        <button class="ghost-action" id="addBillScanItemButton" type="button">เพิ่มรายการเอง</button>
+      </div>
+
+      <div class="line-panel" id="billScanDetailPanel" style="margin-top:12px;" hidden>
+        <div class="scan-summary">
+          <span>ยอดที่จัดหมวดแล้ว</span>
+          <strong id="billScanAssignedTotal">฿0</strong>
+        </div>
+        <div class="scan-item-toolbar">
+          <select class="select" id="billScanAssignCategory"></select>
+          <button class="mini-action" id="assignBillScanItemsButton" type="button">ย้ายเข้าหมวดนี้</button>
+        </div>
+        <div>
+          <div class="line-panel-head">
+            <span class="line-panel-title">รายการยังไม่จัดหมวด</span>
+            <span class="section-note" id="billScanUnassignedCount">0 รายการ</span>
+          </div>
+          <div class="scan-list" id="billScanUnassignedList"></div>
+        </div>
+        <div>
+          <div class="line-panel-head">
+            <span class="line-panel-title">หมวดที่เลือกแล้ว</span>
+            <span class="section-note" id="billScanMismatchText"></span>
+          </div>
+          <div class="scan-groups" id="billScanGroups"></div>
+        </div>
+      </div>
+
+      <button class="primary-action" id="applyBillScanButton" type="button" style="width:100%; margin-top:14px;">ใส่ลงฟอร์มรายจ่าย</button>
+    </div>
   </div>
 
   <div class="sheet-backdrop" id="backfillSheet" role="dialog" aria-modal="true" aria-labelledby="backfillTitle">
@@ -3809,6 +4085,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
     const STORAGE_KEYS = {
       transactions: "jkj.transactions.v1",
@@ -3890,6 +4167,21 @@
       backfill: {
         incomes: [],
         expenses: []
+      },
+      billScan: {
+        mode: "rough",
+        rawText: "",
+        imageUrl: "",
+        store: "",
+        date: todayISO(),
+        time: currentTime(),
+        category: "",
+        total: 0,
+        items: [],
+        selectedIds: [],
+        status: "ยังไม่ได้เลือกรูป",
+        progress: 0,
+        reading: false
       },
       calcEl: null,
       calcMode: "amount",
@@ -3996,6 +4288,7 @@
       sheetTitle: document.getElementById("sheetTitle"),
       closeSheetButton: document.getElementById("closeSheetButton"),
       holdSheetButton: document.getElementById("holdSheetButton"),
+      scanBillButton: document.getElementById("scanBillButton"),
       editingTransactionId: document.getElementById("editingTransactionId"),
       transactionTypeInput: document.getElementById("transactionTypeInput"),
       transactionModeInput: document.getElementById("transactionModeInput"),
@@ -4013,6 +4306,30 @@
       timeInput: document.getElementById("timeInput"),
       titleInput: document.getElementById("titleInput"),
       noteInput: document.getElementById("noteInput"),
+      billScanSheet: document.getElementById("billScanSheet"),
+      closeBillScanButton: document.getElementById("closeBillScanButton"),
+      billScanFileInput: document.getElementById("billScanFileInput"),
+      billScanPreview: document.getElementById("billScanPreview"),
+      billScanStatus: document.getElementById("billScanStatus"),
+      billScanProgress: document.getElementById("billScanProgress"),
+      billScanStoreInput: document.getElementById("billScanStoreInput"),
+      billScanDateInput: document.getElementById("billScanDateInput"),
+      billScanTimeInput: document.getElementById("billScanTimeInput"),
+      billScanTotalInput: document.getElementById("billScanTotalInput"),
+      billScanCategoryField: document.getElementById("billScanCategoryField"),
+      billScanCategoryInput: document.getElementById("billScanCategoryInput"),
+      billScanRawText: document.getElementById("billScanRawText"),
+      analyzeBillTextButton: document.getElementById("analyzeBillTextButton"),
+      addBillScanItemButton: document.getElementById("addBillScanItemButton"),
+      billScanDetailPanel: document.getElementById("billScanDetailPanel"),
+      billScanAssignCategory: document.getElementById("billScanAssignCategory"),
+      assignBillScanItemsButton: document.getElementById("assignBillScanItemsButton"),
+      billScanUnassignedCount: document.getElementById("billScanUnassignedCount"),
+      billScanUnassignedList: document.getElementById("billScanUnassignedList"),
+      billScanGroups: document.getElementById("billScanGroups"),
+      billScanAssignedTotal: document.getElementById("billScanAssignedTotal"),
+      billScanMismatchText: document.getElementById("billScanMismatchText"),
+      applyBillScanButton: document.getElementById("applyBillScanButton"),
       openBackfillButton: document.getElementById("openBackfillButton"),
       backfillSheet: document.getElementById("backfillSheet"),
       backfillForm: document.getElementById("backfillForm"),
@@ -4127,6 +4444,20 @@
       els.backupButton.addEventListener("click", backupJson);
       els.closeSheetButton.addEventListener("click", closeTransactionSheet);
       els.holdSheetButton.addEventListener("click", holdTransactionDraft);
+      els.scanBillButton.addEventListener("click", openBillScanSheet);
+      els.closeBillScanButton.addEventListener("click", closeBillScanSheet);
+      els.billScanFileInput.addEventListener("change", handleBillScanFile);
+      els.analyzeBillTextButton.addEventListener("click", analyzeBillScanText);
+      els.addBillScanItemButton.addEventListener("click", addManualBillScanItem);
+      els.assignBillScanItemsButton.addEventListener("click", assignSelectedBillScanItems);
+      els.applyBillScanButton.addEventListener("click", applyBillScanToTransaction);
+      [els.billScanStoreInput, els.billScanDateInput, els.billScanTimeInput, els.billScanTotalInput, els.billScanCategoryInput, els.billScanRawText].forEach((input) => {
+        input.addEventListener("input", syncBillScanFields);
+        input.addEventListener("change", syncBillScanFields);
+      });
+      document.querySelectorAll("[data-bill-scan-mode]").forEach((button) => {
+        button.addEventListener("click", () => setBillScanMode(button.dataset.billScanMode));
+      });
       els.openBackfillButton.addEventListener("click", openBackfillSheet);
       els.closeBackfillButton.addEventListener("click", closeBackfillSheet);
       els.addLineItemButton.addEventListener("click", addCurrentLineItem);
@@ -4253,6 +4584,10 @@
         if (event.target === els.backfillSheet) closeBackfillSheet();
       });
 
+      els.billScanSheet.addEventListener("click", (event) => {
+        if (event.target === els.billScanSheet) closeBillScanSheet();
+      });
+
       document.addEventListener("keydown", (event) => {
         if (els.timeOverlay.classList.contains("open")) {
           if (event.key === "Escape") closeTimePicker();
@@ -4264,6 +4599,10 @@
           return;
         }
         if (event.key === "Escape" && els.sheet.classList.contains("open")) {
+          if (els.billScanSheet.classList.contains("open")) {
+            closeBillScanSheet();
+            return;
+          }
           closeTransactionSheet();
         }
         if (event.key === "Escape" && els.backfillSheet.classList.contains("open")) {
@@ -7520,6 +7859,402 @@
         .join("");
     }
 
+    function resetBillScanState(options = {}) {
+      state.billScan = {
+        mode: options.mode || state.billScan?.mode || "rough",
+        rawText: "",
+        imageUrl: "",
+        store: "",
+        date: todayISO(),
+        time: currentTime(),
+        category: defaultCategory("expense"),
+        total: 0,
+        items: [],
+        selectedIds: [],
+        status: "ยังไม่ได้เลือกรูป",
+        progress: 0,
+        reading: false
+      };
+      if (els.billScanFileInput) els.billScanFileInput.value = "";
+    }
+
+    function openBillScanSheet() {
+      if (els.transactionTypeInput.value !== "expense" || els.editingTransactionId.value) return;
+      resetBillScanState();
+      renderBillScan();
+      els.billScanSheet.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeBillScanSheet() {
+      els.billScanSheet.classList.remove("open");
+      if (!els.sheet.classList.contains("open") && !els.backfillSheet.classList.contains("open")) {
+        document.body.style.overflow = "";
+      }
+    }
+
+    function setBillScanMode(mode) {
+      state.billScan.mode = mode === "detail" ? "detail" : "rough";
+      renderBillScan();
+    }
+
+    function syncBillScanFields() {
+      state.billScan.store = els.billScanStoreInput.value.trim();
+      state.billScan.date = els.billScanDateInput.value || todayISO();
+      state.billScan.time = els.billScanTimeInput.value || currentTime();
+      state.billScan.total = clampMoney(els.billScanTotalInput.value);
+      state.billScan.category = els.billScanCategoryInput.value || defaultCategory("expense");
+      state.billScan.rawText = els.billScanRawText.value;
+      updateBillScanTotals();
+    }
+
+    async function handleBillScanFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (state.billScan.imageUrl) URL.revokeObjectURL(state.billScan.imageUrl);
+      state.billScan.imageUrl = URL.createObjectURL(file);
+      state.billScan.status = "กำลังอ่านรูปบิล";
+      state.billScan.progress = 4;
+      state.billScan.reading = true;
+      renderBillScan();
+
+      if (!window.Tesseract?.recognize) {
+        state.billScan.status = "OCR ยังโหลดไม่สำเร็จ วางข้อความบิลเองได้";
+        state.billScan.progress = 0;
+        state.billScan.reading = false;
+        renderBillScan();
+        showToast("โหลด OCR ไม่สำเร็จ ลองต่อเน็ตหรือวางข้อความเอง");
+        return;
+      }
+
+      try {
+        const result = await window.Tesseract.recognize(file, "tha+eng", {
+          logger: (message) => {
+            if (!message?.progress) return;
+            state.billScan.progress = Math.round(message.progress * 100);
+            state.billScan.status = message.status === "recognizing text" ? "กำลังอ่านข้อความในบิล" : "กำลังเตรียม OCR";
+            updateBillScanStatus();
+          }
+        });
+        state.billScan.rawText = result?.data?.text || "";
+        applyParsedBillText(parseBillText(state.billScan.rawText));
+        state.billScan.status = state.billScan.items.length ? `อ่านได้ ${state.billScan.items.length} รายการ` : "อ่านยอดรวมได้ ลองตรวจข้อความอีกครั้ง";
+      } catch (error) {
+        console.error(error);
+        state.billScan.status = "อ่านรูปไม่สำเร็จ วางข้อความบิลเองได้";
+        showToast("อ่านบิลไม่สำเร็จ");
+      } finally {
+        state.billScan.progress = 100;
+        state.billScan.reading = false;
+        renderBillScan();
+      }
+    }
+
+    function analyzeBillScanText() {
+      syncBillScanFields();
+      applyParsedBillText(parseBillText(state.billScan.rawText));
+      state.billScan.status = state.billScan.items.length ? `วิเคราะห์ได้ ${state.billScan.items.length} รายการ` : "ยังไม่เจอรายการสินค้า ลองแก้ข้อความ";
+      renderBillScan();
+    }
+
+    function applyParsedBillText(parsed) {
+      const category = state.billScan.category || defaultCategory("expense");
+      state.billScan.store = parsed.store || state.billScan.store || "";
+      state.billScan.date = parsed.date || state.billScan.date || todayISO();
+      state.billScan.time = parsed.time || state.billScan.time || currentTime();
+      state.billScan.total = parsed.total || state.billScan.total || sum(parsed.items.map((item) => item.amount));
+      state.billScan.category = category;
+      state.billScan.items = parsed.items.map((item) => ({
+        id: uid(),
+        title: item.title,
+        amount: clampMoney(item.amount),
+        category: "",
+        suggestedCategory: guessBillItemCategory(item.title)
+      }));
+      state.billScan.selectedIds = [];
+    }
+
+    function parseBillText(text) {
+      const rawLines = String(text || "")
+        .replace(/\u00a0/g, " ")
+        .split(/\r?\n/)
+        .map((line) => line.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+      const lines = rawLines.map((line) => line.replace(/[|]/g, " ").trim()).filter(Boolean);
+      const totalWords = /(รวม|ยอดรวม|ยอดสุทธิ|สุทธิ|total|grand|amount|ชำระ|จ่ายจริง|net)/i;
+      const skipWords = /(ภาษี|vat|tax|เงินทอน|change|เงินสด|cash|บัตร|card|พร้อมเพย์|promptpay|ส่วนลด|discount|ยอดก่อน|subtotal|เลขที่|สาขา|receipt|ใบเสร็จ|ผู้รับ|โทร)/i;
+      let total = 0;
+      let totalLineIndex = -1;
+
+      lines.forEach((line, index) => {
+        if (!totalWords.test(line)) return;
+        const amount = lastMoneyInLine(line);
+        if (amount > 0) {
+          total = amount;
+          totalLineIndex = index;
+        }
+      });
+
+      const items = [];
+      lines.forEach((line, index) => {
+        if (index === totalLineIndex || totalWords.test(line) || skipWords.test(line)) return;
+        const money = lastMoneyMatch(line);
+        if (!money || money.value <= 0) return;
+        const title = cleanBillItemTitle(line.slice(0, money.index).trim());
+        if (!title || title.length < 2 || /^\d+$/.test(title)) return;
+        if (money.value > 99999) return;
+        items.push({ title, amount: money.value });
+      });
+
+      const firstUsefulLine = lines.find((line) => (
+        line.length >= 2 &&
+        !lastMoneyMatch(line) &&
+        !skipWords.test(line) &&
+        !totalWords.test(line)
+      ));
+      if (!total) total = sum(items.map((item) => item.amount));
+
+      return {
+        store: cleanStoreName(firstUsefulLine || ""),
+        date: extractBillDate(lines.join(" ")),
+        time: extractBillTime(lines.join(" ")),
+        total: clampMoney(total),
+        items
+      };
+    }
+
+    function lastMoneyInLine(line) {
+      return lastMoneyMatch(line)?.value || 0;
+    }
+
+    function lastMoneyMatch(line) {
+      const matches = [...String(line || "").matchAll(/(?:฿|THB)?\s*(-?\d{1,3}(?:,\d{3})*|-?\d+)(?:[.,](\d{1,2}))?/gi)];
+      if (!matches.length) return null;
+      const match = matches[matches.length - 1];
+      const raw = `${match[1] || "0"}.${(match[2] || "00").padEnd(2, "0")}`;
+      const value = clampMoney(raw.replace(/,/g, ""));
+      return { value, index: match.index || 0, raw: match[0] };
+    }
+
+    function cleanBillItemTitle(title) {
+      return String(title || "")
+        .replace(/^[\s\d.)({\-\u0e50-\u0e59]+/, "")
+        .replace(/\b(x|qty|จำนวน)\s*\d+\b/gi, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    }
+
+    function cleanStoreName(name) {
+      return String(name || "")
+        .replace(/^\*+|\*+$/g, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    }
+
+    function extractBillTime(text) {
+      const match = String(text || "").match(/(?:เวลา|time)?\s*([01]?\d|2[0-3])[:. ]([0-5]\d)/i);
+      if (!match) return currentTime();
+      return `${String(match[1]).padStart(2, "0")}:${match[2]}`;
+    }
+
+    function extractBillDate(text) {
+      const match = String(text || "").match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+      if (!match) return todayISO();
+      let day = Number(match[1]);
+      let month = Number(match[2]);
+      let year = Number(match[3]);
+      if (year < 100) year += 2500;
+      if (year > 2400) year -= 543;
+      if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) return todayISO();
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    }
+
+    function guessBillItemCategory(title) {
+      const text = String(title || "").toLowerCase();
+      const categories = state.categories.filter((category) => category.type === "expense").map((category) => category.name);
+      const has = (name) => categories.includes(name);
+      if (/(น้ำ|ดื่ม|นม|uht|กาแฟ|ชา|โกโก้|เป๊ปซี่|โค้ก|คริสตัล|ดัชมิลล์|เบียร์)/i.test(text) && has("เครื่องดื่ม")) return "เครื่องดื่ม";
+      if (/(ข้าว|อาหาร|เบอร์เกอร์|ไก่|หมู|ปลา|ไข่|ขนม|แซนด์วิช|มาม่า|บะหมี่|ซูชิ|สลัด)/i.test(text) && has("อาหาร")) return "อาหาร";
+      if (/(สบู่|แชมพู|ยาสีฟัน|แปรง|ทิชชู่|ครีม|โลชั่น|ผงซัก|น้ำยา|ถุง|ของใช้)/i.test(text) && has("ช้อปปิ้ง")) return "ช้อปปิ้ง";
+      if (/(ยา|หน้ากาก|เวช|สุขภาพ|วิตามิน)/i.test(text) && has("สุขภาพ")) return "สุขภาพ";
+      return defaultCategory("expense");
+    }
+
+    function renderBillScan() {
+      const scan = state.billScan;
+      document.querySelectorAll("[data-bill-scan-mode]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.billScanMode === scan.mode);
+      });
+      els.billScanCategoryInput.innerHTML = expenseCategoryOptions(scan.category || defaultCategory("expense"));
+      els.billScanAssignCategory.innerHTML = expenseCategoryOptions(defaultCategory("expense"));
+      els.billScanStoreInput.value = scan.store || "";
+      els.billScanDateInput.value = scan.date || todayISO();
+      els.billScanTimeInput.value = scan.time || currentTime();
+      els.billScanTotalInput.value = scan.total || "";
+      els.billScanRawText.value = scan.rawText || "";
+      els.billScanPreview.hidden = !scan.imageUrl;
+      if (scan.imageUrl) els.billScanPreview.src = scan.imageUrl;
+      els.billScanCategoryField.hidden = scan.mode === "detail";
+      els.billScanDetailPanel.hidden = scan.mode !== "detail";
+      updateBillScanStatus();
+      renderBillScanItems();
+      updateBillScanTotals();
+    }
+
+    function updateBillScanStatus() {
+      els.billScanStatus.textContent = state.billScan.status || "พร้อมสแกนบิล";
+      els.billScanProgress.style.setProperty("--scan-progress", `${Math.max(0, Math.min(100, state.billScan.progress || 0))}%`);
+    }
+
+    function renderBillScanItems() {
+      const scan = state.billScan;
+      const unassigned = scan.items.filter((item) => !item.category);
+      const assigned = scan.items.filter((item) => item.category);
+      els.billScanUnassignedCount.textContent = `${unassigned.length} รายการ`;
+      els.billScanUnassignedList.innerHTML = unassigned.length ? "" : `<div class="scan-empty">ยังไม่มีรายการค้างจัดหมวด</div>`;
+      unassigned.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "scan-item";
+        row.innerHTML = `
+          <input type="checkbox" ${scan.selectedIds.includes(item.id) ? "checked" : ""} aria-label="เลือกรายการ">
+          <input class="input" data-scan-item-field="title" value="${escapeAttr(item.title)}" placeholder="ชื่อรายการ">
+          <input class="input" data-scan-item-field="amount" type="number" inputmode="decimal" min="0" step="0.01" value="${item.amount || ""}" placeholder="ยอด">
+        `;
+        row.querySelector('input[type="checkbox"]').addEventListener("change", (event) => toggleBillScanItem(item.id, event.target.checked));
+        row.querySelectorAll("[data-scan-item-field]").forEach((input) => {
+          input.addEventListener("input", () => updateBillScanItem(item.id, input.dataset.scanItemField, input.value));
+          input.addEventListener("change", () => updateBillScanItem(item.id, input.dataset.scanItemField, input.value));
+        });
+        els.billScanUnassignedList.appendChild(row);
+      });
+
+      const grouped = assigned.reduce((groups, item) => {
+        if (!groups[item.category]) groups[item.category] = [];
+        groups[item.category].push(item);
+        return groups;
+      }, {});
+      const categories = Object.keys(grouped);
+      els.billScanGroups.innerHTML = categories.length ? "" : `<div class="scan-empty">เลือกหมวด แล้วติ๊กรายการเพื่อย้ายเข้าหมวด</div>`;
+      categories.forEach((category) => {
+        const items = grouped[category];
+        const wrap = document.createElement("div");
+        wrap.className = "scan-group";
+        wrap.innerHTML = `
+          <div class="scan-group-head">
+            <span>${escapeHtml(category)}</span>
+            <span>${formatCurrency(sum(items.map((item) => item.amount)))}</span>
+          </div>
+          ${items.map((item) => `
+            <div class="scan-group-row">
+              <span>${escapeHtml(item.title)}</span>
+              <span>${formatPlainMoney(item.amount)}</span>
+              <button type="button" data-unassign-bill-item="${escapeAttr(item.id)}">ย้ายออก</button>
+            </div>
+          `).join("")}
+        `;
+        wrap.querySelectorAll("[data-unassign-bill-item]").forEach((button) => {
+          button.addEventListener("click", () => unassignBillScanItem(button.dataset.unassignBillItem));
+        });
+        els.billScanGroups.appendChild(wrap);
+      });
+    }
+
+    function updateBillScanTotals() {
+      const assignedTotal = sum(state.billScan.items.filter((item) => item.category).map((item) => item.amount));
+      const total = clampMoney(els.billScanTotalInput.value || state.billScan.total);
+      els.billScanAssignedTotal.textContent = formatCurrency(assignedTotal);
+      const diff = clampMoney(total - assignedTotal);
+      els.billScanMismatchText.textContent = state.billScan.mode === "detail" && total && Math.abs(diff) >= 0.01
+        ? `ต่างจากยอดรวม ${formatCurrency(diff)}`
+        : "";
+    }
+
+    function toggleBillScanItem(id, checked) {
+      state.billScan.selectedIds = checked
+        ? unique([...state.billScan.selectedIds, id])
+        : state.billScan.selectedIds.filter((itemId) => itemId !== id);
+    }
+
+    function updateBillScanItem(id, field, value) {
+      state.billScan.items = state.billScan.items.map((item) => {
+        if (item.id !== id) return item;
+        return { ...item, [field]: field === "amount" ? clampMoney(value) : value };
+      });
+      updateBillScanTotals();
+    }
+
+    function assignSelectedBillScanItems() {
+      const category = els.billScanAssignCategory.value || defaultCategory("expense");
+      if (!state.billScan.selectedIds.length) {
+        showToast("ติ๊กรายการก่อนย้ายเข้าหมวด");
+        return;
+      }
+      state.billScan.items = state.billScan.items.map((item) => (
+        state.billScan.selectedIds.includes(item.id) ? { ...item, category } : item
+      ));
+      state.billScan.selectedIds = [];
+      renderBillScan();
+    }
+
+    function unassignBillScanItem(id) {
+      state.billScan.items = state.billScan.items.map((item) => (
+        item.id === id ? { ...item, category: "" } : item
+      ));
+      renderBillScan();
+    }
+
+    function addManualBillScanItem() {
+      state.billScan.items.push({ id: uid(), title: "", amount: 0, category: "", suggestedCategory: defaultCategory("expense") });
+      state.billScan.mode = "detail";
+      renderBillScan();
+    }
+
+    function applyBillScanToTransaction() {
+      syncBillScanFields();
+      const scan = state.billScan;
+      const title = scan.store || "สแกนบิลก่อนจน";
+      els.dateInput.value = scan.date || todayISO();
+      els.timeInput.value = scan.time || currentTime();
+      els.titleInput.value = title;
+      els.noteInput.value = scan.rawText ? `สแกนบิลก่อนจน\n${scan.rawText.trim().slice(0, 900)}` : "สแกนบิลก่อนจน";
+
+      if (scan.mode === "rough") {
+        const amount = clampMoney(scan.total);
+        if (!amount) {
+          showToast("ตรวจยอดรวมก่อนนำเข้า");
+          els.billScanTotalInput.focus();
+          return;
+        }
+        setTransactionMode("single");
+        els.amountInput.value = amount;
+        els.categoryInput.value = scan.category || defaultCategory("expense");
+        state.transactionLines = [defaultLineForMode("single")];
+        closeBillScanSheet();
+        showToast("ใส่ยอดรวมลงฟอร์มแล้ว");
+        return;
+      }
+
+      const lines = scan.items
+        .filter((item) => item.category && clampMoney(item.amount) > 0)
+        .map((item) => ({
+          id: uid(),
+          title: String(item.title || item.category).trim() || item.category,
+          category: item.category,
+          amount: clampMoney(item.amount),
+          discount: 0
+        }));
+      if (!lines.length) {
+        showToast("จัดหมวดอย่างน้อย 1 รายการก่อนนำเข้า");
+        return;
+      }
+      const unassignedCount = scan.items.filter((item) => !item.category && clampMoney(item.amount) > 0).length;
+      if (unassignedCount && !confirm(`ยังมี ${unassignedCount} รายการที่ยังไม่จัดหมวด นำเข้าเฉพาะรายการที่จัดแล้ว?`)) return;
+      state.transactionLines = lines;
+      setTransactionMode("detailedSplit");
+      closeBillScanSheet();
+      showToast("ใส่รายการแยกหมวดลงฟอร์มแล้ว");
+    }
+
     function renderQuickCategoryOptions() {
       const categories = state.categories.filter((category) => category.type === els.quickTypeInput.value);
       els.quickCategoryInput.innerHTML = categories
@@ -7598,6 +8333,7 @@
       els.titleInput.placeholder = isInvestment ? "เช่น ลงทุนกองทุน" : "เช่น ชาเย็น";
       els.noteInput.value = transaction?.note || draft?.note || "";
       els.holdSheetButton.hidden = type !== "expense" || !!transaction;
+      els.scanBillButton.hidden = type !== "expense" || !!transaction;
       state.transactionLines = transaction
         ? transactionLines(transaction).map(lineForEditing)
         : (draft?.lines?.length ? draft.lines.map((line) => ({ ...line, id: line.id || uid() })) : [defaultLineForMode(mode)]);
@@ -7621,6 +8357,7 @@
       if (!keepDraft && els.transactionTypeInput.value === "expense" && !els.editingTransactionId.value) {
         clearExpenseDraft();
       }
+      closeBillScanSheet();
       els.sheet.classList.remove("open");
       document.body.style.overflow = "";
       els.form.reset();
@@ -7628,6 +8365,7 @@
       els.transactionTypeInput.value = "expense";
       els.transactionModeInput.value = "single";
       els.titleInput.placeholder = "เช่น ชาเย็น";
+      els.scanBillButton.hidden = true;
       els.dateInput.value = todayISO();
       els.timeInput.value = currentTime();
       state.transactionLines = [];
