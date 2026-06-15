@@ -151,6 +151,7 @@
     .ghost-action:focus-visible,
     .danger-action:focus-visible,
     .nav-button:focus-visible,
+    .groups-mini-action:focus-visible,
     .quick-chip:focus-visible,
     .settings-entry:focus-visible,
     .segment-button:focus-visible {
@@ -1110,97 +1111,164 @@
     }
 
     body[data-active-view="groups"] .app {
-      width: min(100%, 1120px);
-      padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
-    }
-
-    body[data-active-view="groups"] .bottom-nav {
-      display: none;
+      width: min(100%, 820px);
+      padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 58px);
     }
 
     .groups-shell {
       display: grid;
+      gap: 16px;
+    }
+
+    .groups-bridge-head {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--surface) 94%, var(--surface-warm));
+      box-shadow: 0 8px 20px rgba(17, 24, 39, 0.045);
+    }
+
+    .groups-head-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
       gap: 14px;
     }
 
-    .groups-toolbar {
-      position: sticky;
-      top: 10px;
-      z-index: 18;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px;
-      border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
-      border-radius: 12px;
-      background: color-mix(in srgb, var(--surface) 94%, transparent);
-      box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+    .groups-title-wrap {
+      display: grid;
+      min-width: 0;
+      gap: 5px;
     }
 
-    .groups-toolbar-actions {
-      display: flex;
-      align-items: center;
+    .groups-title-wrap .section-title {
+      font-size: 20px;
+      line-height: 1.18;
+      font-weight: 780;
+    }
+
+    .groups-title-wrap .section-note {
+      max-width: 54ch;
+      line-height: 1.55;
+    }
+
+    .groups-mini-actions {
+      display: inline-flex;
+      flex-shrink: 0;
       gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+    }
+
+    .groups-mini-action {
+      display: inline-flex;
+      width: 42px;
+      height: 42px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--surface) 96%, transparent);
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 760;
+      box-shadow: 0 4px 10px rgba(17, 24, 39, 0.04);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .groups-mini-action:hover {
+      border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
+      transform: translateY(-1px);
+    }
+
+    .groups-bridge-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(112px, auto);
+      gap: 10px;
+    }
+
+    .groups-bridge-actions .primary-action,
+    .groups-bridge-actions .secondary-action {
+      min-height: 44px;
+      border-radius: 14px;
+      box-shadow: none;
     }
 
     .groups-overview {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
+      gap: 14px;
     }
 
-    .groups-overview-card {
-      padding: 12px;
-      border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-      border-radius: 10px;
-      background: var(--surface);
+    .hjk-status-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
     }
 
-    .groups-overview-card span {
+    .hjk-strip-item {
+      min-width: 0;
+      padding: 9px 8px;
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface-soft) 62%, transparent);
+    }
+
+    .hjk-strip-item span,
+    .hjk-overview-title,
+    .hjk-module-balance span {
       display: block;
       color: var(--muted);
       font-size: 12px;
-      font-weight: 680;
+      font-weight: 700;
     }
 
-    .groups-overview-card strong {
+    .hjk-strip-item strong {
       display: block;
-      margin-top: 3px;
+      margin-top: 2px;
       color: var(--primary);
-      font-size: 21px;
+      font-size: 18px;
       line-height: 1.1;
-      font-weight: 780;
+      font-weight: 820;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    [data-theme="dark"] .groups-overview-card strong {
+    [data-theme="dark"] .hjk-strip-item strong,
+    [data-theme="dark"] .hjk-overview-value {
       color: #D8E7DC;
+    }
+
+    .hjk-overview-stack {
+      display: grid;
+      gap: 10px;
     }
 
     .hjk-overview-card,
     .hjk-launch-card,
     .hjk-dashboard-module-card {
       border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-      border-radius: 20px;
+      border-radius: 16px;
       background: color-mix(in srgb, var(--surface) 96%, var(--surface-warm));
-      box-shadow: 0 10px 28px rgba(17, 24, 39, 0.045);
       overflow: hidden;
     }
 
     .hjk-launch-card {
       display: grid;
       gap: 14px;
-      padding: 20px;
+      padding: 18px;
       color: var(--text);
+      box-shadow: 0 8px 18px rgba(17, 24, 39, 0.045);
     }
 
     .hjk-launch-card h3 {
       margin: 0 0 4px;
       color: var(--text);
-      font-size: 18px;
-      line-height: 1.2;
+      font-size: 17px;
+      line-height: 1.25;
       font-weight: 760;
     }
 
@@ -1208,6 +1276,7 @@
       margin: 0;
       color: var(--muted);
       font-size: 13px;
+      line-height: 1.5;
     }
 
     .hjk-launch-actions {
@@ -1219,21 +1288,22 @@
     .hjk-launch-actions .ghost-action,
     .hjk-launch-actions .secondary-action {
       min-height: 44px;
-      border-radius: 16px;
+      border-radius: 14px;
       box-shadow: none;
     }
 
     .hjk-overview-card {
       padding: 0;
+      box-shadow: none;
     }
 
     .hjk-overview-card summary {
       display: grid;
-      grid-template-columns: 36px minmax(0, 1fr) auto;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
       gap: 12px;
       align-items: center;
-      min-height: 82px;
-      padding: 18px 20px;
+      min-height: 70px;
+      padding: 14px 16px;
       list-style: none;
       cursor: pointer;
     }
@@ -1244,34 +1314,28 @@
 
     .hjk-overview-icon {
       display: inline-flex;
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       align-items: center;
       justify-content: center;
-      border-radius: 12px;
+      border-radius: 11px;
       background: rgba(40, 77, 59, 0.08);
       color: var(--primary);
-      font-size: 18px;
-    }
-
-    .hjk-overview-title {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 760;
     }
 
     .hjk-overview-value {
       display: block;
       margin-top: 2px;
       color: var(--primary);
-      font-size: 22px;
+      font-size: 19px;
       line-height: 1.08;
-      font-weight: 800;
+      font-weight: 820;
     }
 
     .hjk-overview-chevron {
-      color: var(--text);
+      color: var(--muted);
       transition: transform 200ms ease;
     }
 
@@ -1281,8 +1345,8 @@
 
     .hjk-overview-body {
       display: grid;
-      gap: 8px;
-      padding: 0 20px 18px;
+      gap: 7px;
+      padding: 0 14px 14px;
     }
 
     .hjk-overview-line {
@@ -1290,12 +1354,17 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
       align-items: center;
-      min-height: 48px;
-      padding: 10px 12px;
-      border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-      border-radius: 14px;
-      background: color-mix(in srgb, var(--surface) 88%, var(--background));
+      min-height: 44px;
+      padding: 9px 10px;
+      border: 1px solid color-mix(in srgb, var(--border) 66%, transparent);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 90%, var(--background));
       font-size: 13px;
+    }
+
+    .hjk-overview-line small {
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .hjk-overview-line strong,
@@ -1306,14 +1375,12 @@
 
     .hjk-dashboard-module-card {
       display: grid;
-      gap: 14px;
-      min-height: 152px;
-      padding: 20px;
+      gap: 12px;
+      min-height: 138px;
+      padding: 18px;
       color: #FFFFFF;
-      background:
-        radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.16), transparent 31%),
-        linear-gradient(135deg, #1F5137 0%, #2B6042 64%, #1E3F2D 100%);
-      box-shadow: 0 16px 36px rgba(31, 81, 55, 0.18);
+      background: linear-gradient(135deg, #1F5137 0%, #2F6044 100%);
+      box-shadow: 0 12px 26px rgba(31, 81, 55, 0.14);
     }
 
     .hjk-module-top {
@@ -1335,7 +1402,7 @@
     }
 
     .hjk-language-pill span {
-      min-width: 34px;
+      min-width: 32px;
       padding: 5px 8px;
       border-radius: 999px;
       color: rgba(255, 255, 255, 0.75);
@@ -1346,13 +1413,13 @@
     .hjk-language-pill span:last-child {
       background: #FFFFFF;
       color: var(--primary);
-      box-shadow: 0 4px 12px rgba(17, 24, 39, 0.14);
+      box-shadow: 0 4px 10px rgba(17, 24, 39, 0.12);
     }
 
     .hjk-module-title {
       margin: 0;
       color: #FFFFFF;
-      font-size: 30px;
+      font-size: 24px;
       line-height: 1;
       font-weight: 800;
     }
@@ -1362,24 +1429,17 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
       align-items: end;
-      padding: 14px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 18px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 15px;
       background: rgba(255, 255, 255, 0.08);
-    }
-
-    .hjk-module-balance span {
-      display: block;
-      color: rgba(255, 255, 255, 0.76);
-      font-size: 12px;
-      font-weight: 700;
     }
 
     .hjk-module-balance strong {
       display: block;
       margin-top: 4px;
       color: #77D6AA;
-      font-size: 28px;
+      font-size: 24px;
       line-height: 1;
       font-weight: 820;
     }
@@ -1389,23 +1449,56 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      min-height: 44px;
-      padding: 10px 12px;
+      min-height: 42px;
+      padding: 9px 12px;
       border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-      border-radius: 16px;
+      border-radius: 14px;
       background: var(--surface);
       color: var(--muted);
       font-size: 13px;
     }
 
+    .groups-preview-panel {
+      display: grid;
+      gap: 10px;
+    }
+
+    .groups-preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-inline: 2px;
+    }
+
+    .groups-preview-head strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 760;
+    }
+
+    .groups-preview-head span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .groups-preview-head .secondary-action {
+      min-height: 40px;
+      border-radius: 13px;
+      white-space: nowrap;
+      box-shadow: none;
+    }
+
     .groups-frame-shell {
       position: relative;
-      min-height: 700px;
+      min-height: 300px;
       border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-      border-radius: 14px;
+      border-radius: 18px;
       overflow: hidden;
       background: #F6F7F2;
-      box-shadow: 0 18px 44px rgba(17, 24, 39, 0.11);
+      box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
     }
 
     body.groups-fullscreen-open {
@@ -1425,8 +1518,8 @@
     .groups-frame {
       display: block;
       width: 100%;
-      height: min(84dvh, 900px);
-      min-height: 700px;
+      height: 320px;
+      min-height: 300px;
       border: 0;
       background: #F6F7F2;
     }
@@ -1469,22 +1562,37 @@
     }
 
     @media (max-width: 620px) {
-      .groups-toolbar {
+      .groups-head-top {
         align-items: flex-start;
-        flex-direction: column;
       }
 
-      .groups-toolbar-actions {
-        width: 100%;
-        justify-content: stretch;
+      .groups-title-wrap .section-title {
+        font-size: 19px;
       }
 
-      .groups-toolbar-actions > * {
-        flex: 1;
+      .groups-mini-actions {
+        gap: 6px;
       }
 
-      .groups-overview {
+      .groups-mini-action {
+        width: 40px;
+        height: 40px;
+      }
+
+      .groups-bridge-actions {
         grid-template-columns: 1fr;
+      }
+
+      .hjk-status-strip {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .hjk-strip-item {
+        padding-inline: 6px;
+      }
+
+      .hjk-strip-item strong {
+        font-size: 16px;
       }
 
       .pending-debt-summary,
@@ -1499,7 +1607,7 @@
 
       .groups-frame-shell,
       .groups-frame {
-        min-height: 76dvh;
+        min-height: 285px;
       }
     }
 
@@ -3133,24 +3241,38 @@
 
       <section class="view" id="view-groups" data-view="groups">
         <section class="section groups-shell">
-          <div class="groups-toolbar">
-            <div>
-              <h2 class="section-title">หารก่อนจน (HJK)</h2>
-              <p class="section-note">โมดูลหารบิลเต็มระบบ: กลุ่ม สมาชิก บิลละเอียด ส่วนลด ภาษี ผ่อนชำระ บิลประจำ นำเข้า และส่งออก</p>
+          <div class="groups-bridge-head">
+            <div class="groups-head-top">
+              <div class="groups-title-wrap">
+                <h2 class="section-title">หารก่อนจน (HJK)</h2>
+                <p class="section-note">ศูนย์กลางหารบิลกลุ่ม เชื่อมยอดค้างชำระกลับเข้า JKJ โดยยังใช้ฟังก์ชัน HJK ครบเหมือนเดิม</p>
+              </div>
+              <div class="groups-mini-actions" aria-label="คำสั่ง HJK">
+                <button class="groups-mini-action" type="button" data-open-view="home" aria-label="กลับ JKJ">‹</button>
+                <button class="groups-mini-action" id="reloadGroupsButton" type="button" aria-label="รีโหลด HJK">↻</button>
+              </div>
             </div>
-            <div class="groups-toolbar-actions">
-              <button class="ghost-action" type="button" data-open-view="home">กลับ JKJ</button>
-              <button class="ghost-action" id="reloadGroupsButton" type="button">รีโหลด</button>
-              <button class="secondary-action" id="openGroupsFullButton" type="button">เปิดเต็มจอ</button>
+            <div class="groups-bridge-actions">
+              <button class="primary-action" id="openGroupsFullButton" type="button">เปิด HJK เต็มจอ</button>
+              <button class="secondary-action" type="button" data-open-view="money">เคลียร์เงิน</button>
             </div>
           </div>
 
           <div class="groups-overview" id="groupsOverview"></div>
 
-          <div class="groups-frame-shell" id="groupsFrameShell">
-            <button class="groups-fullscreen-exit" id="closeGroupsFullButton" type="button">ย่อกลับ</button>
-            <div class="groups-frame-status" id="splitEasyStatus"></div>
-            <iframe class="groups-frame" id="splitEasyFrame" src="spliteasy.html" title="หารก่อนจน (HJK) full group bill splitter"></iframe>
+          <div class="groups-preview-panel">
+            <div class="groups-preview-head">
+              <div>
+                <strong>ตัวอย่าง HJK</strong>
+                <span>ดูสถานะล่าสุดแบบย่อ เปิดเต็มจอเมื่อต้องจัดการบิลจริง</span>
+              </div>
+              <button class="secondary-action" id="openGroupsPreviewFullButton" type="button">เปิดเต็มจอ</button>
+            </div>
+            <div class="groups-frame-shell" id="groupsFrameShell">
+              <button class="groups-fullscreen-exit" id="closeGroupsFullButton" type="button">ย่อกลับ</button>
+              <div class="groups-frame-status" id="splitEasyStatus"></div>
+              <iframe class="groups-frame" id="splitEasyFrame" src="spliteasy.html" title="หารก่อนจน (HJK) full group bill splitter"></iframe>
+            </div>
           </div>
         </section>
       </section>
@@ -3821,6 +3943,7 @@
       splitEasyFrame: document.getElementById("splitEasyFrame"),
       splitEasyStatus: document.getElementById("splitEasyStatus"),
       openGroupsFullButton: document.getElementById("openGroupsFullButton"),
+      openGroupsPreviewFullButton: document.getElementById("openGroupsPreviewFullButton"),
       closeGroupsFullButton: document.getElementById("closeGroupsFullButton"),
       reloadGroupsButton: document.getElementById("reloadGroupsButton"),
       moneyNetAmount: document.getElementById("moneyNetAmount"),
@@ -3984,6 +4107,7 @@
       });
       window.addEventListener("message", handleSplitEasyMessage);
       els.openGroupsFullButton?.addEventListener("click", openGroupsFullscreen);
+      els.openGroupsPreviewFullButton?.addEventListener("click", openGroupsFullscreen);
       els.closeGroupsFullButton?.addEventListener("click", () => closeGroupsFullscreen());
       els.reloadGroupsButton?.addEventListener("click", reloadSplitEasyFrame);
       els.splitEasyFrame?.addEventListener("load", handleSplitEasyFrameLoad);
@@ -5187,17 +5311,24 @@
         <div class="hjk-overview-line"><span>ภาษี / ค่าบริการ</span><b>${formatCurrency(taxTotal)}</b></div>
         <div class="hjk-overview-line"><span><strong>ยอดรวมทั้งสิ้น</strong></span><b>${formatCurrency(totalAmount - discountTotal + taxTotal)}</b></div>
       `;
+      const stripHtml = `
+        <div class="hjk-status-strip" aria-label="สรุป HJK">
+          <div class="hjk-strip-item"><span>กลุ่ม</span><strong>${groups.length}</strong></div>
+          <div class="hjk-strip-item"><span>บิล</span><strong>${expenseCount}</strong></div>
+          <div class="hjk-strip-item"><span>รวม</span><strong>${formatCurrency(totalAmount - discountTotal + taxTotal)}</strong></div>
+        </div>
+      `;
       const accordionHtml = `
-        <details class="groups-overview-card hjk-overview-card" open>
-          <summary><span class="hjk-overview-icon">♙</span><span><span class="hjk-overview-title">กลุ่มทั้งหมด</span><strong class="hjk-overview-value">${groups.length}</strong></span><span class="hjk-overview-chevron">›</span></summary>
+        <details class="hjk-overview-card">
+          <summary><span class="hjk-overview-icon">G</span><span><span class="hjk-overview-title">กลุ่มทั้งหมด</span><strong class="hjk-overview-value">${groups.length}</strong></span><span class="hjk-overview-chevron">›</span></summary>
           <div class="hjk-overview-body">${latestGroups || `<div class="hjk-overview-line"><span>ยังไม่มีกลุ่ม HJK</span><b>0</b></div>`}</div>
         </details>
-        <details class="groups-overview-card hjk-overview-card">
-          <summary><span class="hjk-overview-icon">▤</span><span><span class="hjk-overview-title">บิลในกลุ่ม</span><strong class="hjk-overview-value">${expenseCount}</strong></span><span class="hjk-overview-chevron">›</span></summary>
+        <details class="hjk-overview-card">
+          <summary><span class="hjk-overview-icon">B</span><span><span class="hjk-overview-title">บิลในกลุ่ม</span><strong class="hjk-overview-value">${expenseCount}</strong></span><span class="hjk-overview-chevron">›</span></summary>
           <div class="hjk-overview-body">${billRows || `<div class="hjk-overview-line"><span>ยังไม่มีบิลในกลุ่ม</span><b>0</b></div>`}</div>
         </details>
-        <details class="groups-overview-card hjk-overview-card">
-          <summary><span class="hjk-overview-icon">▣</span><span><span class="hjk-overview-title">ยอดบิลรวม</span><strong class="hjk-overview-value">${formatCurrency(totalAmount)}</strong></span><span class="hjk-overview-chevron">›</span></summary>
+        <details class="hjk-overview-card">
+          <summary><span class="hjk-overview-icon">฿</span><span><span class="hjk-overview-title">ยอดบิลรวม</span><strong class="hjk-overview-value">${formatCurrency(totalAmount)}</strong></span><span class="hjk-overview-chevron">›</span></summary>
           <div class="hjk-overview-body">${totalRows}</div>
         </details>
       `;
@@ -5214,7 +5345,7 @@
       };
 
       if (els.groupsOverview) {
-        els.groupsOverview.innerHTML = accordionHtml;
+        els.groupsOverview.innerHTML = `${stripHtml}<div class="hjk-overview-stack">${accordionHtml}</div>`;
         bindOverviewAccordion(els.groupsOverview);
       }
 
@@ -5231,7 +5362,7 @@
             <button class="secondary-action" type="button" data-open-view="groups">เปิดเต็มจอ</button>
           </div>
         </div>
-        ${accordionHtml}
+        <div class="hjk-overview-stack">${accordionHtml}</div>
         <div class="hjk-dashboard-module-card">
           <div class="hjk-module-top">
             <span>สวัสดี</span>
