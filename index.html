@@ -5493,6 +5493,8 @@
         clearedAt: debt.clearedAt || "",
         clearedTransactionId: debt.clearedTransactionId || "",
         splitEasySettlementId: debt.splitEasySettlementId || "",
+        detailClearedKeys: Array.isArray(debt.detailClearedKeys) ? debt.detailClearedKeys : [],
+        detailClearedItems: Array.isArray(debt.detailClearedItems) ? debt.detailClearedItems : [],
         source: debt.source || "spliteasy"
       })).filter((debt) => debt.amount > 0);
       savePendingDebts();
@@ -6219,6 +6221,30 @@
         .map((debt) => {
           const receivable = debt.creditorIsMe;
           const person = receivable ? debt.debtor : debt.creditor;
+          const detailRows = pendingDebtSourceDetailEntries(debt, person);
+          const detailReceivable = sum(detailRows.filter((entry) => entry.direction === "receivable").map((entry) => entry.amount));
+          const detailPayable = sum(detailRows.filter((entry) => entry.direction === "payable").map((entry) => entry.amount));
+          const detailNet = detailReceivable - detailPayable;
+          const hasClearedDetails = Array.isArray(debt.detailClearedKeys) && debt.detailClearedKeys.length > 0;
+          if (detailRows.length) {
+            const detailDirection = detailNet >= 0 ? "receivable" : "payable";
+            const latestAt = detailRows.map((entry) => `${entry.date || ""} ${entry.time || ""}`.trim()).sort().at(-1) || (debt.createdAt || todayISO()).slice(0, 10);
+            if (Math.abs(detailNet) <= 0.005) return null;
+            return {
+              key: `pending:${debt.debtId}`,
+              source: "pending",
+              id: debt.debtId,
+              person: moneyExactPersonKey(person),
+              direction: detailDirection,
+              amount: clampMoney(Math.abs(detailNet)),
+              date: latestAt.slice(0, 10),
+              time: "",
+              title: detailDirection === "receivable" ? `${person || "ไม่ระบุชื่อ"}ค้างเรา` : `เราค้าง${person || "ไม่ระบุชื่อ"}`,
+              note: debt.groupName || "HJK",
+              raw: debt
+            };
+          }
+          if (hasClearedDetails) return null;
           return {
             key: `pending:${debt.debtId}`,
             source: "pending",
@@ -6232,8 +6258,249 @@
             note: debt.groupName || "HJK",
             raw: debt
           };
-        });
+        })
+        .filter(Boolean);
       return [...moneyEntries, ...pendingEntries].filter((entry) => entry.amount > 0);
+    }
+
+    function combinedMoneyDisplayEntries(group) {
+      const rows = [];
+      group.entries.forEach((entry) => {
+        if (entry.source !== "pending") {
+          rows.push(entry);
+          return;
+        }
+        const detailRows = pendingDebtSourceDetailEntries(entry.raw, group.person);
+        if (detailRows.length) rows.push(...detailRows);
+        else rows.push(entry);
+      });
+      return rows.filter((entry) => entry.amount > 0);
+    }
+
+    function pendingDebtSourceDetailEntries(debt, personName, options = {}) {
+      if (!debt || !debt.groupId) return [];
+      const groups = readSplitEasyGroups();
+      const group = groups.find((item) => item.id === debt.groupId) || groups.find((item) => item.name === debt.groupName);
+      if (!group) return [];
+      const me = splitEasyMeMember(group);
+      if (!me) return [];
+      const otherId = debt.creditorIsMe
+        ? (debt.debtorId || splitEasyMemberIdByName(group, debt.debtor || personName))
+        : (debt.creditorId || splitEasyMemberIdByName(group, debt.creditor || personName));
+      if (!otherId) return [];
+      const other = (group.members || []).find((member) => member.id === otherId);
+      const person = personName || other?.name || debt.debtor || debt.creditor || "ไม่ระบุชื่อ";
+      const rows = [];
+      (group.expenses || []).forEach((expense, index) => {
+        if (!expense || expense.isSettlement || expense.jkjDebtId) return;
+        splitEasyExpensePairDetails(expense, group.members || [], me.id, otherId).forEach((detail, detailIndex) => {
+          const payable = detail.from === me.id && detail.to === otherId;
+          const receivable = detail.from === otherId && detail.to === me.id;
+          if (!payable && !receivable) return;
+          const direction = receivable ? "receivable" : "payable";
+          const amountDue = clampMoney(detail.amount);
+          const detailKey = pendingDebtDetailEntryKey(debt.debtId, expense.id || index, detailIndex, direction, amountDue);
+          if (!options.includeCleared && pendingDebtDetailIsCleared(debt, detailKey)) return;
+          rows.push({
+            key: detailKey,
+            source: "pending-detail",
+            id: debt.debtId,
+            person: moneyExactPersonKey(person),
+            direction,
+            amount: amountDue,
+            date: String(expense.date || expense.createdAt || debt.createdAt || todayISO()).slice(0, 10),
+            time: expense.time || "",
+            title: receivable ? `${person}ค้างเรา` : `เราค้าง${person}`,
+            note: [expense.title || expense.name || `รายการที่ ${index + 1}`, group.name || debt.groupName || "HJK"].filter(Boolean).join(" · "),
+            detailTitle: expense.title || expense.name || "",
+            raw: debt,
+            rawExpenseId: expense.id || "",
+            rawDetailIndex: detailIndex
+          });
+        });
+      });
+      return rows.sort((a, b) => (`${b.date || ""} ${b.time || ""}`).localeCompare(`${a.date || ""} ${a.time || ""}`));
+    }
+
+    function pendingDebtDetailEntryKey(debtId, expenseId, detailIndex, direction, amount) {
+      return `pending-detail:${[debtId, expenseId, detailIndex, direction, amount].map((part) => encodeURIComponent(String(part))).join("|")}`;
+    }
+
+    function pendingDebtDetailIsCleared(debt, detailKey) {
+      return Array.isArray(debt.detailClearedKeys) && debt.detailClearedKeys.includes(detailKey);
+    }
+
+    function splitEasyMeMember(group) {
+      return (group.members || []).find((member) => member.isMe) || (group.members || [])[0] || null;
+    }
+
+    function splitEasyExpensePairDetails(expense, members, meId, otherId) {
+      const validIds = new Set((members || []).map((member) => member.id));
+      const baseShares = splitEasyBaseShares(expense, members);
+      const netShares = splitEasyNetShares(expense, members);
+      const rawExpDebts = {};
+      const amount = +expense.amount || 0;
+      const addDebt = (from, to, value) => {
+        if (!validIds.has(from) || !validIds.has(to) || from === to || !(value > 0)) return;
+        if (!rawExpDebts[from]) rawExpDebts[from] = {};
+        rawExpDebts[from][to] = (rawExpDebts[from][to] || 0) + value;
+      };
+
+      if (expense.splitType === "subitem" && Array.isArray(expense.subItems) && expense.subItems.length) {
+        expense.subItems.forEach((item) => {
+          const payerId = item.payerId || expense.paidById;
+          const consumers = (item.consumers || []).filter((id) => validIds.has(id));
+          if (!payerId || !consumers.length) return;
+          const priceToSplit = item.finalPrice !== undefined ? item.finalPrice : (+item.price || 0);
+          const share = priceToSplit / consumers.length;
+          consumers.forEach((consumerId) => addDebt(consumerId, payerId, share));
+        });
+      } else {
+        if (!(amount > 0)) return [];
+        const payers = Array.isArray(expense.payers) && expense.payers.length
+          ? expense.payers
+          : [{ id: expense.paidById, amt: amount }];
+        Object.entries(baseShares).forEach(([debtorId, shareAmount]) => {
+          payers.forEach((payer) => {
+            const payerAmount = +payer.amt || 0;
+            if (!payer.id || debtorId === payer.id || !(payerAmount > 0)) return;
+            addDebt(debtorId, payer.id, shareAmount * (payerAmount / amount));
+          });
+        });
+      }
+
+      const rows = [];
+      Object.entries(rawExpDebts).forEach(([debtorId, creditors]) => {
+        const grossOwed = baseShares[debtorId] || 0;
+        const netOwed = netShares[debtorId] || 0;
+        const multiplier = grossOwed > 0 ? netOwed / grossOwed : 1;
+        Object.entries(creditors).forEach(([creditorId, rawAmount]) => {
+          if (!((debtorId === meId && creditorId === otherId) || (debtorId === otherId && creditorId === meId))) return;
+          const amountDue = clampMoney(rawAmount * multiplier);
+          if (amountDue > 0.01) rows.push({ from: debtorId, to: creditorId, amount: amountDue });
+        });
+      });
+      return rows;
+    }
+
+    function splitEasyBaseShares(expense, members) {
+      const shares = {};
+      const amount = +expense.amount || 0;
+      const validIds = new Set((members || []).map((member) => member.id));
+      if (Array.isArray(expense.subItems) && expense.subItems.length) {
+        expense.subItems.forEach((item) => {
+          const consumers = (item.consumers || []).filter((id) => validIds.has(id));
+          if (!consumers.length) return;
+          const priceToSplit = item.finalPrice !== undefined ? item.finalPrice : (+item.price || 0);
+          const share = priceToSplit / consumers.length;
+          consumers.forEach((id) => { shares[id] = (shares[id] || 0) + share; });
+        });
+        return shares;
+      }
+      const ids = (expense.participants || (members || []).map((member) => member.id)).filter((id) => validIds.has(id));
+      if (!ids.length) return shares;
+      if (expense.splitType === "custom") {
+        ids.forEach((id) => { shares[id] = +(+(expense.customAmounts?.[id]) || 0).toFixed(2); });
+      } else if (expense.splitType === "percentage") {
+        ids.forEach((id) => { shares[id] = amount * ((expense.percentages?.[id] || 0) / 100); });
+      } else {
+        const share = amount / ids.length;
+        ids.forEach((id) => { shares[id] = share; });
+      }
+      return shares;
+    }
+
+    function splitEasyNetShares(expense, members) {
+      const shares = {};
+      const amount = +expense.amount || 0;
+      const validIds = new Set((members || []).map((member) => member.id));
+      if (Array.isArray(expense.subItems) && expense.subItems.length) {
+        const discount = expense.discount;
+        const isModeB = discount && discount.enabled && discount.mode === "B";
+        let totalBase = 0;
+        if (isModeB) expense.subItems.forEach((item) => { totalBase += +item.price || 0; });
+        const discRatio = isModeB && totalBase > 0 ? (+discount.amount || 0) / totalBase : 0;
+        expense.subItems.forEach((item) => {
+          const consumers = (item.consumers || []).filter((id) => validIds.has(id));
+          if (!consumers.length) return;
+          let priceToSplit;
+          if (isModeB) {
+            const base = +item.price || 0;
+            const discountedBase = Math.max(0, base - (base * discRatio));
+            const vatRate = (expense.vat_percent || 0) / 100;
+            const serviceRate = (expense.service_percent || 0) / 100;
+            const service = item.hasService ? discountedBase * serviceRate : 0;
+            const vat = item.hasVat ? (discountedBase + service) * vatRate : 0;
+            priceToSplit = discountedBase + service + vat;
+          } else {
+            priceToSplit = item.finalPrice !== undefined ? item.finalPrice : (+item.price || 0);
+          }
+          const share = priceToSplit / consumers.length;
+          consumers.forEach((id) => { shares[id] = (shares[id] || 0) + share; });
+        });
+        if (isModeB) return shares;
+      } else {
+        const ids = (expense.participants || (members || []).map((member) => member.id)).filter((id) => validIds.has(id));
+        if (!ids.length) return shares;
+        if (expense.splitType === "custom") {
+          ids.forEach((id) => { shares[id] = +(+(expense.customAmounts?.[id]) || 0).toFixed(2); });
+        } else if (expense.splitType === "percentage") {
+          ids.forEach((id) => { shares[id] = amount * ((expense.percentages?.[id] || 0) / 100); });
+        } else {
+          const share = amount / ids.length;
+          ids.forEach((id) => { shares[id] = share; });
+        }
+      }
+
+      const discount = expense.discount;
+      const discountAmount = (discount && discount.enabled && discount.type !== "credit") ? (+discount.amount || 0) : 0;
+      const usedCreditsAmount = (expense.usedCredits || []).reduce((total, creditId) => {
+        let value = 0;
+        (members || []).forEach((member) => {
+          const credit = (member.credits || []).find((item) => item.id === creditId);
+          if (credit) value = +credit.value || 0;
+        });
+        return total + value;
+      }, 0);
+      if (discountAmount <= 0 && usedCreditsAmount <= 0) return shares;
+      const totalBeforeDiscount = Object.values(shares).reduce((total, value) => total + value, 0);
+      if (totalBeforeDiscount <= 0) return shares;
+      const discountShares = {};
+
+      if (discountAmount > 0 && discount) {
+        if (discount.type === "bill") {
+          const ids = Object.keys(shares);
+          if (discount.dist === "proportional") {
+            ids.forEach((id) => { discountShares[id] = (discountShares[id] || 0) + discountAmount * (shares[id] / totalBeforeDiscount); });
+          } else if (discount.dist === "custom") {
+            ids.forEach((id) => { discountShares[id] = (discountShares[id] || 0) + +(discount.customAllocation?.[id] || 0); });
+          } else {
+            const share = discountAmount / ids.length;
+            ids.forEach((id) => { discountShares[id] = (discountShares[id] || 0) + share; });
+          }
+        } else if (discount.type === "person") {
+          const receivers = discount.receivers || [];
+          if (receivers.length > 1) {
+            receivers.forEach((id) => { discountShares[id] = (discountShares[id] || 0) + +(discount.customAllocation?.[id] || 0); });
+          } else if (receivers.length === 1) {
+            discountShares[receivers[0]] = (discountShares[receivers[0]] || 0) + discountAmount;
+          }
+        }
+      }
+
+      if (usedCreditsAmount > 0 && expense.usedCredits) {
+        expense.usedCredits.forEach((creditId) => {
+          (members || []).forEach((member) => {
+            const credit = (member.credits || []).find((item) => item.id === creditId);
+            if (credit) discountShares[credit.ownerId] = (discountShares[credit.ownerId] || 0) + (+credit.value || 0);
+          });
+        });
+      }
+
+      Object.keys(shares).forEach((id) => {
+        shares[id] = Math.max(0, shares[id] - (discountShares[id] || 0));
+      });
+      return shares;
     }
 
     function combinedMoneyPersonGroups(activeItems, pendingItems) {
@@ -6284,7 +6551,10 @@
       const subText = group.net > 0
         ? `${escapeHtml(group.person)}ต้องจ่ายเรา`
         : (group.net < 0 ? `เราต้องจ่าย${escapeHtml(group.person)}` : "หักลบกันพอดี");
-      const recent = group.entries
+      const detailEntries = combinedMoneyDisplayEntries(group);
+      const detailReceivableTotal = sum(detailEntries.filter((entry) => entry.direction === "receivable").map((entry) => entry.amount));
+      const detailPayableTotal = sum(detailEntries.filter((entry) => entry.direction === "payable").map((entry) => entry.amount));
+      const recent = detailEntries
         .slice()
         .sort((a, b) => (`${b.date || ""} ${b.time || ""}`).localeCompare(`${a.date || ""} ${a.time || ""}`));
       return `
@@ -6303,8 +6573,8 @@
             <div>
               <p class="money-recent-title">ยอดรวม</p>
               <div class="money-person-total-box">
-                <span>เขาค้างเรา <strong class="amount-income">${formatCurrency(group.receivableTotal)}</strong></span>
-                <span>เราค้างเขา <strong class="amount-expense">${formatCurrency(group.payableTotal)}</strong></span>
+                <span>เขาค้างเรา <strong class="amount-income">${formatCurrency(detailReceivableTotal)}</strong></span>
+                <span>เราค้างเขา <strong class="amount-expense">${formatCurrency(detailPayableTotal)}</strong></span>
               </div>
             </div>
             <div>
@@ -6319,7 +6589,7 @@
 
     function combinedMoneyEntryHtml(entry) {
       const payable = entry.direction === "payable";
-      const sourceLabel = entry.source === "pending" ? "HJK" : "JKJ";
+      const sourceLabel = entry.source === "pending" || entry.source === "pending-detail" ? "HJK" : "JKJ";
       const moneyActions = entry.source === "money"
         ? `<button class="small-icon-button" type="button" data-money-edit="${escapeAttr(entry.id)}" title="แก้ไข" aria-label="แก้ไข"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.2 2.2 0 0 0-3-3L5 17l-1 3Z"></path><path d="m14 6 4 4"></path></svg></button>
            <button class="small-icon-button delete" type="button" data-money-delete="${escapeAttr(entry.id)}" title="ลบ" aria-label="ลบ"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 14h10l1-14"></path><path d="M9 7V4h6v3"></path></svg></button>`
@@ -6346,7 +6616,12 @@
     }
 
     function clearCombinedMoneyEntry(entryKey) {
-      const [source, id] = String(entryKey || "").split(":");
+      if (String(entryKey || "").startsWith("pending-detail:")) {
+        clearPendingDebtDetailNow(entryKey);
+        return;
+      }
+      const [source, ...rest] = String(entryKey || "").split(":");
+      const id = rest.join(":");
       if (source === "money") {
         clearMoneyItem(id);
         return;
@@ -6370,6 +6645,72 @@
       showToast(`เคลียร์รายการของ ${group.person} แล้ว`);
     }
 
+    function clearPendingDebtDetailNow(detailKey, options = {}) {
+      const parts = String(detailKey || "").replace(/^pending-detail:/, "").split("|").map((part) => decodeURIComponent(part));
+      const debtId = parts[0] || "";
+      const debt = state.pendingDebts.items.find((item) => item.debtId === debtId && item.status !== "cleared");
+      if (!debt || pendingDebtDetailIsCleared(debt, detailKey)) return false;
+      const person = debt.creditorIsMe ? debt.debtor : debt.creditor;
+      const allRows = pendingDebtSourceDetailEntries(debt, person, { includeCleared: true });
+      const detail = allRows.find((entry) => entry.key === detailKey);
+      if (!detail) return false;
+      const now = new Date().toISOString();
+      const date = todayISO();
+      const time = currentTime();
+      const role = detail.direction === "receivable" ? "receivable" : "payable";
+      const title = role === "receivable"
+        ? `${detail.person}จ่ายคืนแล้ว - ${detail.detailTitle || debt.groupName || "HJK"}`
+        : `จ่ายคืน${detail.person}แล้ว - ${detail.detailTitle || debt.groupName || "HJK"}`;
+      const transaction = createPendingDebtTransaction({ ...debt, amount: detail.amount }, title, role, { now, date, time });
+      transaction.pendingDebtDetailKey = detailKey;
+      transaction.lines = transaction.lines.map((line) => ({ ...line, title, amount: detail.amount }));
+
+      const nextKeys = [...new Set([...(debt.detailClearedKeys || []), detailKey])];
+      const nextDetailItem = {
+        key: detailKey,
+        title,
+        type: role === "receivable" ? "owedToMe" : "iOwe",
+        person: detail.person,
+        amount: detail.amount,
+        note: `HJK · ${detail.note || debt.groupName || "Group"}`,
+        clearedAt: now,
+        clearedDate: date,
+        clearedTime: time,
+        transactionId: transaction.id
+      };
+      const nextDebt = {
+        ...debt,
+        detailClearedKeys: nextKeys,
+        detailClearedItems: [...(debt.detailClearedItems || []), nextDetailItem]
+      };
+      const remainingRows = pendingDebtSourceDetailEntries(nextDebt, person);
+      const shouldClearDebt = remainingRows.length === 0;
+      const settlementId = shouldClearDebt ? syncPendingDebtSettlementToSplitEasy(debt, now) : debt.splitEasySettlementId;
+
+      state.transactions.unshift(transaction);
+      state.pendingDebts.items = state.pendingDebts.items.map((item) => item.debtId === debtId
+        ? {
+            ...item,
+            detailClearedKeys: nextKeys,
+            detailClearedItems: nextDebt.detailClearedItems,
+            status: shouldClearDebt ? "cleared" : "pending",
+            clearedAt: shouldClearDebt ? now : item.clearedAt,
+            clearedTransactionId: shouldClearDebt ? transaction.id : item.clearedTransactionId,
+            splitEasySettlementId: settlementId || item.splitEasySettlementId || "",
+            updatedAt: now
+          }
+        : item
+      );
+      saveTransactions();
+      savePendingDebts();
+      if (!options.silent) {
+        if (shouldClearDebt) reloadSplitEasyFrame();
+        renderAll();
+        showToast(role === "receivable" ? "บันทึกรับคืนรายการนี้แล้ว" : "บันทึกจ่ายคืนรายการนี้แล้ว");
+      }
+      return true;
+    }
+
     function clearPendingDebtNow(debtId, options = {}) {
       const debt = state.pendingDebts.items.find((item) => item.debtId === debtId && item.status !== "cleared");
       if (!debt) return false;
@@ -6383,8 +6724,21 @@
       const moneyHistory = state.moneyClear.items
         .filter((item) => item.status === "cleared")
         .map((item) => ({ ...item, historySource: "money", sortAt: item.clearedAt || "" }));
+      const pendingDetailHistory = state.pendingDebts.items
+        .flatMap((debt) => (debt.detailClearedItems || []).map((item) => ({
+          id: item.key,
+          type: item.type,
+          person: item.person,
+          amount: clampMoney(item.amount),
+          note: item.note,
+          clearedAt: item.clearedAt || "",
+          clearedDate: item.clearedDate || (item.clearedAt || todayISO()).slice(0, 10),
+          clearedTime: item.clearedTime || "",
+          historySource: "pending",
+          sortAt: item.clearedAt || ""
+        })));
       const pendingHistory = state.pendingDebts.items
-        .filter((debt) => debt.status === "cleared")
+        .filter((debt) => debt.status === "cleared" && !(debt.detailClearedItems || []).length)
         .map((debt) => ({
           id: debt.debtId,
           type: debt.creditorIsMe ? "owedToMe" : "iOwe",
@@ -6397,7 +6751,7 @@
           historySource: "pending",
           sortAt: debt.clearedAt || debt.updatedAt || ""
         }));
-      return [...moneyHistory, ...pendingHistory].sort((a, b) => (b.sortAt || "").localeCompare(a.sortAt || ""));
+      return [...moneyHistory, ...pendingDetailHistory, ...pendingHistory].sort((a, b) => (b.sortAt || "").localeCompare(a.sortAt || ""));
     }
 
     function combinedMoneyHistoryItemHtml(item) {
