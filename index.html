@@ -786,6 +786,10 @@
       --settings-accent: #2F7D5B;
     }
 
+    .settings-entry[data-settings-page="account"] {
+      --settings-accent: #1F5137;
+    }
+
     .settings-entry[data-settings-page="data"] {
       --settings-accent: #4B5563;
     }
@@ -957,6 +961,112 @@
     .settings-card h3 {
       margin: 0 0 10px;
       font-size: 16px;
+    }
+
+    .account-qr-preview {
+      display: grid;
+      min-height: 168px;
+      place-items: center;
+      margin-bottom: 12px;
+      overflow: hidden;
+      border: 1px dashed color-mix(in srgb, var(--primary) 34%, var(--border));
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 82%, var(--surface-soft));
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .account-qr-preview img {
+      display: block;
+      width: min(100%, 220px);
+      max-height: 220px;
+      object-fit: contain;
+    }
+
+    .payment-account-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .payment-account-row {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+
+    .payment-account-row.default {
+      border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+      background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+    }
+
+    .payment-account-thumb {
+      width: 64px;
+      height: 64px;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #FFFFFF;
+      box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
+    }
+
+    .payment-account-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .payment-account-meta {
+      min-width: 0;
+    }
+
+    .payment-account-meta strong,
+    .payment-account-meta small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .payment-account-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .account-setup-prompt {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 18px);
+      z-index: 65;
+      display: none;
+      width: min(calc(100% - 28px), 420px);
+      padding: 14px;
+      border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transform: translateX(-50%);
+    }
+
+    .account-setup-prompt.show {
+      display: grid;
+      gap: 10px;
+    }
+
+    .account-setup-prompt strong {
+      font-size: 15px;
+    }
+
+    .account-setup-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
     }
 
     .compact-row {
@@ -2323,6 +2433,25 @@
       white-space: nowrap;
     }
 
+    .money-person-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .money-share-button {
+      min-width: 44px;
+      min-height: 40px;
+      padding: 0 11px;
+      border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--surface) 96%, var(--primary) 4%);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
     .money-chevron {
       color: var(--text);
       font-size: 18px;
@@ -3230,6 +3359,26 @@
         font-size: clamp(13px, 3.7vw, 16px);
       }
 
+      .money-person-card summary {
+        grid-template-columns: 48px minmax(0, 1fr) auto;
+      }
+
+      .money-net-amount {
+        grid-column: 2;
+        grid-row: 2;
+      }
+
+      .money-person-actions {
+        grid-column: 3;
+        grid-row: 2;
+        justify-content: flex-end;
+      }
+
+      .money-chevron {
+        grid-column: 3;
+        grid-row: 1;
+      }
+
       .action-row.three {
         gap: 7px;
       }
@@ -3662,6 +3811,11 @@
                 <span><strong>จดเร็ว</strong><span>รายการด่วนที่ใช้บ่อย</span></span>
                 <span class="settings-entry-arrow">›</span>
               </button>
+              <button class="settings-entry" type="button" data-settings-page="account">
+                <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h16v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z"></path><path d="M7.5 10.5h3"></path><path d="M7.5 14h2"></path><path d="M14 10.5h2.5V13H14Z"></path><path d="M15.25 13v2.5"></path><path d="M14 15.5h2.5"></path></svg></span>
+                <span><strong>ข้อมูลบัญชี</strong><span>QR CODE รับเงินและบัญชีตั้งต้น</span></span>
+                <span class="settings-entry-arrow">›</span>
+              </button>
               <button class="settings-entry" type="button" data-settings-page="data">
                 <span class="settings-entry-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8.5c0-1.7 2.7-3 6-3s6 1.3 6 3-2.7 3-6 3-6-1.3-6-3Z"></path><path d="M6 8.5v7c0 1.7 2.7 3 6 3s6-1.3 6-3v-7"></path><path d="M6 12c0 1.7 2.7 3 6 3s6-1.3 6-3"></path></svg></span>
                 <span><strong>ข้อมูล</strong><span>Export, Backup, Restore</span></span>
@@ -3754,6 +3908,34 @@
                 <button class="ghost-action" id="resetQuickButton" type="button">ล้างฟอร์ม</button>
               </div>
               <div class="settings-list" id="quickSettingsList"></div>
+            </div>
+          </div>
+
+          <div class="settings-panel" id="settingsAccountPanel" data-settings-panel="account">
+            <div class="back-line">
+              <button class="ghost-action" type="button" data-settings-page="menu">‹ กลับ</button>
+              <h3 class="section-title">ข้อมูลบัญชี</h3>
+            </div>
+            <div class="settings-card">
+              <div class="account-qr-preview" id="paymentQrPreview">
+                <span>เลือกรูป QR CODE รับเงิน</span>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="paymentAccountNoteInput">โน้ตบัญชี</label>
+                  <input class="input" id="paymentAccountNoteInput" type="text" placeholder="เช่น กสิกร บัญชีหลัก">
+                </div>
+                <div class="field">
+                  <label for="paymentQrFileInput">รูป QR CODE</label>
+                  <input class="input" id="paymentQrFileInput" type="file" accept="image/*">
+                </div>
+              </div>
+              <div class="action-row" style="margin-top:12px;">
+                <button class="primary-action" id="savePaymentAccountButton" type="button">เพิ่ม QR CODE</button>
+                <button class="ghost-action" id="resetPaymentAccountButton" type="button">ล้างฟอร์ม</button>
+              </div>
+              <p class="section-note" style="margin-top:10px;">บัญชีที่ตั้งเป็นค่าเริ่มต้นจะถูกใช้ตอนแชร์สรุปยอดเคลียร์เงิน</p>
+              <div class="payment-account-list" id="paymentAccountList"></div>
             </div>
           </div>
 
@@ -4160,6 +4342,16 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="account-setup-prompt" id="accountSetupPrompt" role="dialog" aria-live="polite" aria-label="ตั้งค่า QR CODE">
+    <div>
+      <strong>ยังไม่ได้ตั้งค่า QR CODE รับเงิน</strong>
+      <p class="section-note">ตั้งค่า QR CODE เริ่มต้นก่อนแชร์สรุปยอดรับเงิน</p>
+    </div>
+    <div class="account-setup-actions">
+      <button class="primary-action" id="goAccountSettingsButton" type="button">ไปตั้งค่า QR CODE</button>
+      <button class="ghost-action" id="closeAccountPromptButton" type="button">ปิด</button>
+    </div>
+  </div>
 
   <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
@@ -4170,6 +4362,7 @@
       budget: "jkj.budget.v1",
       expenseDraft: "jkj.expenseDraft.v1",
       appSettings: "jkj.appSettings.v1",
+      paymentAccounts: "jkj.paymentAccounts.v1",
       moneyClear: "jkj.moneyClear.v1",
       pendingDebts: "jkj.pendingDebts.v1",
       splitGroups: "jkj.splitGroups.v1",
@@ -4219,6 +4412,8 @@
         pendingDebtStatus: "pending",
         chartPeriod: "month"
       }),
+      paymentAccounts: readStorage(STORAGE_KEYS.paymentAccounts, { items: [], defaultId: "" }),
+      paymentAccountDraftImage: "",
       moneyClear: readStorage(STORAGE_KEYS.moneyClear, { items: [] }),
       pendingDebts: readStorage(STORAGE_KEYS.pendingDebts, { items: [] }),
       splitGroups: readStorage(STORAGE_KEYS.splitGroups, []),
@@ -4354,11 +4549,20 @@
       saveQuickButton: document.getElementById("saveQuickButton"),
       resetQuickButton: document.getElementById("resetQuickButton"),
       quickSettingsList: document.getElementById("quickSettingsList"),
+      paymentQrPreview: document.getElementById("paymentQrPreview"),
+      paymentAccountNoteInput: document.getElementById("paymentAccountNoteInput"),
+      paymentQrFileInput: document.getElementById("paymentQrFileInput"),
+      savePaymentAccountButton: document.getElementById("savePaymentAccountButton"),
+      resetPaymentAccountButton: document.getElementById("resetPaymentAccountButton"),
+      paymentAccountList: document.getElementById("paymentAccountList"),
       exportSettingsButton: document.getElementById("exportSettingsButton"),
       backupButton: document.getElementById("backupButton"),
       restoreInput: document.getElementById("restoreInput"),
       themeToggle: document.getElementById("themeToggle"),
       quickAddHomeToggle: document.getElementById("quickAddHomeToggle"),
+      accountSetupPrompt: document.getElementById("accountSetupPrompt"),
+      goAccountSettingsButton: document.getElementById("goAccountSettingsButton"),
+      closeAccountPromptButton: document.getElementById("closeAccountPromptButton"),
       sheet: document.getElementById("transactionSheet"),
       form: document.getElementById("transactionForm"),
       sheetTitle: document.getElementById("sheetTitle"),
@@ -4480,6 +4684,7 @@
       normalizeTransactions();
       normalizeMoneyClear();
       normalizePendingDebts();
+      normalizePaymentAccounts();
       normalizeSplitGroups();
       applyTheme(readStorage(STORAGE_KEYS.theme, "light"));
       bindEvents();
@@ -4759,6 +4964,9 @@
       els.quickTypeInput.addEventListener("change", renderQuickCategoryOptions);
       els.saveQuickButton.addEventListener("click", saveQuickFromSettings);
       els.resetQuickButton.addEventListener("click", resetQuickForm);
+      els.paymentQrFileInput?.addEventListener("change", handlePaymentQrFile);
+      els.savePaymentAccountButton?.addEventListener("click", savePaymentAccountFromSettings);
+      els.resetPaymentAccountButton?.addEventListener("click", resetPaymentAccountForm);
 
       els.restoreInput.addEventListener("change", restoreJson);
       els.themeToggle.addEventListener("change", () => {
@@ -4792,6 +5000,8 @@
           renderMoneyClear();
         });
       });
+      els.goAccountSettingsButton?.addEventListener("click", openAccountSettingsFromPrompt);
+      els.closeAccountPromptButton?.addEventListener("click", hideAccountSetupPrompt);
     }
 
     function setView(view) {
@@ -6109,6 +6319,24 @@
       };
     }
 
+    function normalizePaymentAccounts() {
+      if (!state.paymentAccounts || !Array.isArray(state.paymentAccounts.items)) {
+        state.paymentAccounts = { items: [], defaultId: "" };
+      }
+      state.paymentAccounts.items = state.paymentAccounts.items
+        .map((account) => ({
+          id: account.id || uid(),
+          note: String(account.note || "").trim() || "บัญชีรับเงิน",
+          image: String(account.image || ""),
+          createdAt: account.createdAt || new Date().toISOString()
+        }))
+        .filter((account) => account.image.startsWith("data:image/"));
+      if (!state.paymentAccounts.items.some((account) => account.id === state.paymentAccounts.defaultId)) {
+        state.paymentAccounts.defaultId = state.paymentAccounts.items[0]?.id || "";
+      }
+      savePaymentAccounts();
+    }
+
     function normalizeSplitGroups() {
       state.splitGroups = (Array.isArray(state.splitGroups) ? state.splitGroups : []).map((group) => {
         const me = (group.members || []).find((member) => member.isMe) || { id: "me", name: "เรา", isMe: true };
@@ -6197,6 +6425,13 @@
           event.preventDefault();
           event.stopPropagation();
           clearCombinedMoneyPerson(button.dataset.moneyClearPerson);
+        });
+      });
+      els.moneyPanels.querySelectorAll("[data-money-share-person]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          shareCombinedMoneyPerson(button.dataset.moneySharePerson);
         });
       });
       els.moneyPanels.querySelectorAll("[data-money-clear]").forEach((button) => button.addEventListener("click", () => clearMoneyItem(button.dataset.moneyClear)));
@@ -7326,7 +7561,10 @@
               <span class="money-person-sub">${subText}</span>
             </span>
             <strong class="money-net-amount ${amountClass}">${formatCurrency(Math.abs(group.net))}</strong>
-            <button class="money-settle-all" type="button" data-money-clear-person="${escapeAttr(group.key)}">${actionText}</button>
+            <span class="money-person-actions">
+              <button class="money-share-button" type="button" data-money-share-person="${escapeAttr(group.key)}">แชร์</button>
+              <button class="money-settle-all" type="button" data-money-clear-person="${escapeAttr(group.key)}">${actionText}</button>
+            </span>
             <span class="money-chevron">⌄</span>
           </summary>
           <div class="money-person-details">
@@ -7373,6 +7611,244 @@
           </span>
         </div>
       `;
+    }
+
+    async function shareCombinedMoneyPerson(personKey) {
+      const activeItems = state.moneyClear.items.filter((item) => item.status !== "cleared");
+      const pendingItems = state.pendingDebts.items.filter((item) => item.status !== "cleared");
+      const group = combinedMoneyPersonGroups(activeItems, pendingItems).find((item) => item.key === personKey);
+      if (!group) return;
+      const entries = combinedMoneyDisplayEntries(group)
+        .slice()
+        .sort((a, b) => (`${a.date || ""} ${a.time || ""}`).localeCompare(`${b.date || ""} ${b.time || ""}`));
+      if (!entries.length) {
+        showToast("ยังไม่มีรายการค้างให้แชร์");
+        return;
+      }
+      const needsQr = group.net > 0.005;
+      const account = needsQr ? defaultPaymentAccount() : null;
+      if (needsQr && !account) {
+        showAccountSetupPrompt();
+        return;
+      }
+      try {
+        const dataUrl = await createMoneySummaryImage(group, entries, account);
+        await shareOrDownloadMoneyImage(dataUrl, `jkj-payment-summary-${safeFilePart(group.person)}-${todayISO()}.png`);
+        showToast("สร้างรูปสรุปยอดแล้ว");
+      } catch (error) {
+        showToast("สร้างรูปแชร์ไม่สำเร็จ");
+      }
+    }
+
+    async function createMoneySummaryImage(group, entries, account) {
+      const width = 1080;
+      const pad = 72;
+      const contentWidth = width - pad * 2;
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.textBaseline = "top";
+      const rowMeta = entries.map((entry) => {
+        ctx.font = "700 34px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        const titleLines = wrapCanvasText(ctx, entry.title || "-", contentWidth - 230);
+        ctx.font = "400 24px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        const noteLines = wrapCanvasText(ctx, [entry.note, formatDateShort(entry.date)].filter(Boolean).join(" · "), contentWidth - 230);
+        return { titleLines, noteLines, height: Math.max(104, 34 + titleLines.length * 38 + noteLines.length * 28) };
+      });
+      const qrHeight = account ? 360 : 0;
+      const listHeight = rowMeta.reduce((total, row) => total + row.height, 0) + 112;
+      const height = 420 + listHeight + qrHeight + 120;
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.fillStyle = "#F8F8F5";
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = "#1F5137";
+      ctx.font = "800 52px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText("JKJ", pad, 58);
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "400 28px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText(formatDateShort(todayISO()), pad, 122);
+
+      const netReceivable = group.net > 0.005;
+      const netPayable = group.net < -0.005;
+      const amountColor = netReceivable ? "#16A34A" : (netPayable ? "#DC2626" : "#111827");
+      drawRoundRect(ctx, pad, 184, contentWidth, 184, 28, netReceivable ? "#EFF8F1" : (netPayable ? "#FFF1F1" : "#FFFFFF"), "#DDE4DC");
+      ctx.fillStyle = "#111827";
+      ctx.font = "800 44px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText("สรุปยอดชำระ", pad + 36, 218);
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "500 30px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText(group.person, pad + 36, 276);
+      ctx.fillStyle = amountColor;
+      ctx.font = "800 56px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(formatCurrency(Math.abs(group.net)), pad + contentWidth - 36, 226);
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "500 26px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText(netReceivable ? "เขาต้องจ่ายเรา" : (netPayable ? "เราต้องจ่ายเขา" : "หักลบกันพอดี"), pad + contentWidth - 36, 298);
+      ctx.textAlign = "left";
+
+      let y = 416;
+      drawRoundRect(ctx, pad, y, contentWidth, listHeight, 24, "#FFFFFF", "#E8E8E3");
+      ctx.fillStyle = "#111827";
+      ctx.font = "800 34px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText("รายการค้าง", pad + 32, y + 32);
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "500 24px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(`${entries.length} รายการ`, pad + contentWidth - 32, y + 38);
+      ctx.textAlign = "left";
+      y += 92;
+
+      entries.forEach((entry, index) => {
+        const meta = rowMeta[index];
+        const payable = entry.direction === "payable";
+        const rowY = y;
+        if (index > 0) {
+          ctx.strokeStyle = "#E8E8E3";
+          ctx.beginPath();
+          ctx.moveTo(pad + 32, rowY);
+          ctx.lineTo(pad + contentWidth - 32, rowY);
+          ctx.stroke();
+        }
+        ctx.fillStyle = payable ? "#FEE2E2" : "#DCFCE7";
+        drawCircle(ctx, pad + 58, rowY + 34, 24);
+        ctx.fillStyle = payable ? "#DC2626" : "#15803D";
+        ctx.font = "800 24px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(payable ? "จ" : "ร", pad + 58, rowY + 22);
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#111827";
+        ctx.font = "700 34px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        let textY = rowY + 22;
+        meta.titleLines.forEach((line) => {
+          ctx.fillText(line, pad + 96, textY);
+          textY += 38;
+        });
+        ctx.fillStyle = "#6B7280";
+        ctx.font = "400 24px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        meta.noteLines.forEach((line) => {
+          ctx.fillText(line, pad + 96, textY);
+          textY += 28;
+        });
+        ctx.fillStyle = payable ? "#DC2626" : "#16A34A";
+        ctx.font = "800 32px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText(formatCurrency(entry.amount), pad + contentWidth - 32, rowY + 26);
+        ctx.textAlign = "left";
+        y += meta.height;
+      });
+      y += 32;
+
+      if (account) {
+        drawRoundRect(ctx, pad, y, contentWidth, 300, 24, "#FFFFFF", "#E8E8E3");
+        ctx.fillStyle = "#111827";
+        ctx.font = "800 34px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.fillText("QR CODE รับเงิน", pad + 32, y + 34);
+        ctx.fillStyle = "#6B7280";
+        ctx.font = "500 26px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.fillText(account.note || "บัญชีรับเงิน", pad + 32, y + 86);
+        const qrImage = await loadCanvasImage(account.image);
+        drawImageContain(ctx, qrImage, pad + contentWidth - 272, y + 30, 220, 220);
+        y += 336;
+      }
+
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "500 24px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText("สร้างจาก JKJ · เคลียร์เงิน", pad, y + 12);
+      return canvas.toDataURL("image/png");
+    }
+
+    async function shareOrDownloadMoneyImage(dataUrl, fileName) {
+      const blob = dataUrlToBlob(dataUrl);
+      if (typeof navigator !== "undefined" && navigator.share && typeof File !== "undefined") {
+        const file = new File([blob], fileName, { type: "image/png" });
+        if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: "สรุปยอดชำระ", files: [file] });
+          return;
+        }
+      }
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    function dataUrlToBlob(dataUrl) {
+      const [meta, data] = String(dataUrl).split(",");
+      const mime = (meta.match(/data:([^;]+)/) || [])[1] || "image/png";
+      const binary = atob(data || "");
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mime });
+    }
+
+    function loadCanvasImage(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+    }
+
+    function drawImageContain(ctx, image, x, y, width, height) {
+      const ratio = Math.min(width / image.width, height / image.height);
+      const drawWidth = image.width * ratio;
+      const drawHeight = image.height * ratio;
+      ctx.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight);
+    }
+
+    function wrapCanvasText(ctx, text, maxWidth) {
+      const clean = String(text || "").trim();
+      if (!clean) return [""];
+      const chunks = clean.includes(" ") ? clean.split(/\s+/) : Array.from(clean);
+      const lines = [];
+      let line = "";
+      chunks.forEach((chunk) => {
+        const test = line ? `${line}${clean.includes(" ") ? " " : ""}${chunk}` : chunk;
+        if (ctx.measureText(test).width <= maxWidth || !line) {
+          line = test;
+        } else {
+          lines.push(line);
+          line = chunk;
+        }
+      });
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function drawRoundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      ctx.save();
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, y, width, height, radius);
+      else {
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+      }
+      ctx.fillStyle = fill;
+      ctx.fill();
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawCircle(ctx, x, y, radius) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function safeFilePart(value) {
+      return String(value || "money").trim().replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, "-").slice(0, 40) || "money";
     }
 
     function clearCombinedMoneyEntry(entryKey) {
@@ -7994,6 +8470,7 @@
       });
 
       renderQuickSettings();
+      renderPaymentAccounts();
     }
 
     function showSettingsPage(page) {
@@ -8030,6 +8507,137 @@
         deleteButton.addEventListener("click", () => deleteQuick(quick.id));
         els.quickSettingsList.appendChild(row);
       });
+    }
+
+    function renderPaymentAccounts() {
+      if (!els.paymentAccountList) return;
+      renderPaymentQrPreview();
+      const accounts = state.paymentAccounts.items || [];
+      if (!accounts.length) {
+        els.paymentAccountList.innerHTML = `<div class="pending-debt-empty">ยังไม่มี QR CODE รับเงิน</div>`;
+        return;
+      }
+      els.paymentAccountList.innerHTML = accounts.map((account) => {
+        const isDefault = account.id === state.paymentAccounts.defaultId;
+        return `
+          <div class="payment-account-row${isDefault ? " default" : ""}">
+            <span class="payment-account-thumb"><img src="${escapeAttr(account.image)}" alt="QR CODE ${escapeAttr(account.note)}"></span>
+            <span class="payment-account-meta">
+              <strong>${escapeHtml(account.note)}</strong>
+              <small>${isDefault ? "บัญชีตั้งต้น" : "แตะตั้งเป็นบัญชีตั้งต้นได้"}</small>
+            </span>
+            <span class="payment-account-actions">
+              ${isDefault ? `<span class="pill">ตั้งต้น</span>` : `<button class="ghost-action" type="button" data-account-default="${escapeAttr(account.id)}">ตั้งต้น</button>`}
+              <button class="small-icon-button delete" type="button" data-account-delete="${escapeAttr(account.id)}" title="ลบ ${escapeAttr(account.note)}" aria-label="ลบ ${escapeAttr(account.note)}">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 14h10l1-14"></path><path d="M9 7V4h6v3"></path></svg>
+              </button>
+            </span>
+          </div>
+        `;
+      }).join("");
+      els.paymentAccountList.querySelectorAll("[data-account-default]").forEach((button) => {
+        button.addEventListener("click", () => setDefaultPaymentAccount(button.dataset.accountDefault));
+      });
+      els.paymentAccountList.querySelectorAll("[data-account-delete]").forEach((button) => {
+        button.addEventListener("click", () => deletePaymentAccount(button.dataset.accountDelete));
+      });
+    }
+
+    function renderPaymentQrPreview() {
+      if (!els.paymentQrPreview) return;
+      if (state.paymentAccountDraftImage) {
+        els.paymentQrPreview.innerHTML = `<img src="${escapeAttr(state.paymentAccountDraftImage)}" alt="QR CODE ที่เลือก">`;
+        return;
+      }
+      els.paymentQrPreview.innerHTML = `<span>เลือกรูป QR CODE รับเงิน</span>`;
+    }
+
+    function handlePaymentQrFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) {
+        state.paymentAccountDraftImage = "";
+        renderPaymentQrPreview();
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        showToast("เลือกไฟล์รูปภาพ QR CODE");
+        event.target.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.paymentAccountDraftImage = String(reader.result || "");
+        renderPaymentQrPreview();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function savePaymentAccountFromSettings() {
+      const note = els.paymentAccountNoteInput.value.trim();
+      const image = state.paymentAccountDraftImage;
+      if (!image) {
+        showToast("เลือกรูป QR CODE ก่อน");
+        return;
+      }
+      const account = {
+        id: uid(),
+        note: note || `บัญชีรับเงิน ${state.paymentAccounts.items.length + 1}`,
+        image,
+        createdAt: new Date().toISOString()
+      };
+      state.paymentAccounts.items.push(account);
+      if (!state.paymentAccounts.defaultId) state.paymentAccounts.defaultId = account.id;
+      savePaymentAccounts();
+      resetPaymentAccountForm();
+      renderPaymentAccounts();
+      showToast("เพิ่ม QR CODE แล้ว");
+    }
+
+    function resetPaymentAccountForm() {
+      state.paymentAccountDraftImage = "";
+      if (els.paymentAccountNoteInput) els.paymentAccountNoteInput.value = "";
+      if (els.paymentQrFileInput) els.paymentQrFileInput.value = "";
+      renderPaymentQrPreview();
+    }
+
+    function setDefaultPaymentAccount(id) {
+      if (!state.paymentAccounts.items.some((account) => account.id === id)) return;
+      state.paymentAccounts.defaultId = id;
+      savePaymentAccounts();
+      renderPaymentAccounts();
+      showToast("ตั้ง QR CODE เริ่มต้นแล้ว");
+    }
+
+    function deletePaymentAccount(id) {
+      const account = state.paymentAccounts.items.find((item) => item.id === id);
+      if (!account) return;
+      if (!confirm(`ลบ QR CODE ${account.note}?`)) return;
+      state.paymentAccounts.items = state.paymentAccounts.items.filter((item) => item.id !== id);
+      if (state.paymentAccounts.defaultId === id) {
+        state.paymentAccounts.defaultId = state.paymentAccounts.items[0]?.id || "";
+      }
+      savePaymentAccounts();
+      renderPaymentAccounts();
+      showToast("ลบ QR CODE แล้ว");
+    }
+
+    function defaultPaymentAccount() {
+      return state.paymentAccounts.items.find((account) => account.id === state.paymentAccounts.defaultId) || state.paymentAccounts.items[0] || null;
+    }
+
+    function showAccountSetupPrompt() {
+      els.accountSetupPrompt?.classList.add("show");
+      showToast("กรุณาตั้งค่า QR CODE รับเงินก่อน");
+    }
+
+    function hideAccountSetupPrompt() {
+      els.accountSetupPrompt?.classList.remove("show");
+    }
+
+    function openAccountSettingsFromPrompt() {
+      hideAccountSetupPrompt();
+      setView("settings");
+      showSettingsPage("account");
     }
 
     function renderCategoryOptionsForSheet(type) {
@@ -9304,6 +9912,7 @@
         quickAdds: state.quickAdds,
         budget: state.budget,
         appSettings: state.appSettings,
+        paymentAccounts: state.paymentAccounts,
         moneyClear: state.moneyClear,
         pendingDebts: state.pendingDebts,
         splitGroups: state.splitGroups
@@ -9335,18 +9944,21 @@
             chartPeriod: "month",
             ...(data.appSettings || {})
           };
+          state.paymentAccounts = data.paymentAccounts || { items: [], defaultId: "" };
           state.moneyClear = data.moneyClear || { items: [] };
           state.pendingDebts = data.pendingDebts || { items: [] };
           state.splitGroups = Array.isArray(data.splitGroups) ? data.splitGroups : [];
           normalizeTransactions();
           normalizeMoneyClear();
           normalizePendingDebts();
+          normalizePaymentAccounts();
           normalizeSplitGroups();
           saveTransactions();
           saveCategories();
           saveQuickAdds();
           saveBudget();
           saveAppSettings();
+          savePaymentAccounts();
           saveMoneyClear();
           savePendingDebts();
           saveSplitGroups();
@@ -9560,6 +10172,10 @@
 
     function saveAppSettings() {
       localStorage.setItem(STORAGE_KEYS.appSettings, JSON.stringify(state.appSettings));
+    }
+
+    function savePaymentAccounts() {
+      localStorage.setItem(STORAGE_KEYS.paymentAccounts, JSON.stringify(state.paymentAccounts));
     }
 
     function saveMoneyClear() {
