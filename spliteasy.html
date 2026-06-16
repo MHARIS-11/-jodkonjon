@@ -967,7 +967,7 @@ function syncJKJPendingDebtsFromSplitEasy(){
   const currentIds=new Set(current.map(item=>item.debtId));
   const merged=current.map(item=>{
     const old=existing.get(item.debtId)||{};
-    const hasClearedDetails=Array.isArray(old.detailClearedKeys)&&old.detailClearedKeys.length>0;
+    const hasClearedDetails=(Array.isArray(old.detailClearedKeys)&&old.detailClearedKeys.length>0)||(Array.isArray(old.detailClearedSourceKeys)&&old.detailClearedSourceKeys.length>0);
     const amount=hasClearedDetails&&old.status!=='cleared'?Math.min(item.amount,+old.amount||item.amount):item.amount;
     return {...old,...item,amount,status:'pending',createdAt:old.createdAt||now,updatedAt:now,clearedAt:'',clearedTransactionId:'',splitEasySettlementId:''};
   });

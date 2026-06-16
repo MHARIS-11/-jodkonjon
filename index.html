@@ -1866,7 +1866,15 @@
       max-height: 170px;
       object-fit: contain;
       border-radius: 10px;
+      border: 1px solid var(--border);
       background: var(--surface-soft);
+      cursor: zoom-in;
+    }
+
+    .scan-preview-button {
+      min-height: 38px;
+      width: 100%;
+      margin-top: -2px;
     }
 
     .scan-status {
@@ -1939,6 +1947,18 @@
       align-items: center;
     }
 
+    .scan-sticky-tools {
+      position: sticky;
+      top: -10px;
+      z-index: 5;
+      display: grid;
+      gap: 8px;
+      margin: -2px -2px 2px;
+      padding: 2px 2px 10px;
+      background: var(--background);
+      box-shadow: 0 8px 12px rgba(17, 24, 39, 0.035);
+    }
+
     .scan-list,
     .scan-groups {
       display: grid;
@@ -1947,13 +1967,20 @@
 
     .scan-item {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) minmax(76px, 0.34fr);
+      grid-template-columns: 24px minmax(0, 1fr) 88px;
       gap: 8px;
       align-items: center;
-      padding: 8px;
+      padding: 7px;
       border: 1px solid var(--border);
       border-radius: 10px;
       background: var(--surface);
+    }
+
+    .scan-item .input {
+      min-width: 0;
+      min-height: 42px;
+      padding: 8px 10px;
+      font-size: 14px;
     }
 
     .scan-item input[type="checkbox"] {
@@ -2005,18 +2032,54 @@
       font-size: 13px;
     }
 
+    .image-viewer-backdrop {
+      z-index: 62;
+      align-items: center;
+      padding: 18px;
+      background: rgba(17, 24, 39, 0.72);
+    }
+
+    .image-viewer-backdrop.open {
+      display: flex;
+    }
+
+    .image-viewer-card {
+      width: min(100%, 760px);
+      max-height: 90dvh;
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .image-viewer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .image-viewer-card img {
+      width: 100%;
+      max-height: 78dvh;
+      object-fit: contain;
+      border-radius: 10px;
+      background: var(--surface-soft);
+    }
+
     @media (max-width: 560px) {
-      .scan-review-grid,
-      .scan-item-toolbar {
+      .scan-review-grid {
         grid-template-columns: 1fr;
       }
 
       .scan-item {
-        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-columns: 22px minmax(0, 1fr) 76px;
+        gap: 7px;
       }
 
       .scan-item .input[data-scan-item-field="amount"] {
-        grid-column: 2;
+        grid-column: auto;
       }
     }
 
@@ -3877,6 +3940,7 @@
         <strong>เลือกรูปจากแกลอรี่ หรือถ่ายรูปบิลใหม่</strong>
         <input id="billScanFileInput" type="file" accept="image/*">
         <img class="scan-preview" id="billScanPreview" alt="ตัวอย่างบิล" hidden>
+        <button class="ghost-action scan-preview-button" id="openBillScanImageButton" type="button" hidden>ดูรูปบิล</button>
         <div class="scan-status">
           <span id="billScanStatus">ยังไม่ได้เลือกรูป</span>
           <div class="scan-progress" aria-hidden="true"><span id="billScanProgress"></span></div>
@@ -3916,21 +3980,21 @@
       </div>
 
       <div class="line-panel" id="billScanDetailPanel" style="margin-top:12px;" hidden>
-        <div class="scan-summary">
-          <span>ยอดที่จัดหมวดแล้ว</span>
-          <strong id="billScanAssignedTotal">฿0</strong>
-        </div>
-        <div class="scan-item-toolbar">
-          <select class="select" id="billScanAssignCategory"></select>
-          <button class="mini-action" id="assignBillScanItemsButton" type="button">ย้ายเข้าหมวดนี้</button>
-        </div>
-        <div>
+        <div class="scan-sticky-tools">
+          <div class="scan-summary">
+            <span>ยอดที่จัดหมวดแล้ว</span>
+            <strong id="billScanAssignedTotal">฿0</strong>
+          </div>
+          <div class="scan-item-toolbar">
+            <select class="select" id="billScanAssignCategory"></select>
+            <button class="mini-action" id="assignBillScanItemsButton" type="button">ย้ายเข้าหมวดนี้</button>
+          </div>
           <div class="line-panel-head">
             <span class="line-panel-title">รายการยังไม่จัดหมวด</span>
             <span class="section-note" id="billScanUnassignedCount">0 รายการ</span>
           </div>
-          <div class="scan-list" id="billScanUnassignedList"></div>
         </div>
+        <div class="scan-list" id="billScanUnassignedList"></div>
         <div>
           <div class="line-panel-head">
             <span class="line-panel-title">หมวดที่เลือกแล้ว</span>
@@ -3941,6 +4005,18 @@
       </div>
 
       <button class="primary-action" id="applyBillScanButton" type="button" style="width:100%; margin-top:14px;">ใส่ลงฟอร์มรายจ่าย</button>
+    </div>
+  </div>
+
+  <div class="sheet-backdrop image-viewer-backdrop" id="billScanImageViewer" role="dialog" aria-modal="true" aria-labelledby="billScanImageTitle">
+    <div class="image-viewer-card">
+      <div class="image-viewer-head">
+        <strong id="billScanImageTitle">รูปบิล</strong>
+        <button class="icon-button" id="closeBillScanImageButton" type="button" title="ปิดรูปบิล" aria-label="ปิดรูปบิล">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <img id="billScanImageFull" alt="รูปบิลที่เลือก">
     </div>
   </div>
 
@@ -4310,6 +4386,10 @@
       closeBillScanButton: document.getElementById("closeBillScanButton"),
       billScanFileInput: document.getElementById("billScanFileInput"),
       billScanPreview: document.getElementById("billScanPreview"),
+      openBillScanImageButton: document.getElementById("openBillScanImageButton"),
+      billScanImageViewer: document.getElementById("billScanImageViewer"),
+      closeBillScanImageButton: document.getElementById("closeBillScanImageButton"),
+      billScanImageFull: document.getElementById("billScanImageFull"),
       billScanStatus: document.getElementById("billScanStatus"),
       billScanProgress: document.getElementById("billScanProgress"),
       billScanStoreInput: document.getElementById("billScanStoreInput"),
@@ -4447,6 +4527,9 @@
       els.scanBillButton.addEventListener("click", openBillScanSheet);
       els.closeBillScanButton.addEventListener("click", closeBillScanSheet);
       els.billScanFileInput.addEventListener("change", handleBillScanFile);
+      els.billScanPreview.addEventListener("click", openBillScanImageViewer);
+      els.openBillScanImageButton.addEventListener("click", openBillScanImageViewer);
+      els.closeBillScanImageButton.addEventListener("click", closeBillScanImageViewer);
       els.analyzeBillTextButton.addEventListener("click", analyzeBillScanText);
       els.addBillScanItemButton.addEventListener("click", addManualBillScanItem);
       els.assignBillScanItemsButton.addEventListener("click", assignSelectedBillScanItems);
@@ -4588,7 +4671,15 @@
         if (event.target === els.billScanSheet) closeBillScanSheet();
       });
 
+      els.billScanImageViewer.addEventListener("click", (event) => {
+        if (event.target === els.billScanImageViewer) closeBillScanImageViewer();
+      });
+
       document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && els.billScanImageViewer.classList.contains("open")) {
+          closeBillScanImageViewer();
+          return;
+        }
         if (els.timeOverlay.classList.contains("open")) {
           if (event.key === "Escape") closeTimePicker();
           if (event.key === "Enter") applyTimePicker();
@@ -5952,7 +6043,7 @@
       if (!state.pendingDebts || !Array.isArray(state.pendingDebts.items)) {
         state.pendingDebts = { items: [] };
       }
-      state.pendingDebts.items = state.pendingDebts.items.map((debt) => ({
+      const normalized = state.pendingDebts.items.map((debt) => ({
         debtId: debt.debtId || debt.id || uid(),
         groupId: debt.groupId || "",
         groupName: debt.groupName || "หารก่อนจน (HJK)",
@@ -5970,10 +6061,52 @@
         clearedTransactionId: debt.clearedTransactionId || "",
         splitEasySettlementId: debt.splitEasySettlementId || "",
         detailClearedKeys: Array.isArray(debt.detailClearedKeys) ? debt.detailClearedKeys : [],
+        detailClearedSourceKeys: Array.isArray(debt.detailClearedSourceKeys) ? debt.detailClearedSourceKeys : [],
         detailClearedItems: Array.isArray(debt.detailClearedItems) ? debt.detailClearedItems : [],
         source: debt.source || "spliteasy"
-      })).filter((debt) => debt.amount > 0);
+      }));
+      state.pendingDebts.items = normalized
+        .map((debt) => reconcileSplitEasyPendingDebt(debt))
+        .filter((debt) => debt.amount > 0 || debt.status === "cleared");
       savePendingDebts();
+    }
+
+    function reconcileSplitEasyPendingDebt(debt) {
+      if (!debt || debt.source !== "spliteasy" || !debt.groupId || debt.status === "cleared") return debt;
+      const groups = readSplitEasyGroups();
+      const group = groups.find((item) => item.id === debt.groupId) || groups.find((item) => item.name === debt.groupName);
+      if (!group) return debt;
+      const me = splitEasyMeMember(group);
+      if (!me) return debt;
+      const otherId = splitEasyOtherMemberIdForDebt(group, debt, me.id);
+      if (!otherId) return debt;
+      const other = (group.members || []).find((member) => member.id === otherId);
+      const person = moneyExactPersonKey(other?.name || debt.debtor || debt.creditor);
+      const rows = pendingDebtSourceDetailEntries(debt, person);
+      if (!rows.length) {
+        const hasClearedDetail = (debt.detailClearedKeys || []).length || (debt.detailClearedSourceKeys || []).length;
+        return hasClearedDetail
+          ? { ...debt, status: "cleared", clearedAt: debt.clearedAt || new Date().toISOString(), updatedAt: new Date().toISOString() }
+          : debt;
+      }
+      const receivableTotal = sum(rows.filter((entry) => entry.direction === "receivable").map((entry) => entry.amount));
+      const payableTotal = sum(rows.filter((entry) => entry.direction === "payable").map((entry) => entry.amount));
+      const net = receivableTotal - payableTotal;
+      if (Math.abs(net) <= 0.005) {
+        return { ...debt, status: "cleared", clearedAt: debt.clearedAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
+      }
+      const receivable = net > 0;
+      return {
+        ...debt,
+        amount: clampMoney(Math.abs(net)),
+        debtor: receivable ? person : "You",
+        creditor: receivable ? "You" : person,
+        debtorId: receivable ? otherId : me.id,
+        creditorId: receivable ? me.id : otherId,
+        debtorIsMe: !receivable,
+        creditorIsMe: receivable,
+        status: "pending"
+      };
     }
 
     function normalizeSplitGroups() {
@@ -6186,7 +6319,31 @@
       const person = debt.creditorIsMe ? debt.debtor : debt.creditor;
       const detailRows = pendingDebtSourceDetailEntries(debt, person, { includeCleared: true });
       const detailKeys = detailRows.map((entry) => entry.key).filter(Boolean);
+      const detailSourceKeys = detailRows.map((entry) => entry.sourceKey).filter(Boolean);
       const transaction = createPendingDebtTransaction(debt, title, role, { now, date, time });
+      const detailClearedItems = detailRows.map((detail) => {
+        const detailRole = detail.direction === "receivable" ? "receivable" : "payable";
+        const detailTitle = detailRole === "receivable"
+          ? `${detail.person}จ่ายคืนแล้ว - ${detail.detailTitle || debt.groupName || "HJK"}`
+          : `จ่ายคืน${detail.person}แล้ว - ${detail.detailTitle || debt.groupName || "HJK"}`;
+        return {
+          key: detail.key,
+          sourceKey: detail.sourceKey || "",
+          title: detailTitle,
+          type: detailRole === "receivable" ? "owedToMe" : "iOwe",
+          person: detail.person,
+          amount: detail.amount,
+          direction: detail.direction,
+          detailTitle: detail.detailTitle || "",
+          rawExpenseId: detail.rawExpenseId || "",
+          rawDetailIndex: detail.rawDetailIndex,
+          note: `HJK · ${detail.note || debt.groupName || "Group"}`,
+          clearedAt: now,
+          clearedDate: date,
+          clearedTime: time,
+          transactionId: transaction.id
+        };
+      });
       state.transactions.unshift(transaction);
       state.pendingDebts.items = state.pendingDebts.items.map((item) => item.debtId === debtId
         ? {
@@ -6195,6 +6352,8 @@
             clearedAt: now,
             clearedTransactionId: transaction.id,
             detailClearedKeys: [...new Set([...(item.detailClearedKeys || []), ...detailKeys])],
+            detailClearedSourceKeys: [...new Set([...(item.detailClearedSourceKeys || []), ...detailSourceKeys])],
+            detailClearedItems: [...(item.detailClearedItems || []), ...detailClearedItems].filter((detail, index, array) => array.findIndex((entry) => entry.key === detail.key || (entry.sourceKey && entry.sourceKey === detail.sourceKey)) === index),
             splitEasySettlementId: "",
             updatedAt: now
           }
@@ -6239,19 +6398,41 @@
       const groupIndex = groups.findIndex((group) => group.id === debt.groupId);
       if (groupIndex < 0) return "";
       const group = groups[groupIndex];
-      const keys = [...new Set((detailKeys || []).filter(Boolean))];
-      if (!keys.length) return "";
-      const impactedExpenseIds = new Set(keys.map((key) => pendingDebtDetailKeyParts(key).expenseId).filter(Boolean));
       const pendingItems = state.pendingDebts.items || [];
+      const stateDebt = pendingItems.find((item) => item.debtId === debt.debtId) || debt;
+      const person = stateDebt.creditorIsMe ? stateDebt.debtor : stateDebt.creditor;
+      const allSourceRows = pendingDebtSourceDetailEntries(stateDebt, person, { includeCleared: true });
+      let keys = [...new Set((detailKeys || []).filter(Boolean))];
+      if (!keys.length) keys = allSourceRows.map((row) => row.key).filter(Boolean);
+      if (!keys.length) return "";
+      const clearedItems = pendingItems
+        .flatMap((item) => item.detailClearedItems || [])
+        .filter((detail) => keys.includes(detail.key) || (detail.sourceKey && (stateDebt.detailClearedSourceKeys || []).includes(detail.sourceKey)));
+      const sourceKeys = [...new Set([
+        ...(stateDebt.detailClearedSourceKeys || []),
+        ...clearedItems.map((detail) => detail.sourceKey).filter(Boolean),
+        ...allSourceRows.filter((row) => keys.includes(row.key)).map((row) => row.sourceKey).filter(Boolean)
+      ])];
+      const impactedExpenseIds = new Set([
+        ...keys.map((key) => pendingDebtDetailKeyParts(key).expenseId).filter(Boolean),
+        ...clearedItems.map((detail) => detail.rawExpenseId).filter(Boolean),
+        ...allSourceRows.filter((row) => keys.includes(row.key) || sourceKeys.includes(row.sourceKey)).map((row) => row.rawExpenseId).filter(Boolean)
+      ]);
+      if (!impactedExpenseIds.size) return "";
       group.expenses = (group.expenses || []).map((expense) => {
         if (!impactedExpenseIds.has(expense.id || "")) return expense;
-        const clearedKeys = [...new Set([...(expense.jkjClearedDetailKeys || []), ...keys.filter((key) => pendingDebtDetailKeyParts(key).expenseId === (expense.id || ""))])];
+        const expenseRows = allSourceRows.filter((row) => row.rawExpenseId === (expense.id || ""));
+        const expenseKeys = keys.filter((key) => pendingDebtDetailKeyParts(key).expenseId === (expense.id || ""));
+        const expenseSourceKeys = sourceKeys.filter((sourceKey) => expenseRows.some((row) => row.sourceKey === sourceKey));
+        const clearedKeys = [...new Set([...(expense.jkjClearedDetailKeys || []), ...expenseKeys])];
+        const clearedSourceKeys = [...new Set([...(expense.jkjClearedSourceKeys || []), ...expenseSourceKeys])];
         const clearedDetails = pendingItems
           .flatMap((item) => (item.detailClearedItems || []).filter((detail) => clearedKeys.includes(detail.key)))
           .filter((detail, index, array) => array.findIndex((item) => item.key === detail.key) === index);
         const nextExpense = {
           ...expense,
           jkjClearedDetailKeys: clearedKeys,
+          jkjClearedSourceKeys: clearedSourceKeys,
           jkjClearedDetails: clearedDetails,
           jkjStatusUpdatedAt: now
         };
@@ -6280,23 +6461,76 @@
     function splitEasyExpenseFullyClearedInJKJ(group, expense, pendingItems = state.pendingDebts.items || []) {
       const expenseId = expense.id || "";
       if (!expenseId) return false;
-      const rows = pendingItems
-        .filter((debt) => debt.groupId === group.id)
-        .flatMap((debt) => {
-          const person = debt.creditorIsMe ? debt.debtor : debt.creditor;
-          return pendingDebtSourceDetailEntries(debt, person, { includeCleared: true });
-        })
-        .filter((entry) => entry.rawExpenseId === expenseId);
+      const rows = splitEasyExpenseSourceRowsForMe(group, expense);
       if (!rows.length) return false;
-      return rows.every((entry) => {
-        const debt = pendingItems.find((item) => item.debtId === entry.id);
-        return debt && pendingDebtDetailIsCleared(debt, entry.key);
+      const clearedSourceKeys = new Set([...(expense.jkjClearedSourceKeys || [])]);
+      const clearedDetailKeys = new Set([...(expense.jkjClearedDetailKeys || [])]);
+      pendingItems
+        .filter((debt) => debt.groupId === group.id)
+        .flatMap((debt) => debt.detailClearedItems || [])
+        .filter((detail) => detail.rawExpenseId === expenseId)
+        .forEach((detail) => {
+          if (detail.sourceKey) clearedSourceKeys.add(detail.sourceKey);
+          if (detail.key) clearedDetailKeys.add(detail.key);
+        });
+      return rows.every((entry) => clearedSourceKeys.has(entry.sourceKey) || clearedDetailKeys.has(entry.key));
+    }
+
+    function splitEasyExpenseSourceRowsForMe(group, expense) {
+      const me = splitEasyMeMember(group);
+      if (!me) return [];
+      const rows = [];
+      (group.members || []).filter((member) => member.id !== me.id).forEach((other) => {
+        splitEasyExpensePairDetails(expense, group.members || [], me.id, other.id).forEach((detail, detailIndex) => {
+          const payable = detail.from === me.id && detail.to === other.id;
+          const receivable = detail.from === other.id && detail.to === me.id;
+          if (!payable && !receivable) return;
+          const direction = receivable ? "receivable" : "payable";
+          const amountDue = clampMoney(detail.amount);
+          const sourceKey = pendingDebtSourceEntryKey(group.id, expense.id || "", detailIndex, direction, detail, amountDue);
+          rows.push({
+            key: `${expense.id || ""}:${detailIndex}:${direction}:${amountDue}`,
+            sourceKey,
+            rawExpenseId: expense.id || "",
+            direction,
+            amount: amountDue
+          });
+        });
       });
+      return rows;
     }
 
     function splitEasyMemberIdByName(group, name) {
       const member = (group.members || []).find((item) => item.name === name || (item.isMe && ["You", "เรา", "คุณ"].includes(name)));
       return member?.id || "";
+    }
+
+    function splitEasyOtherMemberIdForDebt(group, debt, meId) {
+      const ids = [debt.debtorId, debt.creditorId].filter(Boolean);
+      const direct = ids.find((id) => id && id !== meId && (group.members || []).some((member) => member.id === id));
+      if (direct) return direct;
+      const byDebtor = debt.debtor && !debt.debtorIsMe ? splitEasyMemberIdByName(group, debt.debtor) : "";
+      if (byDebtor && byDebtor !== meId) return byDebtor;
+      const byCreditor = debt.creditor && !debt.creditorIsMe ? splitEasyMemberIdByName(group, debt.creditor) : "";
+      if (byCreditor && byCreditor !== meId) return byCreditor;
+      return "";
+    }
+
+    function splitEasyDebtDirectionPatch(debt, personName, net) {
+      const groups = readSplitEasyGroups();
+      const group = groups.find((item) => item.id === debt.groupId) || groups.find((item) => item.name === debt.groupName);
+      const me = group ? splitEasyMeMember(group) : null;
+      const otherId = group && me ? splitEasyOtherMemberIdForDebt(group, debt, me.id) : "";
+      const person = moneyExactPersonKey(personName || debt.debtor || debt.creditor);
+      const receivable = net > 0;
+      return {
+        debtor: receivable ? person : "You",
+        creditor: receivable ? "You" : person,
+        debtorId: receivable ? otherId : (me?.id || debt.debtorId),
+        creditorId: receivable ? (me?.id || debt.creditorId) : otherId,
+        debtorIsMe: !receivable,
+        creditorIsMe: receivable
+      };
     }
 
     function saveSplitGroup(event) {
@@ -6816,9 +7050,11 @@
           const direction = receivable ? "receivable" : "payable";
           const amountDue = clampMoney(detail.amount);
           const detailKey = pendingDebtDetailEntryKey(debt.debtId, expense.id || index, detailIndex, direction, amountDue);
-          if (!options.includeCleared && pendingDebtDetailIsCleared(debt, detailKey)) return;
+          const sourceKey = pendingDebtSourceEntryKey(group.id, expense.id || index, detailIndex, direction, detail, amountDue);
+          if (!options.includeCleared && pendingDebtDetailIsCleared(debt, detailKey, sourceKey)) return;
           rows.push({
             key: detailKey,
+            sourceKey,
             source: "pending-detail",
             id: debt.debtId,
             person: moneyExactPersonKey(person),
@@ -6831,7 +7067,9 @@
             detailTitle: expense.title || expense.name || "",
             raw: debt,
             rawExpenseId: expense.id || "",
-            rawDetailIndex: detailIndex
+            rawDetailIndex: detailIndex,
+            fromId: detail.from,
+            toId: detail.to
           });
         });
       });
@@ -6842,8 +7080,14 @@
       return `pending-detail:${[debtId, expenseId, detailIndex, direction, amount].map((part) => encodeURIComponent(String(part))).join("|")}`;
     }
 
-    function pendingDebtDetailIsCleared(debt, detailKey) {
-      return Array.isArray(debt.detailClearedKeys) && debt.detailClearedKeys.includes(detailKey);
+    function pendingDebtSourceEntryKey(groupId, expenseId, detailIndex, direction, detail, amount) {
+      return `pending-source:${[groupId, expenseId, detailIndex, detail?.from || "", detail?.to || "", direction, amount].map((part) => encodeURIComponent(String(part))).join("|")}`;
+    }
+
+    function pendingDebtDetailIsCleared(debt, detailKey, sourceKey = "") {
+      if (Array.isArray(debt.detailClearedKeys) && debt.detailClearedKeys.includes(detailKey)) return true;
+      if (sourceKey && Array.isArray(debt.detailClearedSourceKeys) && debt.detailClearedSourceKeys.includes(sourceKey)) return true;
+      return Boolean(sourceKey && Array.isArray(debt.detailClearedItems) && debt.detailClearedItems.some((item) => item.sourceKey === sourceKey));
     }
 
     function splitEasyMeMember(group) {
@@ -7183,8 +7427,10 @@
       transaction.lines = transaction.lines.map((line) => ({ ...line, title, amount: detail.amount }));
 
       const nextKeys = [...new Set([...(debt.detailClearedKeys || []), detailKey])];
+      const nextSourceKeys = [...new Set([...(debt.detailClearedSourceKeys || []), detail.sourceKey].filter(Boolean))];
       const nextDetailItem = {
         key: detailKey,
+        sourceKey: detail.sourceKey || "",
         title,
         type: role === "receivable" ? "owedToMe" : "iOwe",
         person: detail.person,
@@ -7193,6 +7439,8 @@
         detailTitle: detail.detailTitle || "",
         rawExpenseId: detail.rawExpenseId || "",
         rawDetailIndex: detail.rawDetailIndex,
+        fromId: detail.fromId || "",
+        toId: detail.toId || "",
         note: `HJK · ${detail.note || debt.groupName || "Group"}`,
         clearedAt: now,
         clearedDate: date,
@@ -7202,20 +7450,25 @@
       const nextDebt = {
         ...debt,
         detailClearedKeys: nextKeys,
+        detailClearedSourceKeys: nextSourceKeys,
         detailClearedItems: [...(debt.detailClearedItems || []), nextDetailItem]
       };
       const remainingRows = pendingDebtSourceDetailEntries(nextDebt, person);
       const remainingReceivable = sum(remainingRows.filter((entry) => entry.direction === "receivable").map((entry) => entry.amount));
       const remainingPayable = sum(remainingRows.filter((entry) => entry.direction === "payable").map((entry) => entry.amount));
-      const remainingAmount = clampMoney(Math.abs(remainingReceivable - remainingPayable));
+      const remainingNet = remainingReceivable - remainingPayable;
+      const remainingAmount = clampMoney(Math.abs(remainingNet));
       const shouldClearDebt = remainingRows.length === 0 || remainingAmount <= 0.005;
+      const directionPatch = shouldClearDebt ? {} : splitEasyDebtDirectionPatch(debt, detail.person, remainingNet);
 
       state.transactions.unshift(transaction);
       state.pendingDebts.items = state.pendingDebts.items.map((item) => item.debtId === debtId
         ? {
             ...item,
+            ...directionPatch,
             amount: shouldClearDebt ? item.amount : remainingAmount,
             detailClearedKeys: nextKeys,
+            detailClearedSourceKeys: nextSourceKeys,
             detailClearedItems: nextDebt.detailClearedItems,
             status: shouldClearDebt ? "cleared" : "pending",
             clearedAt: shouldClearDebt ? now : item.clearedAt,
@@ -7860,6 +8113,7 @@
     }
 
     function resetBillScanState(options = {}) {
+      if (state.billScan?.imageUrl) URL.revokeObjectURL(state.billScan.imageUrl);
       state.billScan = {
         mode: options.mode || state.billScan?.mode || "rough",
         rawText: "",
@@ -7887,10 +8141,21 @@
     }
 
     function closeBillScanSheet() {
+      closeBillScanImageViewer();
       els.billScanSheet.classList.remove("open");
       if (!els.sheet.classList.contains("open") && !els.backfillSheet.classList.contains("open")) {
         document.body.style.overflow = "";
       }
+    }
+
+    function openBillScanImageViewer() {
+      if (!state.billScan.imageUrl) return;
+      els.billScanImageFull.src = state.billScan.imageUrl;
+      els.billScanImageViewer.classList.add("open");
+    }
+
+    function closeBillScanImageViewer() {
+      els.billScanImageViewer?.classList.remove("open");
     }
 
     function setBillScanMode(mode) {
@@ -8173,8 +8438,14 @@
       let day = Number(match[1]);
       let month = Number(match[2]);
       let year = Number(match[3]);
-      if (year < 100) year += 2500;
-      if (year > 2400) year -= 543;
+      if (year < 100) {
+        const currentYear = new Date().getFullYear();
+        const ceCandidate = 2000 + year;
+        const beCandidate = 2500 + year - 543;
+        year = Math.abs(ceCandidate - currentYear) <= Math.abs(beCandidate - currentYear) ? ceCandidate : beCandidate;
+      } else if (year > 2400) {
+        year -= 543;
+      }
       if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) return todayISO();
       return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     }
@@ -8203,7 +8474,11 @@
       els.billScanTotalInput.value = scan.total || "";
       els.billScanRawText.value = scan.rawText || "";
       els.billScanPreview.hidden = !scan.imageUrl;
-      if (scan.imageUrl) els.billScanPreview.src = scan.imageUrl;
+      els.openBillScanImageButton.hidden = !scan.imageUrl;
+      if (scan.imageUrl) {
+        els.billScanPreview.src = scan.imageUrl;
+        els.billScanImageFull.src = scan.imageUrl;
+      }
       els.billScanCategoryField.hidden = scan.mode === "detail";
       els.billScanDetailPanel.hidden = scan.mode !== "detail";
       updateBillScanStatus();
