@@ -4099,7 +4099,7 @@
         <textarea class="textarea" id="noteInput" placeholder="ไม่บังคับ"></textarea>
       </div>
 
-      <button class="primary-action" id="saveTransactionButton" type="submit" style="width:100%;">บันทึก</button>
+      <button class="primary-action" type="submit" style="width:100%;">บันทึก</button>
     </form>
   </div>
 
@@ -6044,6 +6044,7 @@
       }
       if (data.type === "jkj:pending-debts-updated") {
         syncPendingDebtsFromSplitEasy();
+        renderAll();
         if (data.message) showToast(data.message);
       }
       if (data.type === "jkj:open-clear-money") {
@@ -6392,7 +6393,7 @@
 
     function renderMoneyClear() {
       if (!els.moneyPanels) return;
-      refreshPendingDebtsFromStorage();
+      syncPendingDebtsFromSplitEasy();
       renderMoneyWorkspaces();
       const cash = getCashSummary();
       const activeItems = state.moneyClear.items.filter((item) => item.status !== "cleared");
@@ -6459,9 +6460,103 @@
       normalizePendingDebts();
     }
 
-    function syncPendingDebtsFromSplitEasy() {
+    function syncPendingDebtsFromSplitEasy(renderPanels = false) {
       refreshPendingDebtsFromStorage();
-      renderPendingDebts();
+      const next = derivePendingDebtsFromSplitEasy();
+      if (next) {
+        state.pendingDebts = next;
+        savePendingDebts();
+      }
+      if (renderPanels) renderPendingDebts();
+    }
+
+    function derivePendingDebtsFromSplitEasy() {
+      const groups = readSplitEasyGroups();
+      const hasSplitEasyStore = typeof localStorage !== "undefined" && localStorage.getItem("se_v3") !== null;
+      if (!groups.length && !hasSplitEasyStore) return null;
+      const now = new Date().toISOString();
+      const existingItems = Array.isArray(state.pendingDebts.items) ? state.pendingDebts.items : [];
+      const nextItems = existingItems.filter((item) => item.source !== "spliteasy" || !item.groupId);
+      const producedIds = new Set();
+
+      groups.forEach((group) => {
+        const me = splitEasyMeMember(group);
+        if (!me) return;
+        (group.members || []).filter((member) => member.id && member.id !== me.id).forEach((other) => {
+          const old = findSplitEasyDebtForMember(existingItems, group.id, me.id, other.id);
+          const debtId = old?.debtId || `se:${group.id}:member:${other.id}`;
+          const memory = {
+            detailClearedKeys: Array.isArray(old?.detailClearedKeys) ? old.detailClearedKeys : [],
+            detailClearedSourceKeys: Array.isArray(old?.detailClearedSourceKeys) ? old.detailClearedSourceKeys : [],
+            detailClearedItems: Array.isArray(old?.detailClearedItems) ? old.detailClearedItems : []
+          };
+          const baseDebt = {
+            ...(old || {}),
+            ...memory,
+            debtId,
+            groupId: group.id,
+            groupName: group.name || old?.groupName || "หารก่อนจน (HJK)",
+            debtor: other.name || old?.debtor || "Unknown",
+            creditor: "You",
+            debtorId: other.id,
+            creditorId: me.id,
+            debtorIsMe: false,
+            creditorIsMe: true,
+            source: "spliteasy",
+            createdAt: old?.createdAt || now
+          };
+          const rows = pendingDebtSourceDetailEntries(baseDebt, other.name);
+          const receivableTotal = sum(rows.filter((entry) => entry.direction === "receivable").map((entry) => entry.amount));
+          const payableTotal = sum(rows.filter((entry) => entry.direction === "payable").map((entry) => entry.amount));
+          const net = receivableTotal - payableTotal;
+          if (!rows.length || Math.abs(net) <= 0.005) {
+            if (old?.status === "cleared" || memory.detailClearedItems.length) {
+              producedIds.add(debtId);
+              nextItems.push({ ...baseDebt, amount: 0, status: "cleared", clearedAt: old?.clearedAt || now, updatedAt: now });
+            }
+            return;
+          }
+          const receivable = net > 0;
+          producedIds.add(debtId);
+          nextItems.push({
+            ...baseDebt,
+            debtor: receivable ? (other.name || "Unknown") : "You",
+            creditor: receivable ? "You" : (other.name || "Unknown"),
+            debtorId: receivable ? other.id : me.id,
+            creditorId: receivable ? me.id : other.id,
+            debtorIsMe: !receivable,
+            creditorIsMe: receivable,
+            amount: clampMoney(Math.abs(net)),
+            status: "pending",
+            clearedAt: "",
+            clearedTransactionId: "",
+            splitEasySettlementId: "",
+            updatedAt: now
+          });
+        });
+      });
+
+      existingItems.forEach((item) => {
+        if (item.source !== "spliteasy" || !item.groupId || producedIds.has(item.debtId)) return;
+        if (item.status === "cleared" || (item.detailClearedItems || []).length) nextItems.push(item);
+      });
+      return { items: uniqueByDebtId(nextItems) };
+    }
+
+    function findSplitEasyDebtForMember(items, groupId, meId, otherId) {
+      return (items || [])
+        .filter((item) => item.source === "spliteasy" && item.groupId === groupId)
+        .find((item) => [item.debtorId, item.creditorId].includes(otherId) && [item.debtorId, item.creditorId].includes(meId));
+    }
+
+    function uniqueByDebtId(items) {
+      const seen = new Set();
+      return items.filter((item) => {
+        const key = item.debtId || item.id;
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     }
 
     function renderPendingDebts() {
