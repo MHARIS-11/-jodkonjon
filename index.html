@@ -7845,108 +7845,196 @@
       const contentWidth = width - pad * 2;
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      ctx.textBaseline = "top";
-      const summaryY = 150;
-      const summaryHeight = 150;
-      const listY = summaryY + summaryHeight + 44;
-      const listHeaderHeight = 78;
-      const rowHeight = 78;
-      const listHeight = listHeaderHeight + entries.length * rowHeight + 16;
-      const qrCardHeight = account ? 520 : 0;
-      const height = listY + listHeight + (account ? 28 + qrCardHeight : 0) + 86;
-      canvas.width = width;
-      canvas.height = height;
-
-      ctx.fillStyle = "#F8F8F5";
-      ctx.fillRect(0, 0, width, height);
-      ctx.fillStyle = "#1F5137";
-      ctx.font = "800 52px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-      ctx.fillText("JKJ", pad, 58);
-      ctx.fillStyle = "#6B7280";
-      ctx.font = "400 28px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-      ctx.fillText(formatDateShort(todayISO()), pad, 122);
-
+      const receivableEntries = entries.filter((entry) => entry.direction === "receivable");
+      const payableEntries = entries.filter((entry) => entry.direction === "payable");
+      const receivableTotal = sum(receivableEntries.map((entry) => entry.amount));
+      const payableTotal = sum(payableEntries.map((entry) => entry.amount));
       const netReceivable = group.net > 0.005;
       const netPayable = group.net < -0.005;
       const amountColor = netReceivable ? "#16A34A" : (netPayable ? "#DC2626" : "#111827");
+      const summaryText = netReceivable
+        ? `${group.person}ต้องจ่ายเรา`
+        : (netPayable ? `เราต้องจ่าย${group.person}` : "หักลบกันพอดี");
+      const titleFont = "700 29px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      const metaFont = "400 23px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      const amountFont = "800 30px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      const textWidth = contentWidth - 250;
+
+      const noteParts = (entry) => String(entry.note || "")
+        .split(" · ")
+        .map((part) => part.trim())
+        .filter(Boolean);
+      const entryReason = (entry) => {
+        const parts = noteParts(entry);
+        const fromNote = parts.find((part) => !["JKJ", "HJK"].includes(part));
+        return entry.detailTitle || fromNote || entry.title || "-";
+      };
+      const entryMeta = (entry) => {
+        const parts = noteParts(entry).filter((part) => part !== entryReason(entry) && !["JKJ", "HJK"].includes(part));
+        const side = entry.direction === "receivable" ? `${group.person}ค้างเรา` : `เราค้าง${group.person}`;
+        return [side, ...parts, formatDateShort(entry.date)].filter(Boolean).join(" · ");
+      };
+      const measureRows = (items) => {
+        ctx.font = titleFont;
+        return items.map((entry) => {
+          const titleLines = wrapCanvasText(ctx, entryReason(entry), textWidth);
+          ctx.font = metaFont;
+          const metaLines = wrapCanvasText(ctx, entryMeta(entry), textWidth);
+          ctx.font = titleFont;
+          return {
+            entry,
+            titleLines,
+            metaLines,
+            height: Math.max(84, 24 + (titleLines.length * 34) + (metaLines.length * 27) + 18)
+          };
+        });
+      };
+      const sections = [
+        { title: "เขาค้างเรา", color: "#16A34A", total: receivableTotal, rows: measureRows(receivableEntries) },
+        { title: "เราค้างเขา", color: "#DC2626", total: payableTotal, rows: measureRows(payableEntries) }
+      ].filter((section) => section.rows.length);
+      const rowsHeight = sections.reduce((total, section, index) => (
+        total + 64 + section.rows.reduce((sumRows, row) => sumRows + row.height, 0) + (index ? 18 : 0)
+      ), 0);
+      const headerY = 46;
+      const summaryY = 164;
+      const summaryHeight = 150;
+      const totalsY = summaryY + summaryHeight + 28;
+      const totalsHeight = 118;
+      const listY = totalsY + totalsHeight + 28;
+      const listHeight = 84 + rowsHeight + 30;
+      const qrCardHeight = account ? 650 : 0;
+      const footerPad = 76;
+      const height = listY + listHeight + (account ? 28 + qrCardHeight : 0) + footerPad;
+      canvas.width = width;
+      canvas.height = height;
+      ctx.textBaseline = "top";
+
+      ctx.fillStyle = "#F8F8F5";
+      ctx.fillRect(0, 0, width, height);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#1F5137";
+      ctx.font = "800 58px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText("JKJ", width / 2, headerY);
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "400 28px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText(formatDateThai(todayISO()), width / 2, headerY + 72);
+      ctx.textAlign = "left";
+
       drawRoundRect(ctx, pad, summaryY, contentWidth, summaryHeight, 26, netReceivable ? "#EFF8F1" : (netPayable ? "#FFF1F1" : "#FFFFFF"), "#DDE4DC");
       ctx.fillStyle = "#111827";
-      ctx.font = "800 44px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-      ctx.fillText("สรุปยอดชำระ", pad + 36, summaryY + 30);
-      ctx.fillStyle = "#6B7280";
-      ctx.font = "500 30px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-      ctx.fillText(group.person, pad + 36, summaryY + 86);
-      ctx.fillStyle = amountColor;
-      ctx.font = "800 56px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-      ctx.textAlign = "right";
-      ctx.fillText(formatCurrency(Math.abs(group.net)), pad + contentWidth - 36, summaryY + 28);
+      ctx.font = "800 38px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText(fitCanvasText(ctx, `สรุปยอดชำระ: ${summaryText}`, contentWidth - 310), pad + 36, summaryY + 34);
       ctx.fillStyle = "#6B7280";
       ctx.font = "500 26px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-      ctx.fillText(netReceivable ? "เขาต้องจ่ายเรา" : (netPayable ? "เราต้องจ่ายเขา" : "หักลบกันพอดี"), pad + contentWidth - 36, summaryY + 92);
+      ctx.fillText("หลังหักลบแล้ว", pad + 36, summaryY + 92);
+      ctx.fillStyle = amountColor;
+      ctx.font = "800 58px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(formatCurrency(Math.abs(group.net)), pad + contentWidth - 36, summaryY + 30);
       ctx.textAlign = "left";
+
+      const miniGap = 24;
+      const miniWidth = (contentWidth - miniGap) / 2;
+      const drawMiniTotal = (x, title, value, color, fill) => {
+        drawRoundRect(ctx, x, totalsY, miniWidth, totalsHeight, 22, fill, "#E8E8E3");
+        ctx.fillStyle = "#6B7280";
+        ctx.font = "500 24px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.fillText(title, x + 28, totalsY + 24);
+        ctx.fillStyle = color;
+        ctx.font = "800 42px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.fillText(formatCurrency(value), x + 28, totalsY + 62);
+      };
+      drawMiniTotal(pad, `${group.person}ค้างเรา`, receivableTotal, "#16A34A", "#F7FCF8");
+      drawMiniTotal(pad + miniWidth + miniGap, `เราค้าง${group.person}`, payableTotal, "#DC2626", "#FFF7F7");
 
       let y = listY;
       drawRoundRect(ctx, pad, y, contentWidth, listHeight, 24, "#FFFFFF", "#E8E8E3");
       ctx.fillStyle = "#111827";
-      ctx.font = "800 34px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-      ctx.fillText("รายการค้าง", pad + 32, y + 26);
+      ctx.font = "800 36px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.fillText("รายการค้างทั้งหมด", pad + 32, y + 28);
       ctx.fillStyle = "#6B7280";
-      ctx.font = "500 24px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+      ctx.font = "500 25px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
       ctx.textAlign = "right";
-      ctx.fillText(`${entries.length} รายการ`, pad + contentWidth - 32, y + 32);
+      ctx.fillText(`${entries.length} รายการ`, pad + contentWidth - 32, y + 34);
       ctx.textAlign = "left";
-      y += listHeaderHeight;
+      y += 84;
 
-      entries.forEach((entry, index) => {
-        const payable = entry.direction === "payable";
-        const rowY = y;
-        if (index > 0) {
+      sections.forEach((section, sectionIndex) => {
+        if (sectionIndex > 0) {
           ctx.strokeStyle = "#E8E8E3";
           ctx.beginPath();
-          ctx.moveTo(pad + 32, rowY);
-          ctx.lineTo(pad + contentWidth - 32, rowY);
+          ctx.moveTo(pad + 32, y + 4);
+          ctx.lineTo(pad + contentWidth - 32, y + 4);
           ctx.stroke();
+          y += 18;
         }
-        ctx.fillStyle = payable ? "#FEE2E2" : "#DCFCE7";
-        drawCircle(ctx, pad + 58, rowY + 39, 22);
-        ctx.fillStyle = payable ? "#DC2626" : "#15803D";
-        ctx.font = "800 22px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(payable ? "จ" : "ร", pad + 58, rowY + 27);
-        ctx.textAlign = "left";
-        ctx.fillStyle = "#111827";
-        ctx.font = "700 30px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-        const titleText = fitCanvasText(ctx, entry.title || "-", contentWidth - 370);
-        ctx.fillText(titleText, pad + 96, rowY + 16);
-        ctx.fillStyle = "#6B7280";
-        ctx.font = "400 23px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-        const noteText = fitCanvasText(ctx, [entry.note, formatDateShort(entry.date)].filter(Boolean).join(" · "), contentWidth - 370);
-        ctx.fillText(noteText, pad + 96, rowY + 48);
-        ctx.fillStyle = payable ? "#DC2626" : "#16A34A";
-        ctx.font = "800 32px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.fillStyle = section.color;
+        ctx.font = "800 28px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.fillText(section.title, pad + 32, y + 18);
         ctx.textAlign = "right";
-        ctx.fillText(formatCurrency(entry.amount), pad + contentWidth - 32, rowY + 24);
+        ctx.fillText(formatCurrency(section.total), pad + contentWidth - 32, y + 18);
         ctx.textAlign = "left";
-        y += rowHeight;
+        y += 64;
+
+        section.rows.forEach((row, index) => {
+          const rowY = y;
+          if (index > 0) {
+            ctx.strokeStyle = "#F0F0EC";
+            ctx.beginPath();
+            ctx.moveTo(pad + 32, rowY);
+            ctx.lineTo(pad + contentWidth - 32, rowY);
+            ctx.stroke();
+          }
+          ctx.fillStyle = row.entry.direction === "payable" ? "#FEE2E2" : "#DCFCE7";
+          drawCircle(ctx, pad + 58, rowY + Math.min(42, row.height / 2), 22);
+          ctx.fillStyle = row.entry.direction === "payable" ? "#DC2626" : "#15803D";
+          ctx.font = "800 22px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(row.entry.direction === "payable" ? "จ" : "ร", pad + 58, rowY + Math.min(31, row.height / 2 - 11));
+          ctx.textAlign = "left";
+          let textY = rowY + 18;
+          ctx.fillStyle = "#111827";
+          ctx.font = titleFont;
+          row.titleLines.forEach((line) => {
+            ctx.fillText(line, pad + 96, textY);
+            textY += 34;
+          });
+          ctx.fillStyle = "#6B7280";
+          ctx.font = metaFont;
+          row.metaLines.forEach((line) => {
+            ctx.fillText(line, pad + 96, textY);
+            textY += 27;
+          });
+          ctx.fillStyle = row.entry.direction === "payable" ? "#DC2626" : "#16A34A";
+          ctx.font = amountFont;
+          ctx.textAlign = "right";
+          ctx.fillText(formatCurrency(row.entry.amount), pad + contentWidth - 32, rowY + 24);
+          ctx.textAlign = "left";
+          y += row.height;
+        });
       });
-      y += 32;
+      y += 30;
 
       if (account) {
         drawRoundRect(ctx, pad, y, contentWidth, qrCardHeight, 24, "#FFFFFF", "#E8E8E3");
         ctx.fillStyle = "#111827";
         ctx.font = "800 34px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-        ctx.fillText("QR CODE รับเงิน", pad + 32, y + 34);
+        ctx.fillText("QR รับเงิน", pad + 32, y + 34);
+        ctx.fillStyle = "#6B7280";
+        ctx.font = "500 24px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+        ctx.fillText("สำหรับยอดสุทธิที่ต้องรับ", pad + 32, y + 78);
         const qrImage = await loadCanvasImage(account.image);
-        const qrSize = 330;
+        const qrSize = 420;
         const qrX = pad + (contentWidth - qrSize) / 2;
-        drawImageContain(ctx, qrImage, qrX, y + 92, qrSize, qrSize);
+        drawImageContain(ctx, qrImage, qrX, y + 130, qrSize, qrSize);
         ctx.fillStyle = "#111827";
         ctx.font = "700 30px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("สแกน QR CODE", pad + contentWidth / 2, y + 436);
+        ctx.fillText("สแกน QR CODE", pad + contentWidth / 2, y + 566);
         ctx.fillStyle = "#6B7280";
         ctx.font = "500 26px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
-        ctx.fillText(account.note || "บัญชีรับเงิน", pad + contentWidth / 2, y + 474);
+        ctx.fillText(account.note || "บัญชีรับเงิน", pad + contentWidth / 2, y + 604);
         ctx.textAlign = "left";
         y += qrCardHeight + 28;
       }
