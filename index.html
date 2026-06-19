@@ -1721,6 +1721,156 @@
       }
     }
 
+
+    .groups-shell.hjk-discovery {
+      gap: 18px;
+      padding-top: 2px;
+    }
+
+    .hjk-discovery-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 6px 2px 2px;
+    }
+
+    .hjk-discovery-kicker {
+      margin: 0 0 2px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    .hjk-discovery-title {
+      margin: 0;
+      color: var(--text);
+      font-size: 24px;
+      line-height: 1.08;
+      font-weight: 820;
+      letter-spacing: 0;
+    }
+
+    .hjk-discovery-note {
+      margin: 6px 0 0;
+      max-width: 42ch;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.48;
+    }
+
+    .hjk-discovery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .hjk-discovery-card {
+      display: grid;
+      min-height: 148px;
+      align-content: center;
+      justify-items: center;
+      gap: 10px;
+      padding: 18px 12px 16px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      text-align: center;
+      box-shadow: 0 5px 8px rgba(17, 24, 39, 0.08);
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .hjk-discovery-card:active {
+      transform: scale(0.98);
+    }
+
+    .hjk-discovery-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 10px rgba(17, 24, 39, 0.09);
+    }
+
+    .hjk-discovery-card.is-featured {
+      background: linear-gradient(180deg, #F1D35D 0%, #E8C33D 100%);
+      color: #111827;
+    }
+
+    .hjk-card-icon {
+      width: 50px;
+      height: 50px;
+      color: currentColor;
+    }
+
+    .hjk-card-icon svg {
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .hjk-card-title {
+      display: block;
+      color: currentColor;
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 820;
+    }
+
+    .hjk-card-meta {
+      display: block;
+      margin-top: 3px;
+      color: color-mix(in srgb, currentColor 58%, transparent);
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 650;
+    }
+
+    .hjk-discovery-summary {
+      gap: 10px;
+    }
+
+    .groups-frame-shell.hjk-module-frame {
+      height: 0;
+      min-height: 0;
+      margin: 0;
+      border: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+      box-shadow: none;
+    }
+
+    .groups-frame-shell.hjk-module-frame.expanded {
+      height: auto;
+      min-height: 100dvh;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    [data-theme="dark"] .hjk-discovery-card {
+      background: color-mix(in srgb, var(--surface) 90%, #FFFFFF 4%);
+      box-shadow: 0 5px 8px rgba(0, 0, 0, 0.22);
+    }
+
+    [data-theme="dark"] .hjk-discovery-card.is-featured {
+      background: linear-gradient(180deg, #D7B843 0%, #B9952C 100%);
+      color: #111827;
+    }
+
+    @media (max-width: 380px) {
+      .hjk-discovery-grid {
+        gap: 10px;
+      }
+
+      .hjk-discovery-card {
+        min-height: 136px;
+        padding-inline: 10px;
+      }
+    }
+
     .sheet-backdrop {
       position: fixed;
       inset: 0;
@@ -3739,39 +3889,49 @@
       </section>
 
       <section class="view" id="view-groups" data-view="groups">
-        <section class="section groups-shell">
-          <div class="groups-bridge-head">
-            <div class="groups-head-top">
-              <div class="groups-title-wrap">
-                <h2 class="section-title">หารก่อนจน (HJK)</h2>
-                <p class="section-note">ศูนย์กลางหารบิลกลุ่ม เชื่อมยอดค้างชำระกลับเข้า JKJ โดยยังใช้ฟังก์ชัน HJK ครบเหมือนเดิม</p>
-              </div>
-              <div class="groups-mini-actions" aria-label="คำสั่ง HJK">
-                <button class="groups-mini-action" type="button" data-open-view="home" aria-label="กลับ JKJ">‹</button>
-                <button class="groups-mini-action" id="reloadGroupsButton" type="button" aria-label="รีโหลด HJK">↻</button>
-              </div>
+        <section class="section groups-shell hjk-discovery">
+          <div class="hjk-discovery-head">
+            <div>
+              <p class="hjk-discovery-kicker">หารก่อนจน</p>
+              <h2 class="hjk-discovery-title">HKJ</h2>
+              <p class="hjk-discovery-note">เลือกฟังก์ชันหารบิลแบบเร็ว หน้าตาอยู่ในระบบ JKJ แต่ยังใช้พลังของ HJK ครบเหมือนเดิม</p>
             </div>
-            <div class="groups-bridge-actions">
-              <button class="primary-action" id="openGroupsFullButton" type="button">เปิด HJK เต็มจอ</button>
-              <button class="secondary-action" type="button" data-open-view="money">เคลียร์เงิน</button>
-            </div>
+            <button class="groups-mini-action" id="reloadGroupsButton" type="button" aria-label="รีโหลด HJK">↻</button>
           </div>
 
-          <div class="groups-overview" id="groupsOverview"></div>
+          <div class="hjk-discovery-grid" aria-label="ฟังก์ชัน HKJ">
+            <button class="hjk-discovery-card" type="button" data-hjk-open>
+              <span class="hjk-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M17 20a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"/><path d="M31 21a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"/><path d="M7 40v-2a10 10 0 0 1 20 0v2"/><path d="M26 39h15v-2a9 9 0 0 0-12-8.5"/></svg></span>
+              <span><span class="hjk-card-title">กลุ่ม</span><span class="hjk-card-meta">สมาชิกและบิล</span></span>
+            </button>
+            <button class="hjk-discovery-card is-featured" id="openGroupsFullButton" type="button">
+              <span class="hjk-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M14 8h20l5 6v26H14Z"/><path d="M34 8v7h7"/><path d="M20 23h16"/><path d="M20 30h11"/><path d="M20 36h14"/></svg></span>
+              <span><span class="hjk-card-title">สร้างบิล</span><span class="hjk-card-meta">เปิดโมดูลหลัก</span></span>
+            </button>
+            <button class="hjk-discovery-card" type="button" data-hjk-open>
+              <span class="hjk-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M10 34c7-9 21-9 28 0"/><path d="M16 34V23a8 8 0 0 1 16 0v11"/><path d="M19 24h10"/><path d="M12 38h24"/></svg></span>
+              <span><span class="hjk-card-title">หารกีฬา</span><span class="hjk-card-meta">สนาม ทีม เวลา</span></span>
+            </button>
+            <button class="hjk-discovery-card" type="button" data-open-view="money">
+              <span class="hjk-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M11 15h26v22H11Z"/><path d="M16 21h16"/><path d="M16 28h10"/><path d="M32 30l5 5 8-9"/></svg></span>
+              <span><span class="hjk-card-title">เคลียร์เงิน</span><span class="hjk-card-meta">ยอดค้างใน JKJ</span></span>
+            </button>
+            <button class="hjk-discovery-card" type="button" data-hjk-open>
+              <span class="hjk-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 10a14 14 0 1 0 14 14"/><path d="M24 16v9l6 4"/><path d="M34 8v9h-9"/></svg></span>
+              <span><span class="hjk-card-title">ประวัติ</span><span class="hjk-card-meta">บิลย้อนหลัง</span></span>
+            </button>
+            <button class="hjk-discovery-card" type="button" data-hjk-open>
+              <span class="hjk-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 8v24"/><path d="m15 23 9 9 9-9"/><path d="M11 38h26"/><path d="M34 13h4v25H10V13h4"/></svg></span>
+              <span><span class="hjk-card-title">ส่งออกบิล</span><span class="hjk-card-meta">รูป Line / PDF</span></span>
+            </button>
+          </div>
 
-          <div class="groups-preview-panel">
-            <div class="groups-preview-head">
-              <div>
-                <strong>ตัวอย่าง HJK</strong>
-                <span>ดูสถานะล่าสุดแบบย่อ เปิดเต็มจอเมื่อต้องจัดการบิลจริง</span>
-              </div>
-              <button class="secondary-action" id="openGroupsPreviewFullButton" type="button">เปิดเต็มจอ</button>
-            </div>
-            <div class="groups-frame-shell" id="groupsFrameShell">
-              <button class="groups-fullscreen-exit" id="closeGroupsFullButton" type="button">ย่อกลับ</button>
-              <div class="groups-frame-status" id="splitEasyStatus"></div>
-              <iframe class="groups-frame" id="splitEasyFrame" title="หารก่อนจน (HJK) full group bill splitter"></iframe>
-            </div>
+          <div class="groups-overview hjk-discovery-summary" id="groupsOverview"></div>
+
+          <div class="groups-frame-shell hjk-module-frame" id="groupsFrameShell">
+            <button class="groups-fullscreen-exit" id="closeGroupsFullButton" type="button">ย่อกลับ</button>
+            <div class="groups-frame-status" id="splitEasyStatus"></div>
+            <iframe class="groups-frame" id="splitEasyFrame" title="หารก่อนจน (HJK) full group bill splitter"></iframe>
           </div>
         </section>
       </section>
@@ -4116,7 +4276,7 @@
     </button>
     <button class="nav-button" type="button" data-nav="groups">
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-      กลุ่ม
+      HKJ
     </button>
     <button class="nav-button" type="button" data-nav="money">
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11h10"></path><path d="M7 15h7"></path><path d="M5 5h14v14H5Z"></path><path d="m9 9 2-2 2 2"></path></svg>
@@ -4819,6 +4979,7 @@ PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgPG1ldGEgY2hhcnNldD0iVVRG
       window.addEventListener("storage", handleSplitEasyStorageChange);
       els.openGroupsFullButton?.addEventListener("click", openGroupsFullscreen);
       els.openGroupsPreviewFullButton?.addEventListener("click", openGroupsFullscreen);
+      document.querySelectorAll("[data-hjk-open]").forEach((button) => button.addEventListener("click", openGroupsFullscreen));
       els.closeGroupsFullButton?.addEventListener("click", () => closeGroupsFullscreen());
       els.reloadGroupsButton?.addEventListener("click", reloadSplitEasyFrame);
       els.splitEasyFrame?.addEventListener("load", handleSplitEasyFrameLoad);
@@ -6185,7 +6346,7 @@ PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgPG1ldGEgY2hhcnNldD0iVVRG
 
     function reloadSplitEasyFrame() {
       if (!els.splitEasyFrame) return;
-      setSplitEasyStatus("????????? ????????? (HJK)...", false);
+      setSplitEasyStatus("กำลังโหลด หารก่อนจน (HJK)...", false);
       els.splitEasyFrame.srcdoc = "";
       window.setTimeout(() => {
         mountEmbeddedSplitEasy();
@@ -6205,7 +6366,7 @@ PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgPG1ldGEgY2hhcnNldD0iVVRG
           failed = false;
         }
         if (failed) {
-          setSplitEasyStatus("????????? ????????? (HJK) ?????????????????????", true);
+          setSplitEasyStatus("โหลดโมดูล หารก่อนจน (HJK) ไม่สำเร็จจากไฟล์เดียว", true);
         } else {
           setSplitEasyStatus("", false);
           renderSplitEasySummary();
@@ -6231,7 +6392,7 @@ PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgPG1ldGEgY2hhcnNldD0iVVRG
       if (!els.splitEasyFrame) return;
       const html = embeddedSplitEasyHtml();
       if (!html) {
-        setSplitEasyStatus("?????????? ????????? (HJK) ?????? index.html", true);
+        setSplitEasyStatus("ไม่พบโมดูล หารก่อนจน (HJK) ในไฟล์ index.html", true);
         return;
       }
       els.splitEasyFrame.removeAttribute("src");
